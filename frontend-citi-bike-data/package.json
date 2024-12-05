@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "h3-js": "^4.1.0",
     "mapbox": "^1.0.0-beta10",
     "mapbox-gl": "^3.8.0",
     "next": "15.0.3",
