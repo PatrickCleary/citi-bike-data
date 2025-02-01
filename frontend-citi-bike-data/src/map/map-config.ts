@@ -3,6 +3,7 @@ import { GeoJSONFeature, Map, MapEvent, MapEventType } from "mapbox-gl";
 import { MutableRefObject, useEffect } from "react";
 import { STATION_SOURCE_ID, STATIONS_SOURCE } from "./sources";
 import { STATION_LAYER } from "./layers";
+import { useStationStore } from "@/store/store";
 
 export type EventHandler = {
     eventType: MapEventType;
@@ -14,19 +15,21 @@ export const useApplyLayers = (
     mapLoaded: boolean
 ) => {
 
+    const setStations = useStationStore((state) => state.setStations);
     useEffect(() => {
         if (!mapLoaded) return;
-        addStationLayer(map);
+        addStationLayer(map, setStations);
     }, [mapLoaded, map]);
 };
 
 
 const addStationLayer = (
     map: MutableRefObject<Map | null>,
+    setStations: (stations: string[]) => void
 ) => {
     if (!map.current) return;
     const mapObj = map.current;
-    const eventHandlers = getStationEventHandlers();
+    const eventHandlers = getStationEventHandlers(setStations);
 
     mapObj.addSource(STATION_SOURCE_ID, STATIONS_SOURCE);
     // const source = mapObj.getSource(STATION_SOURCE_ID) as GeoJSONSource;
@@ -54,6 +57,7 @@ const removeStationLayer = (mapObj: Map, eventHandlers: EventHandler[]) => {
 };
 
 const getStationEventHandlers = (
+    setStations: (stations: string[]) => void
     // map: MutableRefObject<Map | null>,
     // hoveredFeatures: MutableRefObject<number[] | null>
 ): {
@@ -65,7 +69,7 @@ const getStationEventHandlers = (
         {
             eventType: 'click',
             layer: STATION_SOURCE_ID,
-            handler: (e) => fetch(`/station_data/${e.features?.[0].properties['start_station_id']}.csv`).then((res) => res.text()).then((data) => console.log(data)),
+            handler: (e) => setStations([e.features?.[0].id] as string[]),
         },
     ];
 };
