@@ -5,7 +5,7 @@ interface Store {
     setStations: (stations: string[]) => void
 }
 
-export const useStore = create<Store>((set) => ({
+export const useStationStore = create<Store>((set) => ({
     stations: [],
     setStations: (stations) => set({ stations }),
 }));
