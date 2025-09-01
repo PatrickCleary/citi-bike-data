@@ -5,3 +5,4 @@ frontend-citi-bike-data/.env
 research/202410-citibike-tripdata/
 research/data/
 research/geo/
+research/.env
