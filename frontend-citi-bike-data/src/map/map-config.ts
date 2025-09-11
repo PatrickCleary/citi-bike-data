@@ -68,27 +68,6 @@ import { Protocol } from "pmtiles";
 import { useQuery } from "@tanstack/react-query";
 import { getTripCountData } from "@/utils/api";
 
-// const getDepartureCountMap = async (
-//   departureCells: string[],
-//   selectedMonth: string,
-//   analysisType: "departures" | "arrivals"
-// ) => {
-//   const data = await fetch(API_URL + "/trip-counts", {
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
-//     },
-//     method: "POST",
-//     body: JSON.stringify({
-//       reference_cell_ids: departureCells,
-//       target_month: selectedMonth,
-//       analysis_type: analysisType,
-//     }),
-//   });
-//   const jsonData = await data.json();
-//   return jsonData["data"]["trip_counts"];
-// };
-
 export const useTripCountData = () => {
   const { departureCells, selectedMonth, analysisType } = useMapConfigStore();
 
