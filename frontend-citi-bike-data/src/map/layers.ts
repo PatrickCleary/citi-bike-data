@@ -1,17 +1,26 @@
-import { LayerSpecification } from "mapbox-gl";
-import { STATION_SOURCE_ID } from "./sources";
+import { LayerSpecification } from "maplibre-gl";
+import { HEX_SOURCE_ID } from "./sources";
 
-export const STATION_LAYER: LayerSpecification = {
-    id: STATION_SOURCE_ID,
-    source: STATION_SOURCE_ID,
-    type: 'circle',
-    paint: {
-        // if `value` is undefined, set the radius to 3 otherwise set it to `value`
-        'circle-radius': [
-            'case',
-            ['==', ['typeof', ['get', 'value']], 'undefined'],
-            3,
-            ['get', 'value']
-        ]
-    }
+const HEX_LAYER_ID = "nyc_jc_hex_tiles_layer";
+const HEX_LAYER_LINE_ID = "nyc_jc_hex_tiles_line_layer";
+
+export const HEX_LAYER: LayerSpecification = {
+  id: HEX_LAYER_ID,
+  source: HEX_SOURCE_ID,
+  "source-layer": "nyc_jc_hexagons",
+  type: "fill",
+  paint: {
+    "fill-color": "#FF0000",
+    "fill-opacity": 0.5,
+  },
+};
+
+export const HEX_LAYER_LINE: LayerSpecification = {
+  id: HEX_LAYER_LINE_ID,
+  source: HEX_SOURCE_ID,
+  "source-layer": "nyc_jc_hexagons",
+  type: "line",
+  paint: {
+    "line-color": "#ffffff",
+  },
 };

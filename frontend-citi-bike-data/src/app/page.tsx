@@ -1,6 +1,4 @@
 import { MapPage } from "@/components/map-page";
 
-import 'mapbox-gl/dist/mapbox-gl.css';
-
-
+import "maplibre-gl/dist/maplibre-gl.css";
 export default MapPage;

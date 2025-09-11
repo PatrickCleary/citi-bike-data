@@ -9,9 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "mapbox": "^1.0.0-beta10",
-    "mapbox-gl": "^3.8.0",
+    "maplibre": "^0.0.1-security",
+    "maplibre-gl": "^5.7.1",
     "next": "15.0.3",
+    "pmtiles": "^4.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zustand": "^5.0.1"

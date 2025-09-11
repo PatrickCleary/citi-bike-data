@@ -1,14 +1,9 @@
-import type {
-    SourceSpecification,
-} from 'mapbox-gl';
+import type { SourceSpecification } from "maplibre-gl";
 
-export const STATION_SOURCE_ID = 'stations'
+export const HEX_SOURCE_ID = "nyc_jc_hex_tiles";
 
-export const STATIONS_SOURCE: SourceSpecification = {
-    type: 'geojson',
-    // data must be present. Previously it was set to empty string '' and it tries to fetch data from the current URL.
-    data: `/map_data/stations.geojson`,
-    promoteId: 'id'
-
+export const HEX_SOURCE: SourceSpecification = {
+  type: "vector", // or another appropriate type based on your use case
+  url: "pmtiles://https://kevndteqglsoslznrntz.supabase.co/storage/v1/object/public/citi-bike-data-bucket/nyc_jc_hex.pmtiles",
+  promoteId: "h3_id",
 };
-
