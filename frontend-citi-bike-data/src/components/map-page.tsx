@@ -1,6 +1,6 @@
 "use client";
 import type { MutableRefObject } from "react";
-
+import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -12,14 +12,20 @@ import {
   useUpdateMapStyleOnDataChange,
   useUpdateOriginShape,
 } from "@/map/map-config";
+import { useMapConfigStore } from "@/store/store";
 
-export const MapPage = () => {
+import { DateDisplay } from "./date-display";
+import { TotalDisplay } from "./total-display";
+
+export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
   const mapContainer: MutableRefObject<HTMLDivElement | null> = useRef(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   useUpdateMapStyleOnDataChange(map, mapLoaded);
   useApplyLayers(map, mapLoaded);
+  const { setSelectedMonth, setDepartureCells, analysisType, setAnalysisType } =
+    useMapConfigStore();
   useUpdateOriginShape(map, mapLoaded);
   useAddPMTilesProtocol();
   const handleIdle = useCallback(() => {
@@ -45,6 +51,8 @@ export const MapPage = () => {
       container: mapContainer.current,
     });
     map.current?.on("load", async () => {
+      // map.current?.removeControl(map.current?.attributionControl);
+      map.current?.addControl(new maplibregl.AttributionControl(), "top-right");
       setMapLoaded(true);
     });
   }, []);
@@ -60,8 +68,30 @@ export const MapPage = () => {
     };
   }, [mapLoaded, handleIdle, handleLoading]);
   return (
-    <div className="w-[100svw] h-[100svh]">
-      <div className="h-full w-full" ref={mapContainer}></div>
+    <div className="w-[100svw] h-[100svh] flex flex-row">
+      <div className="h-full w-40 bg-white text-black flex flex-col">
+        <input
+          type="date"
+          onInput={(input) => {
+            console.log(input);
+            setSelectedMonth(input.target.value);
+          }}
+        ></input>
+        <button onClick={() => setDepartureCells([])}>clear</button>
+        <button
+          onClick={() =>
+            setAnalysisType(
+              analysisType === "arrivals" ? "departures" : "arrivals"
+            )
+          }
+        >
+          {analysisType}
+        </button>
+      </div>
+      <div className="h-full w-full" ref={mapContainer}>
+        <DateDisplay />
+        <TotalDisplay />
+      </div>
     </div>
   );
 };

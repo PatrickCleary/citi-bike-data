@@ -6,6 +6,7 @@ export const MAP_CONFIG_DEFAULT: Partial<MapOptions> = {
   bounds: [BOTTOM_LEFT, TOP_RIGHT],
   zoom: 12,
   style: "https://tiles.stadiamaps.com/styles/alidade_smooth.json",
+  attributionControl: false,
 };
 
 export const API_URL = "https://kevndteqglsoslznrntz.supabase.co/functions/v1";
