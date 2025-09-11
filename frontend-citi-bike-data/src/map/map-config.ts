@@ -64,73 +64,49 @@ const removeHexLayer = (mapObj: Map, eventHandlers: EventHandler[]) => {
   mapObj.removeSource(HEX_SOURCE_ID);
 };
 
-import { useState } from "react"; // Add this import
-import { API_URL } from "@/components/constants";
 import { Protocol } from "pmtiles";
+import { useQuery } from "@tanstack/react-query";
+import { getTripCountData } from "@/utils/api";
 
-const getDepartureCountMap = async (departureCells: string[]) => {
-  const data = await fetch(API_URL + "/get-destinations", {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
-    },
-    method: "POST",
-    body: JSON.stringify({
-      start_cell_ids: departureCells,
-      target_month: "2025-07-01",
-    }),
+export const useTripCountData = () => {
+  const { departureCells, selectedMonth, analysisType } = useMapConfigStore();
+
+  const query = useQuery({
+    queryKey: ["tripCounts", departureCells, selectedMonth, analysisType],
+    queryFn: () =>
+      getTripCountData(departureCells, selectedMonth, analysisType),
   });
-  const jsonData = await data.json();
-  return jsonData["data"]["destinations"];
+  return query;
 };
 
 export const useUpdateMapStyleOnDataChange = (
   map: MutableRefObject<Map | null>,
   mapLoaded: boolean
 ) => {
-  const { departureCells } = useMapConfigStore();
-  const [departureCountMap, setDepartureCountMap] = useState<
-    Record<string, number>
-  >({}); // Initialize state
-
-  useEffect(() => {
-    // const hexLayerLine = map.current?.getLayer(HEX_LAYER_LINE.id);
-    // if (hexLayerLine) {
-    //   map.current?.setPaintProperty(HEX_LAYER_LINE.id, "line-color", [
-    //     "case",
-    //     ["in", ["id"], ["literal", departureCells || []]],
-    //     "#000000",
-    //     "#ffffff20",
-    //   ]);
-    // }
-    const fetchDepartureCountMap = async () => {
-      const countMap = await getDepartureCountMap(departureCells);
-      setDepartureCountMap(countMap);
-    };
-    fetchDepartureCountMap();
-  }, [departureCells, map]);
-
-  useEffect(() => {
-    const hexLayer = map.current?.getLayer(HEX_LAYER.id);
-    if (hexLayer && departureCountMap) {
-      map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", [
-        "case",
-        ["has", ["id"], ["literal", departureCountMap]],
-        [
-          "interpolate",
-          ["linear"],
-          ["get", ["id"], ["literal", departureCountMap]],
-          0,
-          "#1a2a6c",
-          50,
-          "#b21f1f",
-          100,
-          "#fdbb2d",
-        ],
-        "#ffffff00",
-      ]);
-    }
-  }, [departureCountMap, map, mapLoaded]); // Include departureCountMap in dependencies
+  const query = useTripCountData();
+  if (!mapLoaded) return;
+  const departureCountMap = query.data?.data.trip_counts;
+  const highestValue = query.data?.data.highest_value || 100;
+  console.log("hv", highestValue);
+  const hexLayer = map.current?.getLayer(HEX_LAYER.id);
+  if (hexLayer && departureCountMap) {
+    map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", [
+      "case",
+      ["has", ["id"], ["literal", departureCountMap]],
+      [
+        "interpolate",
+        ["linear"],
+        ["get", ["id"], ["literal", departureCountMap]],
+        0,
+        "#1a2a6c",
+        highestValue / 2,
+        "#b21f1f",
+        highestValue,
+        "#fdbb2d",
+      ],
+      "#ffffff00",
+    ]);
+  }
 };
 
 const getCellEventHandlers = (

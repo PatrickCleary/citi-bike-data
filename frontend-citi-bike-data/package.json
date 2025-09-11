@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.87.4",
+    "@tanstack/react-query-devtools": "^5.87.4",
+    "dayjs": "^1.11.18",
     "h3-js": "^4.3.0",
     "maplibre": "^0.0.1-security",
     "maplibre-gl": "^5.7.1",
