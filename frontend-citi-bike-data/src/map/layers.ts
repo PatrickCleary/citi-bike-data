@@ -1,5 +1,5 @@
 import { LayerSpecification } from "maplibre-gl";
-import { HEX_SOURCE_ID } from "./sources";
+import { HEX_SOURCE_ID, ORIGIN_SOURCE_ID } from "./sources";
 
 const HEX_LAYER_ID = "nyc_jc_hex_tiles_layer";
 const HEX_LAYER_LINE_ID = "nyc_jc_hex_tiles_line_layer";
@@ -21,6 +21,18 @@ export const HEX_LAYER_LINE: LayerSpecification = {
   "source-layer": "nyc_jc_hexagons",
   type: "line",
   paint: {
-    "line-color": "#ffffff",
+    "line-color": "#ffffff20",
+  },
+};
+
+export const ORIGIN_LAYER_LINE_ID = "origin_hex_tiles_line_layer";
+
+export const ORIGIN_LAYER_LINE: LayerSpecification = {
+  id: ORIGIN_LAYER_LINE_ID,
+  source: ORIGIN_SOURCE_ID,
+  type: "line",
+  paint: {
+    "line-width": 4,
+    "line-color": "#000000",
   },
 };

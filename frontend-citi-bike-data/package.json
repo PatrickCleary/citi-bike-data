@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "h3-js": "^4.3.0",
     "maplibre": "^0.0.1-security",
     "maplibre-gl": "^5.7.1",
     "next": "15.0.3",
