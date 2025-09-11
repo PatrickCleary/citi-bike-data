@@ -10,6 +10,7 @@ import {
   useAddPMTilesProtocol,
   useApplyLayers,
   useUpdateMapStyleOnDataChange,
+  useUpdateOriginShape,
 } from "@/map/map-config";
 
 export const MapPage = () => {
@@ -19,6 +20,7 @@ export const MapPage = () => {
   const [loading, setLoading] = useState(false);
   useUpdateMapStyleOnDataChange(map, mapLoaded);
   useApplyLayers(map, mapLoaded);
+  useUpdateOriginShape(map, mapLoaded);
   useAddPMTilesProtocol();
   const handleIdle = useCallback(() => {
     if (loading) {

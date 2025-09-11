@@ -5,8 +5,15 @@ import maplibregl, {
   MapEventType,
 } from "maplibre-gl";
 import { MutableRefObject, useEffect } from "react";
-import { HEX_SOURCE, HEX_SOURCE_ID } from "./sources";
-import { HEX_LAYER, HEX_LAYER_LINE } from "./layers";
+import {
+  HEX_SOURCE,
+  HEX_SOURCE_ID,
+  ORIGIN_SOURCE,
+  ORIGIN_SOURCE_ID,
+} from "./sources";
+import { cellsToMultiPolygon } from "h3-js";
+
+import { HEX_LAYER, HEX_LAYER_LINE, ORIGIN_LAYER_LINE } from "./layers";
 import { useMapConfigStore } from "@/store/store";
 
 export type EventHandler = {
@@ -34,9 +41,11 @@ const addHexLayer = (
   const eventHandlers = getCellEventHandlers(addOrRemoveDepartureCell);
 
   mapObj.addSource(HEX_SOURCE_ID, HEX_SOURCE);
+  mapObj.addSource(ORIGIN_SOURCE_ID, ORIGIN_SOURCE);
 
-  mapObj.addLayer(HEX_LAYER_LINE);
   mapObj.addLayer(HEX_LAYER);
+  mapObj.addLayer(HEX_LAYER_LINE);
+  mapObj.addLayer(ORIGIN_LAYER_LINE);
 
   eventHandlers.forEach((event) => {
     mapObj.on(event.eventType, event.layer, event.handler);
@@ -85,15 +94,15 @@ export const useUpdateMapStyleOnDataChange = (
   >({}); // Initialize state
 
   useEffect(() => {
-    const hexLayerLine = map.current?.getLayer(HEX_LAYER_LINE.id);
-    if (hexLayerLine) {
-      map.current?.setPaintProperty(HEX_LAYER_LINE.id, "line-color", [
-        "case",
-        ["in", ["id"], ["literal", departureCells || []]],
-        "#000000",
-        "#00000000",
-      ]);
-    }
+    // const hexLayerLine = map.current?.getLayer(HEX_LAYER_LINE.id);
+    // if (hexLayerLine) {
+    //   map.current?.setPaintProperty(HEX_LAYER_LINE.id, "line-color", [
+    //     "case",
+    //     ["in", ["id"], ["literal", departureCells || []]],
+    //     "#000000",
+    //     "#ffffff20",
+    //   ]);
+    // }
     const fetchDepartureCountMap = async () => {
       const countMap = await getDepartureCountMap(departureCells);
       setDepartureCountMap(countMap);
@@ -112,13 +121,13 @@ export const useUpdateMapStyleOnDataChange = (
           ["linear"],
           ["get", ["id"], ["literal", departureCountMap]],
           0,
-          "#1a2a6c", // Low values = blue
+          "#1a2a6c",
           50,
           "#b21f1f",
           100,
-          "#fdbb2d", // High values = red
+          "#fdbb2d",
         ],
-        "#00000000", // Default color for features not in data
+        "#ffffff00",
       ]);
     }
   }, [departureCountMap, map, mapLoaded]); // Include departureCountMap in dependencies
@@ -154,4 +163,39 @@ export const useAddPMTilesProtocol = () => {
       maplibregl.removeProtocol("pmtiles");
     };
   }, []);
+};
+
+export const useUpdateOriginShape = (
+  map: MutableRefObject<Map>,
+  mapLoaded: boolean
+) => {
+  const { departureCells } = useMapConfigStore();
+
+  useEffect(() => {
+    if (!mapLoaded) return;
+    const originGeoJson = convertCellsToGeoJSON(departureCells);
+
+    const originSource = map.current?.getSource(
+      ORIGIN_SOURCE_ID
+    ) as maplibregl.GeoJSONSource;
+    originSource?.setData(originGeoJson);
+  }, [departureCells, map, mapLoaded]);
+};
+
+const convertCellsToGeoJSON = (
+  cells: string[]
+): GeoJSON.FeatureCollection<GeoJSON.Geometry> => {
+  const polygons = cellsToMultiPolygon(cells, true);
+  const features = polygons.map((polygon) => ({
+    type: "Feature",
+    geometry: {
+      type: "Polygon",
+      coordinates: polygon,
+    },
+    properties: {},
+  }));
+  return {
+    type: "FeatureCollection",
+    features: features,
+  };
 };
