@@ -16,6 +16,7 @@ import { useMapConfigStore } from "@/store/store";
 
 import { DateDisplay } from "./date-display";
 import { TotalDisplay } from "./total-display";
+import Popup from "@/map/popup";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -73,7 +74,6 @@ export const MapPage: React.FC = () => {
         <input
           type="date"
           onInput={(input) => {
-            console.log(input);
             setSelectedMonth(input.target.value);
           }}
         ></input>
@@ -92,6 +92,7 @@ export const MapPage: React.FC = () => {
         <DateDisplay />
         <TotalDisplay />
       </div>
+      <Popup map={map} />
     </div>
   );
 };
