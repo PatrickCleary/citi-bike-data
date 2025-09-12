@@ -3,6 +3,7 @@ import maplibregl, {
   Map,
   Event,
   MapEventType,
+  Popup,
 } from "maplibre-gl";
 import { MutableRefObject, useEffect } from "react";
 import {
@@ -13,7 +14,12 @@ import {
 } from "./sources";
 import { cellsToMultiPolygon } from "h3-js";
 
-import { HEX_LAYER, HEX_LAYER_LINE, ORIGIN_LAYER_LINE } from "./layers";
+import {
+  HEX_LAYER,
+  HEX_LAYER_LINE,
+  HEX_SOURCE_LAYER_ID,
+  ORIGIN_LAYER_LINE,
+} from "./layers";
 import { useMapConfigStore } from "@/store/store";
 
 export type EventHandler = {
@@ -26,19 +32,25 @@ export const useApplyLayers = (
   mapLoaded: boolean
 ) => {
   const { addOrRemoveDepartureCell } = useMapConfigStore();
+  const { setHoveredFeature } = usePopupStateStore();
   useEffect(() => {
     if (!mapLoaded) return;
-    addHexLayer(map, addOrRemoveDepartureCell);
-  }, [mapLoaded, map, addOrRemoveDepartureCell]);
+    addHexLayer(map, addOrRemoveDepartureCell, setHoveredFeature);
+  }, [mapLoaded, map, addOrRemoveDepartureCell, setHoveredFeature]);
 };
 
 const addHexLayer = (
   map: MutableRefObject<Map | null>,
-  addOrRemoveDepartureCell: (cell: string) => void
+  addOrRemoveDepartureCell: (cell: string) => void,
+  setHoveredFeature: (feature: HoveredFeature | null) => void
 ) => {
   if (!map.current) return;
   const mapObj = map.current;
-  const eventHandlers = getCellEventHandlers(addOrRemoveDepartureCell);
+  const eventHandlers = getCellEventHandlers(
+    map,
+    addOrRemoveDepartureCell,
+    setHoveredFeature
+  );
 
   mapObj.addSource(HEX_SOURCE_ID, HEX_SOURCE);
   mapObj.addSource(ORIGIN_SOURCE_ID, ORIGIN_SOURCE);
@@ -67,6 +79,7 @@ const removeHexLayer = (mapObj: Map, eventHandlers: EventHandler[]) => {
 import { Protocol } from "pmtiles";
 import { useQuery } from "@tanstack/react-query";
 import { getTripCountData } from "@/utils/api";
+import { HoveredFeature, usePopupStateStore } from "@/store/popup-store";
 
 export const useTripCountData = () => {
   const { departureCells, selectedMonth, analysisType } = useMapConfigStore();
@@ -87,7 +100,6 @@ export const useUpdateMapStyleOnDataChange = (
   if (!mapLoaded) return;
   const departureCountMap = query.data?.data.trip_counts;
   const highestValue = query.data?.data.highest_value || 100;
-  console.log("hv", highestValue);
   const hexLayer = map.current?.getLayer(HEX_LAYER.id);
   if (hexLayer && departureCountMap) {
     map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", [
@@ -110,14 +122,17 @@ export const useUpdateMapStyleOnDataChange = (
 };
 
 const getCellEventHandlers = (
-  addOrRemoveDepartureCell: (cell: string) => void
-  // map: MutableRefObject<Map | null>,
-  // hoveredFeatures: MutableRefObject<number[] | null>
+  map: MutableRefObject<Map | null>,
+  addOrRemoveDepartureCell: (cell: string) => void,
+  setHoveredFeature: (feature: HoveredFeature | null) => void
 ): {
   eventType: MapEventType;
   layer: string;
   handler: (e: Event & { features?: GeoJSONFeature[] }) => void;
 }[] => {
+  let hoveredFeatureId: null | number = null;
+  // Add these variables to track animation state
+  let hoverTimeout = null;
   return [
     {
       eventType: "click",
@@ -126,6 +141,87 @@ const getCellEventHandlers = (
         const cellId = e.features?.[0].id;
         if (typeof cellId !== "string") return;
         addOrRemoveDepartureCell(cellId);
+      },
+    },
+
+    // Updated mousemove handler
+    {
+      eventType: "mousemove",
+      layer: HEX_LAYER.id,
+      handler: (e) => {
+        const feature = e.features?.[0];
+        if (!feature?.id) return;
+
+        const coordinates = e.lngLat;
+        const h3Id = feature.id as string;
+        setHoveredFeature({ id: h3Id, coordinates: coordinates });
+
+        if (!h3Id) return;
+
+        // Clear any pending timeout
+        if (hoverTimeout) {
+          clearTimeout(hoverTimeout);
+          hoverTimeout = null;
+        }
+
+        // If we're hovering a different feature
+        if (hoveredFeatureId !== h3Id) {
+          // Animate previous feature back to 0.5 from wherever it currently is
+          if (hoveredFeatureId !== null) {
+            const previousFeatureState = map.current?.getFeatureState({
+              source: HEX_SOURCE_ID,
+              sourceLayer: HEX_SOURCE_LAYER_ID,
+              id: hoveredFeatureId,
+            });
+
+            const currentOpacity = previousFeatureState?.opacity || 0.5;
+            console.log(currentOpacity);
+            // Only animate if it's not already at 0.5
+            if (currentOpacity !== 0.5) {
+              animateOpacity(map, hoveredFeatureId, currentOpacity, 0.5);
+            } else {
+              // Just set hover state to false if already at correct opacity
+              map.current?.setFeatureState(
+                {
+                  source: HEX_SOURCE_ID,
+                  sourceLayer: HEX_SOURCE_LAYER_ID,
+                  id: hoveredFeatureId,
+                },
+                { hover: false }
+              );
+            }
+          }
+
+          // Start animating new feature from 0.5 to 0.8
+          hoveredFeatureId = h3Id;
+          animateOpacity(map, h3Id, 0.5, 0.8, 100);
+        }
+      },
+    },
+
+    // Add mouseleave handler to handle unhover
+    {
+      eventType: "mouseleave",
+      layer: HEX_LAYER.id,
+      handler: (e) => {
+        if (hoveredFeatureId !== null) {
+          // Get current opacity to animate from current state
+          const featureState = map.current?.getFeatureState({
+            source: HEX_SOURCE_ID,
+            sourceLayer: HEX_SOURCE_LAYER_ID,
+            id: hoveredFeatureId,
+          });
+
+          const currentOpacity = featureState?.opacity || 0.5;
+
+          // Animate back to 0.5
+          animateOpacity(map, hoveredFeatureId, currentOpacity, 0.5);
+
+          // Clear the hovered feature
+          hoveredFeatureId = null;
+        }
+
+        setHoveredFeature(null);
       },
     },
   ];
@@ -174,4 +270,43 @@ const convertCellsToGeoJSON = (
     type: "FeatureCollection",
     features: features,
   };
+};
+
+// Helper function to animate opacity
+const animateOpacity = (
+  map: MutableRefObject<Map>,
+  featureId: string,
+  startOpacity: number,
+  endOpacity: number,
+  duration = 1000
+) => {
+  console.log(featureId);
+  if (!map.current || !featureId) return;
+
+  const startTime = performance.now();
+
+  const animate = (currentTime) => {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // Easing function (ease-out for smooth deceleration)
+    const easeOut = 1 - Math.pow(1 - progress, 3);
+    const currentOpacity = startOpacity + (endOpacity - startOpacity) * easeOut;
+    console.log(currentOpacity);
+    // Update the layer opacity for this specific feature
+    map.current?.setFeatureState(
+      {
+        source: HEX_SOURCE_ID,
+        sourceLayer: HEX_SOURCE_LAYER_ID,
+        id: featureId,
+      },
+      { opacity: currentOpacity, hover: endOpacity > startOpacity }
+    );
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    }
+  };
+
+  requestAnimationFrame(animate);
 };

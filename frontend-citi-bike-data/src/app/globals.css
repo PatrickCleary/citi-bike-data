@@ -19,3 +19,17 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+.maplibregl-popup-content {
+  /* padding: 0 !important;  */
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  overflow-y: hidden !important;
+  overflow-x: hidden !important;
+}
+
+.maplibregl-popup-tip {
+  display: none !important;
+}
