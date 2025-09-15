@@ -1,5 +1,5 @@
 import { useMapConfigStore } from "@/store/store";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import React from "react";
 
 const getMonthDisplayText = (date: string) => {
@@ -9,12 +9,31 @@ const getMonthDisplayText = (date: string) => {
 };
 
 export const DateDisplay: React.FC = () => {
-  const { selectedMonth } = useMapConfigStore();
+  const { selectedMonth, setSelectedMonth } = useMapConfigStore();
   const month = getMonthDisplayText(selectedMonth);
+  const monthObj = dayjs(selectedMonth);
+  console.log(selectedMonth)
+  const setMonth = (date: Dayjs) => {
+    setSelectedMonth(date.format("YYYY-MM-DD"));
+  };
 
   return (
-    <div className="fixed z-10 text-3xl font-bold right-4 bottom-4 text-black">
+    <div className="z-10 text-3xl font-bold text-black">
       <p>{month}</p>
+      <button
+        onClick={() => {
+          setMonth(monthObj.subtract(1, "month"));
+        }}
+      >
+        {"<"}
+      </button>
+      <button
+        onClick={() => {
+          setMonth(monthObj.add(1, "month"));
+        }}
+      >
+        {">"}
+      </button>
     </div>
   );
 };

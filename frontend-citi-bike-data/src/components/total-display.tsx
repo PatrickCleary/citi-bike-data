@@ -5,11 +5,13 @@ export const TotalDisplay: React.FC = () => {
   if (query.isLoading) {
     return null;
   }
-
   const totalTrips = query.data?.data.sum_all_values || 0;
   return (
-    <div className="fixed z-10 text-3xl font-bold right-4 bottom-12 text-black">
-      <p>{totalTrips}</p>
+    <div
+      className="text-3xl font-bold text-black"
+      
+    >
+      <p>{totalTrips.toLocaleString()}</p>
     </div>
   );
 };
