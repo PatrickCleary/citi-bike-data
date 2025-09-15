@@ -89,8 +89,10 @@ export const MapPage: React.FC = () => {
         </button>
       </div>
       <div className="h-full w-full" ref={mapContainer}>
-        <DateDisplay />
-        <TotalDisplay />
+        <div className="fixed flex flex-col gap-4 z-10 right-4 bottom-4">
+          <TotalDisplay />
+          <DateDisplay />
+        </div>
       </div>
       <Popup map={map} />
     </div>

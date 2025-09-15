@@ -16,6 +16,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   const contentRef = useRef(document.createElement("div"));
   const query = useTripCountData();
   const tripCounts = query.data?.data.trip_counts || {};
+  const totalTrips = query.data?.data.sum_all_values || {};
   const { hoveredFeature } = usePopupStateStore();
   const hoveredTripCount = tripCounts[hoveredFeature?.id as string] || 0;
 
@@ -26,8 +27,8 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
     // create a new popup instance, but do not set its location or content yet
     popupRef.current = new maplibregl.Popup({
       closeOnClick: false,
-      offset: 20,
-      anchor: "bottom", // This removes the tip
+      offset: 10,
+      // anchor: "top",
       closeButton: false,
     });
 
@@ -53,7 +54,10 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   return (
     <>
       {createPortal(
-        <PopupContent hoveredTripCount={hoveredTripCount} />,
+        <PopupContent
+          hoveredTripCount={hoveredTripCount}
+          totalTrips={totalTrips}
+        />,
         contentRef.current
       )}
     </>
@@ -62,12 +66,15 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
 
 export default PopupComponent;
 
-export const PopupContent: React.FC<{ hoveredTripCount: number }> = ({
-  hoveredTripCount,
-}) => {
+export const PopupContent: React.FC<{
+  hoveredTripCount: number;
+  totalTrips: number;
+}> = ({ hoveredTripCount, totalTrips }) => {
   return (
-    <div className="text-black rounded-lg bg-white px-4 rounded-2 py-2 font-bold text-2xl">
+    <div className="text-black text-center rounded-lg bg-white/30 border border-[.5px] border-color-white/50 text-neutral-800 text-black pointer-events-none px-2 rounded-2 py-1 font-bold text-lg">
       {formatter.format(hoveredTripCount)}
+      <p className="text-xs italic">arriving rides</p>
+      {/* <p>{formatter.format((100 * hoveredTripCount) / totalTrips)}</p> */}
     </div>
   );
 };

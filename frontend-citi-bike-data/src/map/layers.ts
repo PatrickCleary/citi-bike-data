@@ -11,7 +11,7 @@ export const HEX_LAYER: LayerSpecification = {
   "source-layer": HEX_SOURCE_LAYER_ID,
   type: "fill",
   paint: {
-    "fill-color": "#FF0000",
+    "fill-color": "#FF000000",
     "fill-opacity": [
       "case",
       ["!=", ["feature-state", "opacity"], null],

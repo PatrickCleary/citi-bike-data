@@ -175,7 +175,6 @@ const getCellEventHandlers = (
             });
 
             const currentOpacity = previousFeatureState?.opacity || 0.5;
-            console.log(currentOpacity);
             // Only animate if it's not already at 0.5
             if (currentOpacity !== 0.5) {
               animateOpacity(map, hoveredFeatureId, currentOpacity, 0.5);
@@ -280,7 +279,6 @@ const animateOpacity = (
   endOpacity: number,
   duration = 1000
 ) => {
-  console.log(featureId);
   if (!map.current || !featureId) return;
 
   const startTime = performance.now();
@@ -292,7 +290,6 @@ const animateOpacity = (
     // Easing function (ease-out for smooth deceleration)
     const easeOut = 1 - Math.pow(1 - progress, 3);
     const currentOpacity = startOpacity + (endOpacity - startOpacity) * easeOut;
-    console.log(currentOpacity);
     // Update the layer opacity for this specific feature
     map.current?.setFeatureState(
       {
