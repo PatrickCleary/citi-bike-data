@@ -18,7 +18,7 @@ export const DateDisplay: React.FC = () => {
   };
 
   return (
-    <div className="z-10 text-3xl font-bold text-black">
+    <div className="z-10 text-3xl font-bold text-black text-end">
       <p>{month}</p>
       <button
         onClick={() => {

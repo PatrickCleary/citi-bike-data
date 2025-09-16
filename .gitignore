@@ -6,3 +6,4 @@ research/202410-citibike-tripdata/
 research/data/
 research/geo/
 research/.env
+ingestion/__pycache__/
