@@ -9,8 +9,12 @@ import { MutableRefObject, useEffect } from "react";
 import {
   HEX_SOURCE,
   HEX_SOURCE_ID,
+  NJ_TRANSIT_SOURCE,
+  NJ_TRANSIT_SOURCE_ID,
   ORIGIN_SOURCE,
   ORIGIN_SOURCE_ID,
+  SUBWAY_LINES_SOURCE,
+  SUBWAY_LINES_SOURCE_ID,
 } from "./sources";
 import { cellsToMultiPolygon } from "h3-js";
 
@@ -18,7 +22,9 @@ import {
   HEX_LAYER,
   HEX_LAYER_LINE,
   HEX_SOURCE_LAYER_ID,
+  NJ_TRANSIT_STATIONS_LAYER,
   ORIGIN_LAYER_LINE,
+  SUBWAY_LINE_LAYER,
 } from "./layers";
 import { useMapConfigStore } from "@/store/store";
 
@@ -54,7 +60,11 @@ const addHexLayer = (
 
   mapObj.addSource(HEX_SOURCE_ID, HEX_SOURCE);
   mapObj.addSource(ORIGIN_SOURCE_ID, ORIGIN_SOURCE);
+  mapObj.addSource(SUBWAY_LINES_SOURCE_ID, SUBWAY_LINES_SOURCE);
+  mapObj.addSource(NJ_TRANSIT_SOURCE_ID, NJ_TRANSIT_SOURCE);
 
+  mapObj.addLayer(SUBWAY_LINE_LAYER);
+  mapObj.addLayer(NJ_TRANSIT_STATIONS_LAYER);
   mapObj.addLayer(HEX_LAYER);
   mapObj.addLayer(HEX_LAYER_LINE);
   mapObj.addLayer(ORIGIN_LAYER_LINE);
@@ -155,6 +165,7 @@ const getCellEventHandlers = (
         const coordinates = e.lngLat;
         const h3Id = feature.id as string;
         setHoveredFeature({ id: h3Id, coordinates: coordinates });
+        map.current.getCanvas().style.cursor = "pointer";
 
         if (!h3Id) return;
 
