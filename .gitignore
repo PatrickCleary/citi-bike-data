@@ -7,3 +7,4 @@ research/data/
 research/geo/
 research/.env
 ingestion/__pycache__/
+ingestion/.env
