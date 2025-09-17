@@ -80,7 +80,7 @@ jobs:
       if: steps.fetch_files.outputs.has_new_files == 'true'
       run: |
         echo "Processing ${{ steps.fetch_files.outputs.file_count }} new files..."
-        python processor.py new_files.csv
+        python processor.py ./ingestion/new_files.csv
       env:
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
