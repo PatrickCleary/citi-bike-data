@@ -39,26 +39,28 @@ class BikeShareProcessor:
                 self.upload_output_obj(output, table_name="ride_data")
                 self.mark_file_as_processed(file)
             else:
-                print(f"No data processed for {file['file_name']}, skipping upload.")
+                logger.info(
+                    f"No data processed for {file['file_name']}, skipping upload."
+                )
 
     def fetch_and_process_file(self, file: pd.Series):
-        print(f"Processing file: {file['file_name']} for locale {file['locale']}")
+        logger.info(f"Processing file: {file['file_name']} for locale {file['locale']}")
         url = f"https://s3.amazonaws.com/tripdata/{file['file_name']}"
         df_by_file = process_all_csvs_from_zip_url(url, locale=file["locale"])
         if not df_by_file:
-            print(f"No data processed for {file['file_name']}, skipping upload.")
+            logger.info(f"No data processed for {file['file_name']}, skipping upload.")
         else:
             output = apply_h3_latlng_to_cell(df_by_file)
         return output
 
     def upload_output_obj(self, output_obj: dict[str, pd.DataFrame], table_name: str):
         for key in output_obj.keys():
-            print(f"Uploading {key} with {output_obj[key].shape[0]} records")
+            logger.info(f"Uploading {key} with {output_obj[key].shape[0]} records")
             self.upload_df(output_obj[key], table_name)
 
     def upload_df(self, df: pd.DataFrame, table_name: str, chunk_size=50000):
         for i in range(0, len(df), chunk_size):
-            print(f"uploading chunk {i/ chunk_size}")
+            logger.info(f"uploading chunk {i/ chunk_size}")
             chunk = df.iloc[i : i + 50000]
             self.bulk_insert_with_staging(chunk, table_name)
 
@@ -70,7 +72,7 @@ class BikeShareProcessor:
         if len(df) == 0:
             return {"inserted": 0, "updated": 0}
 
-        logger.info(f"Bulk upserting {len(df)} records to {table_name}")
+        logger.debug(f"Bulk upserting {len(df)} records to {table_name}")
 
         with self.conn.cursor() as cur:
             # Create temporary staging table
@@ -130,7 +132,7 @@ class BikeShareProcessor:
             return {"total_processed": total_processed}
 
     def mark_file_as_processed(self, file_obj):
-        print(f"Marking file {file_obj['file_name']} as completed")
+        logger.info(f"Marking file {file_obj['file_name']} as completed")
         result = (
             supabase.table("processed_files")
             .upsert(
@@ -139,7 +141,7 @@ class BikeShareProcessor:
             )
             .execute()
         )
-        print(result)
+        logger.info(result)
 
     def get_processed_file_record(self, file_df_entry):
         json_str = file_df_entry.to_json(date_format="iso")
@@ -152,6 +154,13 @@ if __name__ == "__main__":
     import os
     import sys
 
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.StreamHandler()],
+    )
+
     dotenv.load_dotenv()
     conn_details = {
         "user": os.getenv("DB_USER"),
@@ -161,11 +170,11 @@ if __name__ == "__main__":
         "dbname": os.getenv("DB_NAME"),
     }
     if len(sys.argv) < 2:
-        print("Usage: python processor.py <file_name>")
+        logger.info("Usage: python processor.py <file_name>")
         sys.exit(1)
 
     file_name = sys.argv[1]
-    print(f"Processing file: {file_name}")
+    logger.info(f"Processing file: {file_name}")
     files_df = pd.read_csv(file_name)
     if not all(
         col in files_df.columns.to_list()

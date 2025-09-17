@@ -1,0 +1,112 @@
+# .github/workflows/citibike_processing.yml
+name: Citibike Data Processing
+
+on:
+#   schedule:
+    # Run daily at 3 AM UTC
+    # - cron: '0 3 * * *'
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  process-citibike-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360  # 6 hours max
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r ./ingestion/requirements.txt
+        
+    - name: Check system resources
+      run: |
+        echo "Available memory:"
+        free -h
+        echo "Available disk space:"
+        df -h
+        echo "CPU cores:"
+        nproc
+        
+    - name: Create temporary directories
+      run: |
+        mkdir -p temp_files
+        mkdir -p logs
+        
+    - name: Fetch new files
+      id: fetch_files
+      run: |
+        echo "Fetching new files from Citibike..."
+        python ./ingestion/run_file_fetch.py
+        
+        # Check if any new files were found
+        if [ -f "new_files.csv" ] && [ -s "new_files.csv" ]; then
+          file_count=$(tail -n +2 "new_files.csv" | wc -l)
+          echo "Found $file_count new files to process"
+          echo "has_new_files=true" >> $GITHUB_OUTPUT
+          echo "file_count=$file_count" >> $GITHUB_OUTPUT
+        else
+          echo "No new files found"
+          echo "has_new_files=false" >> $GITHUB_OUTPUT
+          echo "file_count=0" >> $GITHUB_OUTPUT
+        fi
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        
+    - name: Process files
+      if: steps.fetch_files.outputs.has_new_files == 'true'
+      run: |
+        echo "Processing ${{ steps.fetch_files.outputs.file_count }} new files..."
+        python ./ingestion/processor.py new_files.csv
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_PORT: ${{ secrets.DB_PORT }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        
+    - name: Upload processing logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: processing-logs-${{ github.run_number }}
+        path: |
+          logs/
+          new_files.csv
+        retention-days: 30
+        
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "Processing failed! Check the logs for details."
+        # Optional: Add Slack/email notification here
+        
+    - name: Summary
+      if: always()
+      run: |
+        if [ "${{ steps.fetch_files.outputs.has_new_files }}" == "true" ]; then
+          echo "✅ Processed ${{ steps.fetch_files.outputs.file_count }} files successfully"
+        else
+          echo "ℹ️ No new files to process"
+        fi
