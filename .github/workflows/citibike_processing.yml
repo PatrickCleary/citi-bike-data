@@ -62,8 +62,8 @@ jobs:
         python ./ingestion/run_file_fetch.py
         
         # Check if any new files were found
-        if [ -f "./ingestion/new_files.csv" ] && [ -s "./ingestion/new_files.csv" ]; then
-          file_count=$(tail -n +2 "./ingestion/new_files.csv" | wc -l)
+        if [ -f "new_files.csv" ] && [ -s "new_files.csv" ]; then
+          file_count=$(tail -n +2 "new_files.csv" | wc -l)
           echo "Found $file_count new files to process"
           echo "has_new_files=true" >> $GITHUB_OUTPUT
           echo "file_count=$file_count" >> $GITHUB_OUTPUT
@@ -80,7 +80,7 @@ jobs:
       if: steps.fetch_files.outputs.has_new_files == 'true'
       run: |
         echo "Processing ${{ steps.fetch_files.outputs.file_count }} new files..."
-        python processor.py ./ingestion/new_files.csv
+        python processor.py new_files.csv
       env:
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
@@ -97,7 +97,7 @@ jobs:
         name: processing-logs-${{ github.run_number }}
         path: |
           logs/
-          ./ingestion/new_files.csv
+          new_files.csv
         retention-days: 30
         
     - name: Notify on failure
