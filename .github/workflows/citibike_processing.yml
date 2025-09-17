@@ -62,7 +62,7 @@ jobs:
         python ./ingestion/run_file_fetch.py
         
         # Check if any new files were found
-        if [ -f "./ingestion/new_files.csv" ] && [ -s "./ingestionnew_files.csv" ]; then
+        if [ -f "./ingestion/new_files.csv" ] && [ -s "./ingestion/new_files.csv" ]; then
           file_count=$(tail -n +2 "./ingestion/new_files.csv" | wc -l)
           echo "Found $file_count new files to process"
           echo "has_new_files=true" >> $GITHUB_OUTPUT
