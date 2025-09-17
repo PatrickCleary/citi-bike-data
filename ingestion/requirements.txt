@@ -25,6 +25,7 @@ ipython_pygments_lexers==1.1.1
 jedi==0.19.2
 jupyter_client==8.6.3
 jupyter_core==5.8.1
+lxml==6.0.1
 matplotlib-inline==0.1.7
 nest-asyncio==1.6.0
 numpy==2.3.3
