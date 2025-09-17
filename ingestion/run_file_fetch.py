@@ -56,7 +56,7 @@ def main():
                 )
 
             # Save to CSV for processing step
-            new_files_df.to_csv("new_files.csv", index=False)
+            new_files_df.head(1).to_csv("new_files.csv", index=False)
             logger.info("New files saved to new_files.csv")
 
         logger.info("File fetch process completed successfully")
