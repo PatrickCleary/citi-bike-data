@@ -1,11 +1,14 @@
 import pandas as pd
 import h3
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def apply_h3_latlng_to_cell(df_by_file, resolution=9) -> dict[str, pd.DataFrame]:
     output_obj = {}
     for key in df_by_file.keys():
-        print(f"[{key}] entries: {df_by_file[key].shape[0]}")
+        logger.info(f"[{key}] entries: {df_by_file[key].shape[0]}")
         resolution = 9
         df_in_loop = df_by_file[key].copy()
         df_in_loop["h3_cell_start"] = df_in_loop.apply(
@@ -30,7 +33,7 @@ def apply_h3_latlng_to_cell(df_by_file, resolution=9) -> dict[str, pd.DataFrame]
         )
         # Remove duplicates. These are infrequent and probably just bad data.
         dupes = df_in_loop.duplicated(subset=["ride_id"])
-        print(f"  - Removing {dupes.sum()} duplicate ride_id entries")
+        logger.info(f"  - Removing {dupes.sum()} duplicate ride_id entries")
         df_in_loop = df_in_loop[~dupes]
 
         output_obj[key] = df_in_loop

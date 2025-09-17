@@ -5,6 +5,9 @@ import io
 from pathlib import Path
 import os
 import hashlib
+import logging
+
+logger = logging.getLogger(__name__)
 
 def find_column_match(df_columns, possible_names):
     """Find matching column name from possibilities, case-insensitive"""
@@ -30,7 +33,7 @@ def process_all_csvs_from_zip_url(zip_url, locale):
 
     try:
         # Download ZIP file into memory
-        print(f"Downloading ZIP file from: {zip_url}")
+        logger.info(f"Downloading ZIP file from: {zip_url}")
         response = requests.get(zip_url, stream=True)
         response.raise_for_status()
 
@@ -87,14 +90,14 @@ def process_all_csvs_from_zip_data(zip_data, locale):
             if not csv_files:
                 raise ValueError("No CSV files found in ZIP archive")
 
-            print(f"Found {len(csv_files)} CSV file(s) in ZIP archive:")
+            logger.info(f"Found {len(csv_files)} CSV file(s) in ZIP archive:")
             for csv_file in csv_files:
-                print(f"  - {csv_file}")
+                logger.info(f"  - {csv_file}")
 
             # Process each CSV file
             for csv_file_path in csv_files:
                 try:
-                    print(f"\nProcessing: {csv_file_path}")
+                    logger.info(f"\nProcessing: {csv_file_path}")
 
                     # Read CSV directly from ZIP
                     with zip_ref.open(csv_file_path) as csv_file:
@@ -102,10 +105,10 @@ def process_all_csvs_from_zip_data(zip_data, locale):
 
                     # Process the DataFrame based on which format it uses.
                     if "ride_id" in df.columns:
-                        print("here")
+                        logger.info("here")
                         processed_df = process_dataframe(df, locale)
                     else:
-                        print("239821h")
+                        logger.info("239821h")
                         processed_df = process_dataframe_old_format(df, locale)
 
                     # Use just the filename (without path) as key
@@ -125,24 +128,24 @@ def process_all_csvs_from_zip_data(zip_data, locale):
                         results[filename_only] = processed_df
 
                     processed_count += 1
-                    print(f"  ✓ Successfully processed {len(processed_df)} rows")
+                    logger.info(f"  ✓ Successfully processed {len(processed_df)} rows")
 
                 except Exception as e:
                     error_msg = f"Failed to process {csv_file_path}: {str(e)}"
-                    print(f"  ✗ {error_msg}")
+                    logger.info(f"  ✗ {error_msg}")
                     failed_files.append((csv_file_path, str(e)))
                     continue
 
             # Summary
-            print(f"\n{'='*50}")
-            print(f"PROCESSING SUMMARY:")
-            print(f"Successfully processed: {processed_count} files")
-            print(f"Failed: {len(failed_files)} files")
+            logger.info(f"\n{'='*50}")
+            logger.info(f"PROCESSING SUMMARY:")
+            logger.info(f"Successfully processed: {processed_count} files")
+            logger.info(f"Failed: {len(failed_files)} files")
 
             if failed_files:
-                print(f"\nFailed files:")
+                logger.info(f"\nFailed files:")
                 for failed_file, error in failed_files:
-                    print(f"  - {failed_file}: {error}")
+                    logger.info(f"  - {failed_file}: {error}")
 
             if processed_count == 0:
                 raise ValueError("No CSV files could be processed successfully")
@@ -150,7 +153,7 @@ def process_all_csvs_from_zip_data(zip_data, locale):
             return results
 
     except zipfile.BadZipFile:
-        print("File is not a valid ZIP archive, skipping.")
+        logger.info("File is not a valid ZIP archive, skipping.")
     except Exception as e:
         raise Exception(f"Error processing ZIP file: {str(e)}")
 
@@ -311,7 +314,7 @@ def download_and_save_zip(zip_url, local_path):
     local_path (str): Local path to save the file
     """
     try:
-        print(f"Downloading ZIP file to: {local_path}")
+        logger.info(f"Downloading ZIP file to: {local_path}")
         response = requests.get(zip_url, stream=True)
         response.raise_for_status()
 
@@ -323,7 +326,7 @@ def download_and_save_zip(zip_url, local_path):
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
 
-        print(f"ZIP file saved successfully to: {local_path}")
+        logger.info(f"ZIP file saved successfully to: {local_path}")
         return local_path
 
     except requests.RequestException as e:

@@ -136,4 +136,4 @@ if __name__ == '__main__':
 
     downloader = FileDownloader(supabase)
     new_files_df = downloader.get_unprocessed_files()
-    print(new_files_df)
+    new_files_df.to_csv("new_files.csv", index=False)
