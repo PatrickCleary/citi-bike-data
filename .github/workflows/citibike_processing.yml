@@ -6,6 +6,10 @@ on:
     # Run daily at 3 AM UTC
     - cron: '0 3 * * *'
   workflow_dispatch:  # Allow manual triggering
+  push:
+    branches: [ feat/automate-ingestion ]  # Auto-run on pushes to test branch
+  pull_request:
+    branches: [ main ]
 
 env:
   PYTHON_VERSION: "3.11"
