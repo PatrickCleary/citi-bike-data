@@ -2,7 +2,6 @@
 import type { MutableRefObject } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Map, MapSourceDataEvent } from "maplibre-gl";
 import { MAP_CONFIG_DEFAULT } from "./constants";
@@ -18,6 +17,9 @@ import { DateDisplay } from "./date-display";
 import { TotalDisplay } from "./total-display";
 import Popup from "@/map/popup";
 import { addImages } from "@/map/utils";
+import { LayerControl } from "./layer-control";
+import { MapButton } from "@/map/map-button";
+import { DateControl } from "./date-control";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -26,8 +28,12 @@ export const MapPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   useUpdateMapStyleOnDataChange(map, mapLoaded);
   useApplyLayers(map, mapLoaded);
-  const { setSelectedMonth, setDepartureCells, analysisType, setAnalysisType } =
-    useMapConfigStore();
+  const {
+    setSelectedMonth,
+    setDepartureCells,
+    analysisType,
+    swapAnalysisType,
+  } = useMapConfigStore();
   useUpdateOriginShape(map, mapLoaded);
   useAddPMTilesProtocol();
   const handleIdle = useCallback(() => {
@@ -42,7 +48,7 @@ export const MapPage: React.FC = () => {
         setLoading(true);
       }
     },
-    [loading, setLoading]
+    [loading, setLoading],
   );
 
   useEffect(() => {
@@ -54,7 +60,7 @@ export const MapPage: React.FC = () => {
     });
     map.current?.on("load", async () => {
       await addImages(map);
-      console.log('added')
+      console.log("added");
 
       // map.current?.removeControl(map.current?.attributionControl);
       map.current?.addControl(new maplibregl.AttributionControl(), "top-right");
@@ -73,30 +79,13 @@ export const MapPage: React.FC = () => {
     };
   }, [mapLoaded, handleIdle, handleLoading]);
   return (
-    <div className="w-[100svw] h-[100svh] flex flex-row">
-      <div className="h-full w-40 bg-white text-black flex flex-col">
-        <input
-          type="date"
-          onInput={(input) => {
-            setSelectedMonth(input.target.value);
-          }}
-        ></input>
-        <button onClick={() => setDepartureCells([])}>clear</button>
-        <button
-          onClick={() =>
-            setAnalysisType(
-              analysisType === "arrivals" ? "departures" : "arrivals"
-            )
-          }
-        >
-          {analysisType}
-        </button>
-      </div>
+    <div className="flex h-[100svh] w-[100svw] flex-row">
       <div className="h-full w-full" ref={mapContainer}>
-        <div className="fixed flex flex-col gap-4 z-10 right-4 bottom-4">
+        <div className="fixed bottom-4 right-4 z-10 flex flex-col gap-4">
           <TotalDisplay />
-          <DateDisplay />
+          <DateControl />
         </div>
+        <LayerControl map={map} mapLoaded={mapLoaded} />
       </div>
       <Popup map={map} />
     </div>
