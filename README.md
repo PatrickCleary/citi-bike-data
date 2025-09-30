@@ -2,19 +2,18 @@
 
 An app that allows you to see where citi bike trips are taken from/to each month.
 
+## Data sets
 
-### Setup
+### Adding data layers
 
-- You will need a Mapbox API key and it needs to be set as `NEXT_PUBLIC_MAPBOX_API_KEY`
-- To get local data, the scripts in the `research` jupyter notbeook file need to be ran. Those scripts will populate data in the `public` directory.
+The source-layer name is equivalent to the name given as the `file_name`
 
-### Current status
+automated process: 
+research/layer_generation/layer_generation.ipynb
 
-- Wrote simple python scripts to extract data from citibike published CSVs and convert to files containing total end-destination trips. 
-- Simple frontend setup that prints that data when the user clicks on a marker.
-
-
-### Data sets
+1. arcgis to GEOJSON
+2. tippecanoe -o <file_name>.mbtiles <file_name>.geojson --force
+3. pmtiles convert <file_name>.mbtiles <file_name>.pmtiles
 
 **Citi Bike data**
 
@@ -27,7 +26,6 @@ An app that allows you to see where citi bike trips are taken from/to each month
 - map source: https://hudson-county-gis-hudsoncogis.hub.arcgis.com/datasets/HudsonCoGIS::path-train/explore?layer=0&location=40.740405%2C-74.069207%2C13.90
 
 - arcgis feature layer URL: https://services3.arcgis.com/Stu7jwuXrnM0myT0/arcgis/rest/services/PATH_Train/FeatureServer
-
 
 **stations**
 
@@ -44,10 +42,10 @@ An app that allows you to see where citi bike trips are taken from/to each month
 - arcgis feature layer URL https://services5.arcgis.com/OKgEWPlJhc3vFb8C/arcgis/rest/services/MTA_Subway_Routes_Stops/FeatureServer/1
 
 **stations**
+
 - map source: https://www.arcgis.com/apps/mapviewer/index.html?layers=973c3760224a4970b3152a4667fc7da5
 
 - arcgis feature layer URL https://services5.arcgis.com/OKgEWPlJhc3vFb8C/arcgis/rest/services/MTA_Subway_Routes_Stops/FeatureServer/0
-
 
 ### **NJ Transit**
 
@@ -58,6 +56,7 @@ An app that allows you to see where citi bike trips are taken from/to each month
 - arcgis feature layer URL https://services6.arcgis.com/M0t0HPE53pFK525U/arcgis/rest/services/NJTransit_Light_Rail/FeatureServer
 
 **light rail stations**
+
 - map: https://njogis-newjersey.opendata.arcgis.com/datasets/7877bb73757d4b1586338ccf2168705d_0/explore
 
 - arcgis feature layer URL: https://services6.arcgis.com/M0t0HPE53pFK525U/arcgis/rest/services/NJTransit_Light_Rail_Stations/FeatureServer
@@ -68,13 +67,13 @@ An app that allows you to see where citi bike trips are taken from/to each month
 
 - arcgis feature layer URL: https://services6.arcgis.com/M0t0HPE53pFK525U/arcgis/rest/services/NJTRANSIT_RAIL_LINES_1/FeatureServer
 
+**rail stations**
 
-**rail stations** 
-- map source: https://njogis-newjersey.opendata.arcgis.com/datasets/4809dada94c542e0beff00600ee930f6_0/explore
+- map source: https://njogis-newjersey.opendata.arcgis.com/datasetss/4809dada94c542e0beff00600ee930f6_0/explore
 
 - arcgis feature layer URL: https://services6.arcgis.com/M0t0HPE53pFK525U/arcgis/rest/services/NJTransit_Rail_Stations/FeatureServer
 
-<!-- 
+<!--
 ### **LIRR**
  - source: https://hub.arcgis.com/documents/DCP::long-island-railroad-stations-mta/about?path=
 
