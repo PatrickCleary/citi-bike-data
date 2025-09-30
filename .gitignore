@@ -8,3 +8,4 @@ research/geo/
 research/.env
 ingestion/__pycache__/
 ingestion/.env
+research/layer_generation/geo_layers/

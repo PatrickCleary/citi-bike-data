@@ -17,6 +17,7 @@ import { useMapConfigStore } from "@/store/store";
 import { DateDisplay } from "./date-display";
 import { TotalDisplay } from "./total-display";
 import Popup from "@/map/popup";
+import { addImages } from "@/map/utils";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -52,6 +53,9 @@ export const MapPage: React.FC = () => {
       container: mapContainer.current,
     });
     map.current?.on("load", async () => {
+      await addImages(map);
+      console.log('added')
+
       // map.current?.removeControl(map.current?.attributionControl);
       map.current?.addControl(new maplibregl.AttributionControl(), "top-right");
       setMapLoaded(true);

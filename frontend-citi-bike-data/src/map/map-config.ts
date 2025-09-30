@@ -1,16 +1,35 @@
+import { Protocol } from "pmtiles";
+import { useQuery } from "@tanstack/react-query";
+import { getTripCountData } from "@/utils/api";
+import { HoveredFeature, usePopupStateStore } from "@/store/popup-store";
 import maplibregl, {
   GeoJSONFeature,
   Map,
   Event,
   MapEventType,
-  Popup,
 } from "maplibre-gl";
 import { MutableRefObject, useEffect } from "react";
 import {
   HEX_SOURCE,
   HEX_SOURCE_ID,
+  NJ_LIGHT_RAIL_LINES_SOURCE,
+  NJ_LIGHT_RAIL_LINES_SOURCE_ID,
+  NJ_LIGHT_RAIL_STATIONS_SOURCE,
+  NJ_LIGHT_RAIL_STATIONS_SOURCE_ID,
+  NJ_RAIL_LINES_SOURCE,
+  NJ_RAIL_LINES_SOURCE_ID,
+  NJ_RAIL_STATIONS_SOURCE,
+  NJ_RAIL_STATIONS_SOURCE_ID,
+  NYC_LINES_SOURCE,
+  NYC_LINES_SOURCE_ID,
+  NYC_STATIONS_SOURCE,
+  NYC_STATIONS_SOURCE_ID,
   ORIGIN_SOURCE,
   ORIGIN_SOURCE_ID,
+  PATH_LINES_SOURCE,
+  PATH_LINES_SOURCE_ID,
+  PATH_STATIONS_SOURCE,
+  PATH_STATIONS_SOURCE_ID,
 } from "./sources";
 import { cellsToMultiPolygon } from "h3-js";
 
@@ -18,7 +37,17 @@ import {
   HEX_LAYER,
   HEX_LAYER_LINE,
   HEX_SOURCE_LAYER_ID,
+  NJ_LIGHT_RAIL_LINE_LAYER,
+  NJ_LIGHT_RAIL_STATION_LAYER,
+  NJ_RAIL_LINE_LAYER,
+  NJ_RAIL_STATION_LAYER,
+  NJ_TRANSIT_STATIONS_LAYER,
+  NYC_LINE_LAYER,
+  NYC_STATION_LAYER,
   ORIGIN_LAYER_LINE,
+  PATH_LINE_LAYER,
+  PATH_STATION_LAYER,
+  SUBWAY_LINE_LAYER,
 } from "./layers";
 import { useMapConfigStore } from "@/store/store";
 
@@ -36,7 +65,34 @@ export const useApplyLayers = (
   useEffect(() => {
     if (!mapLoaded) return;
     addHexLayer(map, addOrRemoveDepartureCell, setHoveredFeature);
+    addTransitLayers(map);
   }, [mapLoaded, map, addOrRemoveDepartureCell, setHoveredFeature]);
+};
+
+const addTransitLayers = (map: MutableRefObject<Map | null>) => {
+  if (!map.current) return;
+  const mapObj = map.current;
+  // Sources: pat
+  mapObj.addSource(PATH_LINES_SOURCE_ID, PATH_LINES_SOURCE);
+  mapObj.addSource(PATH_STATIONS_SOURCE_ID, PATH_STATIONS_SOURCE);
+  mapObj.addSource(NYC_LINES_SOURCE_ID, NYC_LINES_SOURCE);
+  mapObj.addSource(NYC_STATIONS_SOURCE_ID, NYC_STATIONS_SOURCE);
+  mapObj.addSource(NJ_LIGHT_RAIL_LINES_SOURCE_ID, NJ_LIGHT_RAIL_LINES_SOURCE);
+  mapObj.addSource(
+    NJ_LIGHT_RAIL_STATIONS_SOURCE_ID,
+    NJ_LIGHT_RAIL_STATIONS_SOURCE
+  );
+  mapObj.addSource(NJ_RAIL_LINES_SOURCE_ID, NJ_RAIL_LINES_SOURCE);
+  mapObj.addSource(NJ_RAIL_STATIONS_SOURCE_ID, NJ_RAIL_STATIONS_SOURCE);
+
+  mapObj.addLayer(PATH_LINE_LAYER);
+  mapObj.addLayer(PATH_STATION_LAYER);
+  mapObj.addLayer(NYC_LINE_LAYER);
+  mapObj.addLayer(NYC_STATION_LAYER);
+  mapObj.addLayer(NJ_LIGHT_RAIL_LINE_LAYER);
+  mapObj.addLayer(NJ_LIGHT_RAIL_STATION_LAYER);
+  mapObj.addLayer(NJ_RAIL_LINE_LAYER);
+  mapObj.addLayer(NJ_RAIL_STATION_LAYER);
 };
 
 const addHexLayer = (
@@ -54,7 +110,11 @@ const addHexLayer = (
 
   mapObj.addSource(HEX_SOURCE_ID, HEX_SOURCE);
   mapObj.addSource(ORIGIN_SOURCE_ID, ORIGIN_SOURCE);
+  // mapObj.addSource(SUBWAY_LINES_SOURCE_ID, SUBWAY_LINES_SOURCE);
+  // mapObj.addSource(NJ_TRANSIT_SOURCE_ID, NJ_TRANSIT_SOURCE);
 
+  // mapObj.addLayer(SUBWAY_LINE_LAYER);
+  // mapObj.addLayer(NJ_TRANSIT_STATIONS_LAYER);
   mapObj.addLayer(HEX_LAYER);
   mapObj.addLayer(HEX_LAYER_LINE);
   mapObj.addLayer(ORIGIN_LAYER_LINE);
@@ -75,11 +135,6 @@ const removeHexLayer = (mapObj: Map, eventHandlers: EventHandler[]) => {
   mapObj.removeLayer(HEX_SOURCE_ID);
   mapObj.removeSource(HEX_SOURCE_ID);
 };
-
-import { Protocol } from "pmtiles";
-import { useQuery } from "@tanstack/react-query";
-import { getTripCountData } from "@/utils/api";
-import { HoveredFeature, usePopupStateStore } from "@/store/popup-store";
 
 export const useTripCountData = () => {
   const { departureCells, selectedMonth, analysisType } = useMapConfigStore();
@@ -155,6 +210,7 @@ const getCellEventHandlers = (
         const coordinates = e.lngLat;
         const h3Id = feature.id as string;
         setHoveredFeature({ id: h3Id, coordinates: coordinates });
+        map.current.getCanvas().style.cursor = "pointer";
 
         if (!h3Id) return;
 
