@@ -5,7 +5,7 @@ interface Store {
   departureCountMap: Record<string, number> | null;
   selectedMonth: string;
   analysisType: "departures" | "arrivals";
-  setAnalysisType: (type: "departures" | "arrivals") => void;
+  swapAnalysisType: () => void;
   setSelectedMonth: (month: string) => void;
   setDepartureCountMap: (map: Record<string, number>) => void;
   setDepartureCells: (departureCells: string[]) => void;
@@ -17,7 +17,11 @@ export const useMapConfigStore = create<Store>((set) => ({
   departureCountMap: null,
   selectedMonth: "2025-07-01",
   analysisType: "departures",
-  setAnalysisType: (type) => set({ analysisType: type }),
+  swapAnalysisType: () =>
+    set((state) => ({
+      analysisType:
+        state.analysisType === "departures" ? "arrivals" : "departures",
+    })),
   setSelectedMonth: (month) => set({ selectedMonth: month }),
   setDepartureCountMap: (map) => set({ departureCountMap: map }),
   setDepartureCells: (departureCells) =>

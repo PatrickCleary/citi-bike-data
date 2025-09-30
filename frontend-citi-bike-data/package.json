@@ -9,8 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@headlessui/react": "^2.2.9",
+    "@mui/icons-material": "^7.3.2",
+    "@mui/material": "^7.3.2",
     "@tanstack/react-query": "^5.87.4",
     "@tanstack/react-query-devtools": "^5.87.4",
+    "classnames": "^2.5.1",
     "dayjs": "^1.11.18",
     "h3-js": "^4.3.0",
     "maplibre": "^0.0.1-security",
@@ -28,6 +34,8 @@
     "eslint": "^8",
     "eslint-config-next": "15.0.3",
     "postcss": "^8",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

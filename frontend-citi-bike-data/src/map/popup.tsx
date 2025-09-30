@@ -4,6 +4,7 @@ import maplibregl, { Map, Popup } from "maplibre-gl";
 import { usePopupStateStore } from "@/store/popup-store";
 import { useTripCountData } from "./map-config";
 import { formatter } from "@/utils/utils";
+import { useMapConfigStore } from "@/store/store";
 
 interface PopupProps {
   map: MutableRefObject<Map | null>;
@@ -58,7 +59,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
           hoveredTripCount={hoveredTripCount}
           totalTrips={totalTrips}
         />,
-        contentRef.current
+        contentRef.current,
       )}
     </>
   );
@@ -70,10 +71,13 @@ export const PopupContent: React.FC<{
   hoveredTripCount: number;
   totalTrips: number;
 }> = ({ hoveredTripCount, totalTrips }) => {
+  const { analysisType } = useMapConfigStore();
   return (
-    <div className="text-black text-center rounded-lg bg-white/30 border border-[.5px] border-color-white/50 text-neutral-800 text-black pointer-events-none px-2 rounded-2 py-1 font-bold text-lg">
-      {formatter.format(hoveredTripCount)}
-      <p className="text-xs italic">arriving rides</p>
+    <div className="border-color-white/50 rounded-2 pointer-events-none rounded-md border-[.5px] bg-white/30 px-2 py-1 text-center text-lg font-bold text-black text-neutral-800 backdrop-blur-md">
+      <span className="font-mono">{formatter.format(hoveredTripCount)}</span>
+      <p className="text-xs italic">
+        {analysisType === "arrivals" ? "Arrivals" : "Departures"}
+      </p>
       {/* <p>{formatter.format((100 * hoveredTripCount) / totalTrips)}</p> */}
     </div>
   );
