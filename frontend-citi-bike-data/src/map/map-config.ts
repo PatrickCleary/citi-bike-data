@@ -58,7 +58,7 @@ export type EventHandler = {
 };
 export const useApplyLayers = (
   map: MutableRefObject<Map | null>,
-  mapLoaded: boolean
+  mapLoaded: boolean,
 ) => {
   const { addOrRemoveDepartureCell } = useMapConfigStore();
   const { setHoveredFeature } = usePopupStateStore();
@@ -80,7 +80,7 @@ const addTransitLayers = (map: MutableRefObject<Map | null>) => {
   mapObj.addSource(NJ_LIGHT_RAIL_LINES_SOURCE_ID, NJ_LIGHT_RAIL_LINES_SOURCE);
   mapObj.addSource(
     NJ_LIGHT_RAIL_STATIONS_SOURCE_ID,
-    NJ_LIGHT_RAIL_STATIONS_SOURCE
+    NJ_LIGHT_RAIL_STATIONS_SOURCE,
   );
   mapObj.addSource(NJ_RAIL_LINES_SOURCE_ID, NJ_RAIL_LINES_SOURCE);
   mapObj.addSource(NJ_RAIL_STATIONS_SOURCE_ID, NJ_RAIL_STATIONS_SOURCE);
@@ -98,14 +98,14 @@ const addTransitLayers = (map: MutableRefObject<Map | null>) => {
 const addHexLayer = (
   map: MutableRefObject<Map | null>,
   addOrRemoveDepartureCell: (cell: string) => void,
-  setHoveredFeature: (feature: HoveredFeature | null) => void
+  setHoveredFeature: (feature: HoveredFeature | null) => void,
 ) => {
   if (!map.current) return;
   const mapObj = map.current;
   const eventHandlers = getCellEventHandlers(
     map,
     addOrRemoveDepartureCell,
-    setHoveredFeature
+    setHoveredFeature,
   );
 
   mapObj.addSource(HEX_SOURCE_ID, HEX_SOURCE);
@@ -149,29 +149,33 @@ export const useTripCountData = () => {
 
 export const useUpdateMapStyleOnDataChange = (
   map: MutableRefObject<Map | null>,
-  mapLoaded: boolean
+  mapLoaded: boolean,
 ) => {
   const query = useTripCountData();
+  const { scale: scale } = useMapConfigStore();
   if (!mapLoaded) return;
   const departureCountMap = query.data?.data.trip_counts;
-  const highestValue = query.data?.data.highest_value || 100;
+  const middleValue = (scale[1] + scale[0]) / 2;
   const hexLayer = map.current?.getLayer(HEX_LAYER.id);
+  if (scale[0] >= scale[1]) return;
   if (hexLayer && departureCountMap) {
     map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", [
       "case",
-      ["has", ["id"], ["literal", departureCountMap]],
+      ["!", ["has", ["id"], ["literal", departureCountMap]]],
+      "#ffffff00", // Transparent color for features without an 'id'
+      ["<", ["get", ["id"], ["literal", departureCountMap]], scale[0]],
+      "#ffffff00", // Transparent color for values under scaleMax[0]
       [
         "interpolate",
         ["linear"],
         ["get", ["id"], ["literal", departureCountMap]],
-        0,
+        scale[0],
         "#1a2a6c",
-        highestValue / 2,
+        middleValue,
         "#b21f1f",
-        highestValue,
+        scale[1],
         "#fdbb2d",
       ],
-      "#ffffff00",
     ]);
   }
 };
@@ -179,7 +183,7 @@ export const useUpdateMapStyleOnDataChange = (
 const getCellEventHandlers = (
   map: MutableRefObject<Map | null>,
   addOrRemoveDepartureCell: (cell: string) => void,
-  setHoveredFeature: (feature: HoveredFeature | null) => void
+  setHoveredFeature: (feature: HoveredFeature | null) => void,
 ): {
   eventType: MapEventType;
   layer: string;
@@ -242,7 +246,7 @@ const getCellEventHandlers = (
                   sourceLayer: HEX_SOURCE_LAYER_ID,
                   id: hoveredFeatureId,
                 },
-                { hover: false }
+                { hover: false },
               );
             }
           }
@@ -294,7 +298,7 @@ export const useAddPMTilesProtocol = () => {
 
 export const useUpdateOriginShape = (
   map: MutableRefObject<Map>,
-  mapLoaded: boolean
+  mapLoaded: boolean,
 ) => {
   const { departureCells } = useMapConfigStore();
 
@@ -303,14 +307,14 @@ export const useUpdateOriginShape = (
     const originGeoJson = convertCellsToGeoJSON(departureCells);
 
     const originSource = map.current?.getSource(
-      ORIGIN_SOURCE_ID
+      ORIGIN_SOURCE_ID,
     ) as maplibregl.GeoJSONSource;
     originSource?.setData(originGeoJson);
   }, [departureCells, map, mapLoaded]);
 };
 
 const convertCellsToGeoJSON = (
-  cells: string[]
+  cells: string[],
 ): GeoJSON.FeatureCollection<GeoJSON.Geometry> => {
   const polygons = cellsToMultiPolygon(cells, true);
   const features = polygons.map((polygon) => ({
@@ -333,7 +337,7 @@ const animateOpacity = (
   featureId: string,
   startOpacity: number,
   endOpacity: number,
-  duration = 1000
+  duration = 1000,
 ) => {
   if (!map.current || !featureId) return;
 
@@ -353,7 +357,7 @@ const animateOpacity = (
         sourceLayer: HEX_SOURCE_LAYER_ID,
         id: featureId,
       },
-      { opacity: currentOpacity, hover: endOpacity > startOpacity }
+      { opacity: currentOpacity, hover: endOpacity > startOpacity },
     );
 
     if (progress < 1) {

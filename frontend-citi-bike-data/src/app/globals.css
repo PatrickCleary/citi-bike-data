@@ -13,11 +13,13 @@
     --foreground: #ededed;
   }
 }
+.maplibregl-map {
+  font-family: 'Outfit' !important;
+}
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 

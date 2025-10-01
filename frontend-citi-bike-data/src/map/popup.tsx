@@ -19,6 +19,10 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   const tripCounts = query.data?.data.trip_counts || {};
   const totalTrips = query.data?.data.sum_all_values || {};
   const { hoveredFeature } = usePopupStateStore();
+  const { departureCells } = useMapConfigStore();
+  const hoveredFeatureIsInSelection = departureCells.includes(
+    hoveredFeature?.id || "",
+  );
   const hoveredTripCount = tripCounts[hoveredFeature?.id as string] || 0;
 
   // instantiate the popup on mount, remove it on unmount
@@ -58,6 +62,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
         <PopupContent
           hoveredTripCount={hoveredTripCount}
           totalTrips={totalTrips}
+          hoveredFeatureIsInSelection={hoveredFeatureIsInSelection}
         />,
         contentRef.current,
       )}
@@ -70,13 +75,21 @@ export default PopupComponent;
 export const PopupContent: React.FC<{
   hoveredTripCount: number;
   totalTrips: number;
-}> = ({ hoveredTripCount, totalTrips }) => {
+  hoveredFeatureIsInSelection: boolean;
+}> = ({ hoveredTripCount, totalTrips, hoveredFeatureIsInSelection }) => {
   const { analysisType } = useMapConfigStore();
   return (
-    <div className="border-color-white/50 rounded-2 pointer-events-none rounded-md border-[.5px] bg-white/30 px-2 py-1 text-center text-lg font-bold text-black text-neutral-800 backdrop-blur-md">
-      <span className="font-mono">{formatter.format(hoveredTripCount)}</span>
+    <div className="border-color-white/50 rounded-2 pointer-events-none rounded-md border-[.5px] bg-white/30 px-2 py-1 text-center text-lg font-bold tabular-nums text-black text-neutral-800 backdrop-blur-md">
+      <span className="font-mono">
+        {formatter.format(hoveredTripCount)} trips
+      </span>
       <p className="text-xs italic">
-        {analysisType === "arrivals" ? "Arrivals" : "Departures"}
+        {analysisType === "arrivals"
+          ? "From this cell to selection"
+          : "From selection to this cell"}
+      </p>
+      <p className="text-xs italic">
+        {hoveredFeatureIsInSelection ? "(in selection)" : ""}
       </p>
       {/* <p>{formatter.format((100 * hoveredTripCount) / totalTrips)}</p> */}
     </div>

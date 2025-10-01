@@ -4,6 +4,7 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { MapButton } from "@/map/map-button";
 import { useMapConfigStore } from "@/store/store";
 import dayjs, { Dayjs } from "dayjs";
+import { CalendarInput } from "./calendar-input";
 
 export const getMonthDisplayText = (date: string) => {
   const dateObj = dayjs(date);
@@ -27,8 +28,8 @@ export const DateControl: React.FC = () => {
           }}
         >
           <div className="flex flex-row">
-            <ChevronLeftSharpIcon fontSize="small"/>
-            <ChevronLeftSharpIcon className="-ml-4" fontSize="small"/>
+            <ChevronLeftSharpIcon fontSize="small" />
+            <ChevronLeftSharpIcon className="-ml-4" fontSize="small" />
           </div>
         </MapButton>
         <MapButton
@@ -36,17 +37,15 @@ export const DateControl: React.FC = () => {
             setMonth(monthObj.subtract(1, "month"));
           }}
         >
-          <ChevronLeftSharpIcon fontSize="small"/>
+          <ChevronLeftSharpIcon fontSize="small" />
         </MapButton>
-        <MapButton onClick={() => {}}>
-          <CalendarMonthIcon fontSize="small"/>
-        </MapButton>
+        <CalendarInput />
         <MapButton
           onClick={() => {
             setMonth(monthObj.add(1, "month"));
           }}
         >
-          <ChevronRightSharpIcon fontSize="small"/>
+          <ChevronRightSharpIcon fontSize="small" />
         </MapButton>
         <MapButton
           onClick={() => {
@@ -54,7 +53,7 @@ export const DateControl: React.FC = () => {
           }}
         >
           <div className="flex flex-row">
-            <ChevronRightSharpIcon fontSize="small"/>
+            <ChevronRightSharpIcon fontSize="small" />
             <ChevronRightSharpIcon className="-ml-4" fontSize="small" />
           </div>
         </MapButton>
