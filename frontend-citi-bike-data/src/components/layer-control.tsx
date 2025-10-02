@@ -133,89 +133,87 @@ export const LayerControl: React.FC<LayerControlProps> = ({
   };
 
   return (
-    <div className="absolute bottom-4 left-4 z-10 text-right">
-      <Menu>
-        <MenuButton className={MapButtonStyle}>
-          <LayersIcon />
-        </MenuButton>
+    <Menu>
+      <MenuButton className={classNames(MapButtonStyle, "focus:outline-none")}>
+        <LayersIcon />
+      </MenuButton>
 
-        <MenuItems
-          anchor="bottom start"
-          transition
-          className="mb-4 origin-bottom-left rounded-lg border border-gray-300 bg-white p-4 shadow-lg [--anchor-gap:theme(spacing.1)] focus:outline-none"
-        >
-          <div className="space-y-2">
-            {layerGroups.map((group, index) => (
-              <div key={group.id} className="flex flex-col">
-                <div className="flex items-start gap-2">
-                  {/* Image with visibility toggle */}
-                  <div className="flex flex-col items-center">
+      <MenuItems
+        anchor="bottom start"
+        transition
+        className="z-10 mb-4 origin-bottom-left rounded-lg border border-gray-300 bg-white p-4 shadow-lg [--anchor-gap:theme(spacing.1)] focus:outline-none"
+      >
+        <div className="space-y-2">
+          {layerGroups.map((group, index) => (
+            <div key={group.id} className="flex flex-col">
+              <div className="flex items-start gap-2">
+                {/* Image with visibility toggle */}
+                <div className="flex flex-col items-center">
+                  <div
+                    className={classNames(
+                      "group relative h-16 w-16 cursor-pointer overflow-hidden rounded outline-blue-400",
+                      group.visible ? "outline" : "outline-hidden",
+                    )}
+                    style={{
+                      backgroundImage: `url("/${group.id}.jpg")`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                    onClick={() => toggleLayerGroup(group.id)}
+                  >
+                    {/* Overlay that lightens on hover */}
                     <div
                       className={classNames(
-                        "group relative h-16 w-16 cursor-pointer overflow-hidden rounded outline-blue-400",
-                        group.visible ? "outline" : "outline-hidden",
+                        "absolute inset-0 bg-white opacity-0 transition-opacity group-hover:opacity-30",
                       )}
-                      style={{
-                        backgroundImage: `url("/${group.id}.jpg")`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }}
-                      onClick={() => toggleLayerGroup(group.id)}
-                    >
-                      {/* Overlay that lightens on hover */}
-                      <div
-                        className={classNames(
-                          "absolute inset-0 bg-white opacity-0 transition-opacity group-hover:opacity-30",
-                        )}
-                      ></div>
+                    ></div>
 
-                      {/* Icon on top of overlay */}
-                      <div className="absolute inset-0 z-10 flex items-center justify-center">
-                        {!group.visible ? (
-                          <VisibilityOutlinedIcon
-                            className="invisible text-gray-700 group-hover:visible group-hover:text-gray-900"
-                            fontSize="small"
-                          />
-                        ) : (
-                          <VisibilityOffOutlinedIcon
-                            className="invisible text-gray-700 group-hover:visible group-hover:text-gray-900"
-                            fontSize="small"
-                          />
-                        )}
-                      </div>
+                    {/* Icon on top of overlay */}
+                    <div className="absolute inset-0 z-10 flex items-center justify-center">
+                      {!group.visible ? (
+                        <VisibilityOutlinedIcon
+                          className="invisible text-gray-700 group-hover:visible group-hover:text-gray-900"
+                          fontSize="small"
+                        />
+                      ) : (
+                        <VisibilityOffOutlinedIcon
+                          className="invisible text-gray-700 group-hover:visible group-hover:text-gray-900"
+                          fontSize="small"
+                        />
+                      )}
                     </div>
-
-                    {/* Label below the image */}
-                    <span className="mt-1 text-xs text-gray-700">
-                      {group.name}
-                    </span>
                   </div>
 
-                  {/* Arrow buttons stacked vertically */}
-                  <div className="flex h-16 flex-col gap-1">
-                    <button
-                      onClick={() => moveLayerGroup(group.id, "up")}
-                      disabled={index === 0}
-                      className="h-8 w-8 rounded-md text-gray-900 enabled:hover:bg-blue-200 enabled:hover:text-blue-700 disabled:opacity-50"
-                      title="Move up"
-                    >
-                      <ArrowUpwardOutlinedIcon fontSize="small" />
-                    </button>
-                    <button
-                      onClick={() => moveLayerGroup(group.id, "down")}
-                      disabled={index === layerGroups.length - 1}
-                      className="h-8 w-8 rounded-md text-gray-900 enabled:hover:bg-blue-200 enabled:hover:text-blue-700 disabled:opacity-50"
-                      title="Move down"
-                    >
-                      <ArrowDownwardOutlinedIcon fontSize="small" />
-                    </button>
-                  </div>
+                  {/* Label below the image */}
+                  <span className="mt-1 text-xs text-gray-700">
+                    {group.name}
+                  </span>
+                </div>
+
+                {/* Arrow buttons stacked vertically */}
+                <div className="flex h-16 flex-col gap-1">
+                  <button
+                    onClick={() => moveLayerGroup(group.id, "up")}
+                    disabled={index === 0}
+                    className="h-8 w-8 rounded-md text-gray-900 enabled:hover:bg-blue-200 enabled:hover:text-blue-700 disabled:opacity-50"
+                    title="Move up"
+                  >
+                    <ArrowUpwardOutlinedIcon fontSize="small" />
+                  </button>
+                  <button
+                    onClick={() => moveLayerGroup(group.id, "down")}
+                    disabled={index === layerGroups.length - 1}
+                    className="h-8 w-8 rounded-md text-gray-900 enabled:hover:bg-blue-200 enabled:hover:text-blue-700 disabled:opacity-50"
+                    title="Move down"
+                  >
+                    <ArrowDownwardOutlinedIcon fontSize="small" />
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </MenuItems>
-      </Menu>
-    </div>
+            </div>
+          ))}
+        </div>
+      </MenuItems>
+    </Menu>
   );
 };
