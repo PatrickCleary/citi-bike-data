@@ -5,7 +5,7 @@ export const TOP_RIGHT: LngLatLike = [-73.7877, 40.8916];
 export const MAP_CONFIG_DEFAULT: Partial<MapOptions> = {
   bounds: [BOTTOM_LEFT, TOP_RIGHT],
   zoom: 12,
-  style: "https://tiles.stadiamaps.com/styles/alidade_smooth.json",
+  style: "/map_styles/alidade_smooth_custom.json",
   attributionControl: false,
 };
 

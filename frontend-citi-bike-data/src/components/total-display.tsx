@@ -7,7 +7,7 @@ const getDisplayText = (trips, analysisType, departureCells) => {
     return "Total trips";
   }
   if (departureCells.length >= 1) {
-    return `${analysisType === "departures" ? "Arrivals to" : "Departures from"} selection`;
+    return `${analysisType === "departures" ? "Trips ended in" : "Trips started from"} selection`;
   }
 };
 
@@ -20,20 +20,22 @@ export const TotalDisplay: React.FC = () => {
     selectedMonth,
   } = useMapConfigStore();
   const query = useTripCountData();
-  if (query.isLoading) {
-    return null;
-  }
   const totalTrips = query.data?.data.sum_all_values || 0;
 
   return (
-    <div className="border-color-white/50 rounded-md border border-gray-300 bg-white/30 px-4 py-2 text-end font-bold text-black backdrop-blur-md">
-      <button onClick={() => swapAnalysisType()}>{"< - > "}</button>
-      <button onClick={() => setDepartureCells([])}>clear</button>
-
-      <p>
-        <span className="font-mono text-xl">{totalTrips.toLocaleString()}</span>
+    <div className="border-color-white/50 flex flex-col items-end rounded-md border border-gray-300 bg-white/30 px-4 py-2 font-bold text-black backdrop-blur-md">
+      {query.isLoading ? (
+        <span className="animate-pulse text-xl blur-sm">0</span>
+      ) : (
+        <p>
+          <span className="text-xl tabular-nums">
+            {totalTrips.toLocaleString()}
+          </span>
+        </p>
+      )}
+      <p className="font-light">
+        {getDisplayText(totalTrips, analysisType, departureCells)}
       </p>
-      <p>{getDisplayText(totalTrips, analysisType, departureCells)}</p>
     </div>
   );
 };

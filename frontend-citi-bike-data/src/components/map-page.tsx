@@ -13,13 +13,13 @@ import {
 } from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
 
-import { DateDisplay } from "./date-display";
 import { TotalDisplay } from "./total-display";
 import Popup from "@/map/popup";
 import { addImages } from "@/map/utils";
 import { LayerControl } from "./layer-control";
 import { MapButton } from "@/map/map-button";
 import { DateControl } from "./date-control";
+import { DisplaySettings } from "./display-settings";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -28,12 +28,6 @@ export const MapPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   useUpdateMapStyleOnDataChange(map, mapLoaded);
   useApplyLayers(map, mapLoaded);
-  const {
-    setSelectedMonth,
-    setDepartureCells,
-    analysisType,
-    swapAnalysisType,
-  } = useMapConfigStore();
   useUpdateOriginShape(map, mapLoaded);
   useAddPMTilesProtocol();
   const handleIdle = useCallback(() => {
@@ -60,7 +54,6 @@ export const MapPage: React.FC = () => {
     });
     map.current?.on("load", async () => {
       await addImages(map);
-      console.log("added");
 
       // map.current?.removeControl(map.current?.attributionControl);
       map.current?.addControl(new maplibregl.AttributionControl(), "top-right");
@@ -79,13 +72,14 @@ export const MapPage: React.FC = () => {
     };
   }, [mapLoaded, handleIdle, handleLoading]);
   return (
-    <div className="flex h-[100svh] w-[100svw] flex-row">
+    <div className="flex h-[100svh] w-[100svw] flex-row font-sans">
       <div className="h-full w-full" ref={mapContainer}>
         <div className="fixed bottom-4 right-4 z-10 flex flex-col gap-4">
           <TotalDisplay />
           <DateControl />
         </div>
         <LayerControl map={map} mapLoaded={mapLoaded} />
+        <DisplaySettings />
       </div>
       <Popup map={map} />
     </div>
