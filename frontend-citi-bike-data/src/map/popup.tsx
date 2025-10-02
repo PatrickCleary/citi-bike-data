@@ -26,8 +26,8 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   const hoveredFeatureIsInSelection = departureCells.includes(
     hoveredFeature?.id || "",
   );
-  const hoveredTripCount =
-    tripCounts[hoveredFeature?.id as string] || undefined;
+  const loading = query.isLoading;
+  const hoveredTripCount = tripCounts[hoveredFeature?.id as string] || 0;
   const hexColor = getHexagonColor(hoveredTripCount, scale);
   // instantiate the popup on mount, remove it on unmount
   useEffect(() => {
@@ -64,6 +64,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
       {createPortal(
         <PopupContent
           hoveredTripCount={hoveredTripCount}
+          loading={loading}
           totalTrips={totalTrips}
           hoveredFeatureIsInSelection={hoveredFeatureIsInSelection}
           hexColor={hexColor}
@@ -77,11 +78,13 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
 export default PopupComponent;
 
 export const PopupContent: React.FC<{
-  hoveredTripCount: number | undefined;
+  loading: boolean;
+  hoveredTripCount: number;
   totalTrips: number;
   hoveredFeatureIsInSelection: boolean;
   hexColor: string;
 }> = ({
+  loading,
   hoveredTripCount,
   totalTrips,
   hoveredFeatureIsInSelection,
@@ -95,7 +98,7 @@ export const PopupContent: React.FC<{
         <div className="flex flex-row items-center justify-center gap-2">
           <ArrDepIcon analysisType={analysisType} />
 
-          {hoveredTripCount === undefined ? (
+          {loading ? (
             <span className="animate-pulse tabular-nums blur-sm">0 trips</span>
           ) : (
             <span className="tabular-nums">
@@ -123,7 +126,7 @@ export const PopupContent: React.FC<{
       <div className="flex flex-row items-center justify-center gap-2">
         <ArrDepIcon analysisType={analysisType} />
         <span className="tabular-nums">
-          {hoveredTripCount === undefined ? (
+          {loading ? (
             <span className="animate-pulse blur-sm">000 trips</span>
           ) : (
             <span>{formatter.format(hoveredTripCount)} trips</span>
