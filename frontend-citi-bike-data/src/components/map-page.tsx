@@ -54,7 +54,6 @@ export const MapPage: React.FC = () => {
     });
     map.current?.on("load", async () => {
       await addImages(map);
-      console.log("added");
 
       // map.current?.removeControl(map.current?.attributionControl);
       map.current?.addControl(new maplibregl.AttributionControl(), "top-right");

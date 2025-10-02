@@ -13,9 +13,6 @@
     --foreground: #ededed;
   }
 }
-.maplibregl-map {
-  font-family: 'Outfit' !important;
-}
 
 body {
   color: var(--foreground);

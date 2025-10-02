@@ -14,7 +14,7 @@ import classNames from "classnames";
 import React, { MutableRefObject, useRef } from "react";
 
 const tabStyle =
-  "data-[selected]:bg-cb-white data-[hover]:bg-cb-white/50  data-[selected]:data-[hover]:bg-cb-white transition font-light rounded-full focus:outline-none w-32 px-2 py-1 text-gray-900";
+  "data-[selected]:bg-cb-lightGray data-[hover]:bg-cb-lightGray/50  data-[selected]:data-[hover]:bg-cb-lightGray transition font-light rounded-full focus:outline-none w-32 px-2 py-1 text-gray-900";
 export const DisplaySettings: React.FC = () => {
   const {
     swapAnalysisType,
