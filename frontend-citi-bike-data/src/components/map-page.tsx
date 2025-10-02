@@ -78,8 +78,10 @@ export const MapPage: React.FC = () => {
           <TotalDisplay />
           <DateControl />
         </div>
-        <LayerControl map={map} mapLoaded={mapLoaded} />
-        <DisplaySettings />
+        <div className="fixed bottom-4 left-4 z-10 flex flex-col gap-2">
+          <LayerControl map={map} mapLoaded={mapLoaded} />
+          <DisplaySettings />
+        </div>
       </div>
       <Popup map={map} />
     </div>
