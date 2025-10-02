@@ -24,7 +24,6 @@ export default {
           "Helvetica Neue",
           "sans-serif",
         ],
-        mono: ["Outfit"],
       },
       colors: {
         cb: {

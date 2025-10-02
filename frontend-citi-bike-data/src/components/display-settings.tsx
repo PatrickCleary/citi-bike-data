@@ -83,7 +83,7 @@ export const DisplaySettings: React.FC = () => {
               </TabList>
             </TabGroup>
             {scaleType === "custom" && (
-              <div className="mt-2 flex h-8 w-full flex-row items-center justify-between rounded-full bg-gradient-to-r from-[#1a2a6c] via-[#b21f1f] to-[#fdbb2d] px-2 font-mono font-semibold tabular-nums text-gray-900">
+              <div className="mt-2 flex h-8 w-full flex-row items-center justify-between rounded-full bg-gradient-to-r from-[#1a2a6c] via-[#b21f1f] to-[#fdbb2d] px-2 font-semibold tabular-nums text-gray-900">
                 <Input
                   value={scale[0]}
                   onChange={(e) => {

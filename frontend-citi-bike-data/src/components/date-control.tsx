@@ -20,7 +20,7 @@ export const DateControl: React.FC = () => {
   };
   return (
     <div className="flex flex-col items-center">
-      <p className="font-mono text-xl font-bold text-gray-900">{month}</p>
+      <p className="text-xl font-bold text-gray-900">{month}</p>
       <div className="flex flex-row gap-1">
         <MapButton
           onClick={() => {

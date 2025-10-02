@@ -96,9 +96,9 @@ export const PopupContent: React.FC<{
           <ArrDepIcon analysisType={analysisType} />
 
           {hoveredTripCount === undefined ? (
-            <span className="animate-pulse font-mono blur-sm">0 trips</span>
+            <span className="animate-pulse tabular-nums blur-sm">0 trips</span>
           ) : (
-            <span className="font-mono">
+            <span className="tabular-nums">
               {formatter.format(hoveredTripCount)} trips
             </span>
           )}
@@ -122,13 +122,11 @@ export const PopupContent: React.FC<{
     <PopupDiv>
       <div className="flex flex-row items-center justify-center gap-2">
         <ArrDepIcon analysisType={analysisType} />
-        <span className="font-mono">
+        <span className="tabular-nums">
           {hoveredTripCount === undefined ? (
-            <span className="animate-pulse font-mono blur-sm">000 trips</span>
+            <span className="animate-pulse blur-sm">000 trips</span>
           ) : (
-            <span className="font-mono">
-              {formatter.format(hoveredTripCount)} trips
-            </span>
+            <span>{formatter.format(hoveredTripCount)} trips</span>
           )}{" "}
         </span>
       </div>
