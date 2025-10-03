@@ -1,13 +1,15 @@
 import { useTripCountData } from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
-import { getMonthDisplayText } from "./date-control";
+
+import { spanClassName } from "@/map/popup";
+import HexagonOutlinedIcon from "@mui/icons-material/HexagonOutlined";
 
 const getDisplayText = (trips, analysisType, departureCells) => {
   if (!departureCells || departureCells.length === 0) {
     return "Total trips";
   }
   if (departureCells.length >= 1) {
-    return `${analysisType === "departures" ? "Trips ended in" : "Trips started from"} selection`;
+    return `${analysisType === "departures" ? "Trips ended in" : "Trips began from"}`;
   }
 };
 
@@ -33,8 +35,13 @@ export const TotalDisplay: React.FC = () => {
           </span>
         </p>
       )}
-      <p className="font-light">
+      <p className="flex flex-row gap-[2px] font-light">
         {getDisplayText(totalTrips, analysisType, departureCells)}
+        {departureCells.length > 0 && (
+          <span className={spanClassName}>
+            <HexagonOutlinedIcon fontSize="small" /> Selection{" "}
+          </span>
+        )}
       </p>
     </div>
   );

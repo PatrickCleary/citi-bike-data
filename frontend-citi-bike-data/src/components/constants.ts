@@ -9,4 +9,4 @@ export const MAP_CONFIG_DEFAULT: Partial<MapOptions> = {
   attributionControl: false,
 };
 
-export const API_URL = "https://kevndteqglsoslznrntz.supabase.co/functions/v1";
+export const API_URL = "https://kevndteqglsoslznrntz.supabase.co";
