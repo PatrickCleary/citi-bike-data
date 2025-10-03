@@ -9,12 +9,13 @@ import {
   TabGroup,
   TabList,
 } from "@headlessui/react";
+import PedalBikeRounded from "@mui/icons-material/PedalBikeRounded";
 import TuneIcon from "@mui/icons-material/Tune";
 import classNames from "classnames";
 import React, { MutableRefObject, useRef } from "react";
 
 const tabStyle =
-  "data-[selected]:bg-cb-lightGray data-[hover]:bg-cb-lightGray/50  data-[selected]:data-[hover]:bg-cb-lightGray transition font-light rounded-full focus:outline-none w-32 px-2 py-1 text-gray-900";
+  "data-[selected]:bg-cb-lightGray flex flex-row gap-2 justify-center items-center data-[hover]:bg-cb-lightGray/50  data-[selected]:data-[hover]:bg-cb-lightGray transition font-light rounded-full focus:outline-none w-32 px-2 py-1 text-gray-900";
 export const DisplaySettings: React.FC = () => {
   const {
     swapAnalysisType,
@@ -44,7 +45,7 @@ export const DisplaySettings: React.FC = () => {
       <MenuItems
         anchor="top start"
         transition
-        className="z-10 flex origin-bottom-left flex-col rounded-lg border border-gray-300 bg-white p-4 font-thin text-black shadow-lg [--anchor-gap:theme(spacing.1)] focus:outline-none"
+        className="z-10 flex origin-bottom-left flex-col rounded-lg border border-gray-300 bg-white p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
         <p className="mb-2 text-xs">Aggregation</p>
         <TabGroup
@@ -53,16 +54,23 @@ export const DisplaySettings: React.FC = () => {
         >
           <TabList className={"ml-2 flex flex-row gap-2 text-sm text-gray-900"}>
             <Tab key={"arrivals"} className={tabStyle}>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: "1.25rem" }}
+              >
+                bike_dock
+              </span>
               Arrivals
             </Tab>
             <Tab key={"departures"} className={tabStyle}>
+              <PedalBikeRounded fontSize="small" />
               Departures
             </Tab>
           </TabList>
         </TabGroup>
         <hr className="border-cb-white my-2 border-[0.5px]" />
 
-        <p className="text-xs">Scale</p>
+        <p className="mb-2 text-xs">Scale</p>
         <div className="flex w-full flex-col pl-2">
           <TabGroup
             selectedIndex={selectedIndexScale}
@@ -144,7 +152,7 @@ export const DisplaySettings: React.FC = () => {
           <p
             className={classNames(
               showError ? "visible" : "invisible",
-              "flex w-full text-center text-xs italic text-red-500",
+              "flex w-full text-center text-sm text-red-500",
             )}
           >
             Scale maximum must be greater than minimum

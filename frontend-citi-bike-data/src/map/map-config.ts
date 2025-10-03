@@ -281,6 +281,7 @@ const getCellEventHandlers = (
         }
 
         setHoveredFeature(null);
+        
       },
     },
   ];

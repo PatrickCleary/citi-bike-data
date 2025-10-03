@@ -53,6 +53,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
       popupRef.current.remove();
       return;
     }
+
     popupRef.current
       .setLngLat(hoveredFeature.coordinates) // set its position using activeFeature's geometry
       .setDOMContent(contentRef.current) // use contentRef to set the DOM content of the popup
@@ -146,7 +147,7 @@ const PopupDiv: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 };
 
-const spanClassName =
+export const spanClassName =
   "bg-cb-lightGray/50 flex flex-row items-center rounded-sm px-1 flex flex-row gap-[2px]";
 const ArrDepText: React.FC<{
   analysisType: "arrivals" | "departures";
@@ -229,6 +230,9 @@ const getHexagonColor = (
     mid: "#b21f1f", // red
     high: "#fdbb2d", // yellow
   };
+  if (tripCount >= maxScale) {
+    return colors.high;
+  }
 
   // Interpolate between colors based on trip count
   if (tripCount <= middleValue) {
