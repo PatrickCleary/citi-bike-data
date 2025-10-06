@@ -102,23 +102,23 @@ export const PopupContent: React.FC<{
   if (noCellsSelected)
     return (
       <PopupDiv>
-        <div className="flex flex-row items-center justify-center gap-2">
+        <div className="flex  flex-row items-center justify-center gap-2 font-sans">
           <ArrDepIcon analysisType={analysisType} />
 
           <div className="flex flex-row items-center justify-center gap-1">
             {loading ? (
               <span className="animate-pulse tabular-nums blur-sm">0</span>
             ) : (
-              <span className="tabular-nums">
+              <span className="font-bold tabular-nums tracking-wider">
                 {formatter.format(hoveredTripCount)}{" "}
               </span>
             )}
-            <span className="text-xs font-light uppercase tracking-wider">
+            <span className="text-xs font-light uppercase tracking-wide">
               trips
             </span>
           </div>
         </div>
-        <p className="flex flex-row items-center gap-1 text-center text-xs font-light uppercase tracking-wider">
+        <p className="flex flex-row items-center gap-1 text-center text-xs font-light uppercase tracking-wide">
           {analysisType === "arrivals" ? "Arriving to" : "Departing from"}
           <span className={spanClassName}>
             <HexagonIcon
@@ -134,17 +134,17 @@ export const PopupContent: React.FC<{
 
   return (
     <PopupDiv>
-      <div className="flex flex-row items-center justify-center gap-2">
+      <div className="flex flex-row items-center justify-center gap-2 font-sans">
         <ArrDepIcon analysisType={analysisType} />
-        <div className="flex flex-row gap-1 items-center">
-          <span className="tabular-nums">
+        <div className="flex flex-row items-center gap-1">
+          <span className="font-bold tabular-nums tracking-wider">
             {loading ? (
               <span className="animate-pulse blur-sm">000</span>
             ) : (
               <span>{formatter.format(hoveredTripCount)}</span>
             )}
           </span>
-          <span className="text-xs font-light uppercase tracking-wider">
+          <span className="text-xs font-light uppercase tracking-wide">
             trips
           </span>
         </div>
@@ -156,7 +156,7 @@ export const PopupContent: React.FC<{
 
 const PopupDiv: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="border-color-white/50 rounded-2 pointer-events-none flex flex-col items-center rounded-md border-[.5px] bg-white/30 px-2 py-1 text-center text-lg font-bold tabular-nums text-black text-neutral-800 backdrop-blur-md">
+    <div className="border-color-white/50 rounded-2 pointer-events-none flex flex-col items-center rounded-md border-[.5px] bg-white/30 px-2 py-1 text-center font-sans text-lg tabular-nums text-black text-neutral-800 backdrop-blur-md">
       {children}
     </div>
   );
@@ -171,7 +171,7 @@ const ArrDepText: React.FC<{
   if (analysisType === "arrivals") {
     return (
       <p className="text-xs font-light uppercase">
-        <span className="flex flex-row tracking-wider items-center gap-1">
+        <span className="flex flex-row items-center gap-1 tracking-wide">
           From
           <span className={spanClassName}>
             <HexagonOutlinedIcon fontSize="small" />

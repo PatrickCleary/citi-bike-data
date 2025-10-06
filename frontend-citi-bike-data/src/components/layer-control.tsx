@@ -148,7 +148,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
       <MenuItems
         anchor="bottom start"
         transition
-        className="z-10 flex origin-bottom-left flex-col rounded-lg border border-gray-300 bg-white p-4 font-thin text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
+        className="z-10 flex origin-bottom-left flex-col rounded-lg border border-gray-300 bg-white p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
         <div className="space-y-2">
           {layerGroups.map((group, index) => (
@@ -195,9 +195,9 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                   <span
                     className={classNames(
                       "mt-1 text-xs uppercase text-gray-700",
-                      group.id === "transit"
-                        ? "tracking-wide"
-                        : "tracking-wider",
+                      group.id === "bike"
+                        ? "tracking-wider"
+                        : "tracking-wide",
                     )}
                   >
                     {group.name}

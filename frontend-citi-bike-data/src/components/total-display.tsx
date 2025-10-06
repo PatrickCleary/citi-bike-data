@@ -1,7 +1,7 @@
 import { useTripCountData } from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
 
-import { spanClassName } from "@/map/popup";
+import { PopupContent, spanClassName } from "@/map/popup";
 import HexagonOutlinedIcon from "@mui/icons-material/HexagonOutlined";
 
 const getDisplayText = (trips, analysisType, departureCells) => {
@@ -25,7 +25,7 @@ export const TotalDisplay: React.FC = () => {
   const totalTrips = query.data?.data.sum_all_values || 0;
 
   return (
-    <div className="border-cb-white/50 drop-shadow-lg flex flex-col items-end rounded-md border border-gray-300 bg-white/30 px-4 py-2 font-bold tracking-wide text-black backdrop-blur-md">
+    <div className="border-cb-white/50 flex flex-col items-end rounded-md border border-gray-300 bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-lg backdrop-blur-md">
       {query.isLoading ? (
         <span className="animate-pulse text-xl blur-sm">0</span>
       ) : (

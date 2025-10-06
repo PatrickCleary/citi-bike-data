@@ -123,12 +123,12 @@ class BikeShareProcessor:
     def upload_output_obj(self, output_obj: dict[str, pd.DataFrame], table_name: str):
         for key in output_obj.keys():
             logger.info(f"Uploading {key} with {output_obj[key].shape[0]} records")
-            self.upload_df(output_obj[key], table_name)
+            self.upload_df(output_obj[key], table_name, 10_000)
 
-    def upload_df(self, df: pd.DataFrame, table_name: str, chunk_size=50000):
+    def upload_df(self, df: pd.DataFrame, table_name: str, chunk_size=50_000):
         for i in range(0, len(df), chunk_size):
             logger.info(f"uploading chunk {i/ chunk_size}")
-            chunk = df.iloc[i : i + 50000]
+            chunk = df.iloc[i : i + chunk_size]
             self.bulk_insert_with_staging(chunk, table_name)
 
     def bulk_insert_with_staging(self, df: pd.DataFrame, table_name: str):

@@ -14,8 +14,13 @@ import TuneIcon from "@mui/icons-material/Tune";
 import classNames from "classnames";
 import React, { MutableRefObject, useRef } from "react";
 
-const tabStyle =
-  "uppercase tracking-wide text-xs data-[selected]:bg-cb-blue/30 flex flex-row gap-2 justify-center items-center data-[hover]:bg-cb-blue/20  data-[selected]:data-[hover]:bg-cb-blue/30 transition font-light rounded-full focus:outline-none w-32 px-2 py-1 text-gray-900";
+export const buttonHoverStyle =
+  "data-[selected]:bg-cb-blue/30 focus:outline-none data-[focus]:bg-cb-blue/20  data-[selected]:data-[focus]:bg-cb-blue/30 data-[hover]:bg-cb-blue/20  data-[selected]:data-[hover]:bg-cb-blue/30  transition ease-out duration-100";
+
+const tabStyle = classNames(
+  "uppercase tracking-wide text-xs flex flex-row gap-2 justify-center items-center  transition rounded-full focus:outline-none w-32 px-2 py-1 text-gray-900",
+  buttonHoverStyle,
+);
 export const DisplaySettings: React.FC = () => {
   const {
     swapAnalysisType,
@@ -51,7 +56,7 @@ export const DisplaySettings: React.FC = () => {
           selectedIndex={selectedIndexAnalysis}
           onChange={() => swapAnalysisType()}
         >
-          <TabList className={"ml-2 flex flex-row gap-2 text-sm text-gray-900"}>
+          <TabList className={"flex flex-row gap-2 text-sm text-gray-900"}>
             <Tab key={"arrivals"} className={tabStyle}>
               <span
                 className="material-symbols-outlined"
@@ -69,8 +74,10 @@ export const DisplaySettings: React.FC = () => {
         </TabGroup>
         <hr className="border-cb-white my-2 border-[0.5px]" />
 
-        <p className="mb-2 text-xs text-gray-400 uppercase tracking-wide">Scale</p>
-        <div className="flex w-full flex-col pl-2">
+        <p className="mb-2 text-xs uppercase tracking-wide text-gray-400">
+          Scale
+        </p>
+        <div className="flex w-full flex-col">
           <TabGroup
             selectedIndex={selectedIndexScale}
             onChange={(index) =>
@@ -100,7 +107,7 @@ export const DisplaySettings: React.FC = () => {
                     "",
                   );
                 }}
-                className="bg-cb-white/50 font-medium border-bg-white w-16 rounded-full border-[0.5px] text-center text-sm tabular-nums focus:outline-none"
+                className="bg-cb-white/50 border-bg-white w-16 rounded-full border-[0.5px] text-center text-sm font-medium tabular-nums focus:outline-none"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 ref={inputRef1}
@@ -129,7 +136,7 @@ export const DisplaySettings: React.FC = () => {
                     "",
                   );
                 }}
-                className="bg-cb-white/50 font-medium border-bg-white w-16 rounded-full border-[0.5px] text-center text-sm focus:outline-none"
+                className="bg-cb-white/50 border-bg-white w-16 rounded-full border-[0.5px] text-center text-sm font-medium focus:outline-none"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 ref={inputRef2}
@@ -150,7 +157,7 @@ export const DisplaySettings: React.FC = () => {
           )}
           <p
             className={classNames(
-              showError ? "visible" : "invisible",
+              showError ? "flex" : "hidden",
               "flex w-full text-wrap text-center text-sm text-red-500",
             )}
           >
