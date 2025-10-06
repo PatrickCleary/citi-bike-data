@@ -9,11 +9,15 @@ import maplibregl, {
   MapEventType,
 } from "maplibre-gl";
 import { MutableRefObject, useEffect } from "react";
+import { useInteractionModeStore } from "@/store/interaction-mode-store";
+import { isMobileDevice } from "@/utils/mobile-detection";
 import {
   BIKE_DOCKS_CURRENT_SOURCE,
   BIKE_DOCKS_CURRENT_SOURCE_ID,
   HEX_SOURCE,
   HEX_SOURCE_ID,
+  INFO_MODE_SELECTED_SOURCE,
+  INFO_MODE_SELECTED_SOURCE_ID,
   NJ_LIGHT_RAIL_LINES_SOURCE,
   NJ_LIGHT_RAIL_LINES_SOURCE_ID,
   NJ_LIGHT_RAIL_STATIONS_SOURCE,
@@ -36,21 +40,21 @@ import {
 import { cellsToMultiPolygon } from "h3-js";
 
 import {
+  DEFAULT_HEX_OPACITY,
   DOCK_LOCATIONS_CURRENT_LAYER,
   HEX_LAYER,
   HEX_LAYER_LINE,
   HEX_SOURCE_LAYER_ID,
+  INFO_MODE_SELECTED_LAYER,
   NJ_LIGHT_RAIL_LINE_LAYER,
   NJ_LIGHT_RAIL_STATION_LAYER,
   NJ_RAIL_LINE_LAYER,
   NJ_RAIL_STATION_LAYER,
-  NJ_TRANSIT_STATIONS_LAYER,
   NYC_LINE_LAYER,
   NYC_STATION_LAYER,
   ORIGIN_LAYER_LINE,
   PATH_LINE_LAYER,
   PATH_STATION_LAYER,
-  SUBWAY_LINE_LAYER,
 } from "./layers";
 import { useMapConfigStore } from "@/store/store";
 
@@ -114,6 +118,7 @@ const addHexLayer = (
 
   mapObj.addSource(HEX_SOURCE_ID, HEX_SOURCE);
   mapObj.addSource(ORIGIN_SOURCE_ID, ORIGIN_SOURCE);
+  mapObj.addSource(INFO_MODE_SELECTED_SOURCE_ID, INFO_MODE_SELECTED_SOURCE);
   // mapObj.addSource(SUBWAY_LINES_SOURCE_ID, SUBWAY_LINES_SOURCE);
   // mapObj.addSource(NJ_TRANSIT_SOURCE_ID, NJ_TRANSIT_SOURCE);
 
@@ -122,6 +127,7 @@ const addHexLayer = (
   mapObj.addLayer(HEX_LAYER);
   mapObj.addLayer(HEX_LAYER_LINE);
   mapObj.addLayer(ORIGIN_LAYER_LINE);
+  mapObj.addLayer(INFO_MODE_SELECTED_LAYER);
 
   eventHandlers.forEach((event) => {
     mapObj.on(event.eventType, event.layer, event.handler);
@@ -198,100 +204,142 @@ const getCellEventHandlers = (
   handler: (e: Event & { features?: GeoJSONFeature[] }) => void;
 }[] => {
   let hoveredFeatureId: null | number = null;
-  // Add these variables to track animation state
   let hoverTimeout = null;
-  return [
+  const isMobile = isMobileDevice();
+
+  const handlers: EventHandler[] = [
     {
       eventType: "click",
       layer: HEX_LAYER.id,
       handler: (e) => {
         const cellId = e.features?.[0].id;
         if (typeof cellId !== "string") return;
-        addOrRemoveDepartureCell(cellId);
-      },
-    },
-
-    // Updated mousemove handler
-    {
-      eventType: "mousemove",
-      layer: HEX_LAYER.id,
-      handler: (e) => {
-        const feature = e.features?.[0];
-        if (!feature?.id) return;
-
         const coordinates = e.lngLat;
-        const h3Id = feature.id as string;
-        setHoveredFeature({ id: h3Id, coordinates: coordinates });
-        map.current.getCanvas().style.cursor = "pointer";
+        const h3Id = cellId as string;
 
-        if (!h3Id) return;
-
-        // Clear any pending timeout
-        if (hoverTimeout) {
-          clearTimeout(hoverTimeout);
-          hoverTimeout = null;
+        // On desktop: always select cell on click (no mode concept)
+        if (!isMobile) {
+          addOrRemoveDepartureCell(cellId);
+          return;
         }
 
-        // If we're hovering a different feature
-        if (hoveredFeatureId !== h3Id) {
-          // Animate previous feature back to 0.5 from wherever it currently is
+        // On mobile: use interaction mode
+        const mode = useInteractionModeStore.getState().mode;
+        const { infoModeSelectedCell, setInfoModeSelectedCell } =
+          usePopupStateStore.getState();
+
+        if (mode === "popup") {
+          // Toggle info mode selection - if clicking the same cell, deselect it and clear popup
+          if (infoModeSelectedCell === h3Id) {
+            setInfoModeSelectedCell(null);
+            setHoveredFeature(null);
+          } else {
+            // Show popup and select new cell
+            setHoveredFeature({ id: h3Id, coordinates: coordinates });
+            setInfoModeSelectedCell(h3Id);
+          }
+        } else {
+          // Select cell on click in selection mode
+          addOrRemoveDepartureCell(cellId);
+          // Clear info mode selection when in selection mode
+          setInfoModeSelectedCell(null);
+        }
+      },
+    },
+  ];
+
+  // Only add mousemove and mouseleave handlers on non-mobile devices
+  if (!isMobile) {
+    handlers.push(
+      {
+        eventType: "mousemove",
+        layer: HEX_LAYER.id,
+        handler: (e) => {
+          const feature = e.features?.[0];
+          if (!feature?.id) return;
+
+          const coordinates = e.lngLat;
+          const h3Id = feature.id as string;
+
+          // Always show popup on hover (desktop only)
+          setHoveredFeature({ id: h3Id, coordinates: coordinates });
+          map.current.getCanvas().style.cursor = "pointer";
+
+          if (!h3Id) return;
+
+          // Clear any pending timeout
+          if (hoverTimeout) {
+            clearTimeout(hoverTimeout);
+            hoverTimeout = null;
+          }
+
+          // If we're hovering a different feature
+          if (hoveredFeatureId !== h3Id) {
+            // Animate previous feature back to 0.5 from wherever it currently is
+            if (hoveredFeatureId !== null) {
+              const previousFeatureState = map.current?.getFeatureState({
+                source: HEX_SOURCE_ID,
+                sourceLayer: HEX_SOURCE_LAYER_ID,
+                id: hoveredFeatureId,
+              });
+
+              const currentOpacity =
+                previousFeatureState?.opacity || DEFAULT_HEX_OPACITY;
+              // Only animate if it's not already at 0.5
+              if (currentOpacity !== DEFAULT_HEX_OPACITY) {
+                animateOpacity(
+                  map,
+                  hoveredFeatureId,
+                  currentOpacity,
+                  DEFAULT_HEX_OPACITY,
+                );
+              } else {
+                // Just set hover state to false if already at correct opacity
+                map.current?.setFeatureState(
+                  {
+                    source: HEX_SOURCE_ID,
+                    sourceLayer: HEX_SOURCE_LAYER_ID,
+                    id: hoveredFeatureId,
+                  },
+                  { hover: false },
+                );
+              }
+            }
+
+            // Start animating new feature
+            hoveredFeatureId = h3Id;
+            animateOpacity(map, h3Id, DEFAULT_HEX_OPACITY, 0.85, 100);
+          }
+        },
+      },
+      {
+        eventType: "mouseleave",
+        layer: HEX_LAYER.id,
+        handler: () => {
           if (hoveredFeatureId !== null) {
-            const previousFeatureState = map.current?.getFeatureState({
+            // Get current opacity to animate from current state
+            const featureState = map.current?.getFeatureState({
               source: HEX_SOURCE_ID,
               sourceLayer: HEX_SOURCE_LAYER_ID,
               id: hoveredFeatureId,
             });
 
-            const currentOpacity = previousFeatureState?.opacity || 0.5;
-            // Only animate if it's not already at 0.5
-            if (currentOpacity !== 0.5) {
-              animateOpacity(map, hoveredFeatureId, currentOpacity, 0.5);
-            } else {
-              // Just set hover state to false if already at correct opacity
-              map.current?.setFeatureState(
-                {
-                  source: HEX_SOURCE_ID,
-                  sourceLayer: HEX_SOURCE_LAYER_ID,
-                  id: hoveredFeatureId,
-                },
-                { hover: false },
-              );
-            }
+            const currentOpacity = featureState?.opacity || 0.5;
+
+            // Animate back to 0.5
+            animateOpacity(map, hoveredFeatureId, currentOpacity, 0.5);
+
+            // Clear the hovered feature
+            hoveredFeatureId = null;
           }
 
-          // Start animating new feature from 0.5 to 0.8
-          hoveredFeatureId = h3Id;
-          animateOpacity(map, h3Id, 0.5, 0.8, 100);
-        }
+          setHoveredFeature(null);
+        },
       },
-    },
+    );
+  }
 
-    // Add mouseleave handler to handle unhover
-    {
-      eventType: "mouseleave",
-      layer: HEX_LAYER.id,
-      handler: (e) => {
-        if (hoveredFeatureId !== null) {
-          // Get current opacity to animate from current state
-          const featureState = map.current?.getFeatureState({
-            source: HEX_SOURCE_ID,
-            sourceLayer: HEX_SOURCE_LAYER_ID,
-            id: hoveredFeatureId,
-          });
-
-          const currentOpacity = featureState?.opacity || 0.5;
-
-          // Animate back to 0.5
-          animateOpacity(map, hoveredFeatureId, currentOpacity, 0.5);
-
-          // Clear the hovered feature
-          hoveredFeatureId = null;
-        }
-
-        setHoveredFeature(null);
-      },
-    },
-  ];
+  return handlers;
 };
 
 export const useAddPMTilesProtocol = () => {
@@ -319,6 +367,25 @@ export const useUpdateOriginShape = (
     ) as maplibregl.GeoJSONSource;
     originSource?.setData(originGeoJson);
   }, [departureCells, map, mapLoaded]);
+};
+
+export const useUpdateInfoModeSelectedCell = (
+  map: MutableRefObject<Map>,
+  mapLoaded: boolean,
+) => {
+  const { infoModeSelectedCell } = usePopupStateStore();
+
+  useEffect(() => {
+    if (!mapLoaded) return;
+
+    const cells = infoModeSelectedCell ? [infoModeSelectedCell] : [];
+    const geoJson = convertCellsToGeoJSON(cells);
+
+    const source = map.current?.getSource(
+      INFO_MODE_SELECTED_SOURCE_ID,
+    ) as maplibregl.GeoJSONSource;
+    source?.setData(geoJson);
+  }, [infoModeSelectedCell, map, mapLoaded]);
 };
 
 const convertCellsToGeoJSON = (

@@ -45,7 +45,7 @@ export const DisplaySettings: React.FC = () => {
   return (
     <Menu>
       <MenuButton className={classNames(MapButtonStyle, "focus:outline-none")}>
-        <TuneIcon />
+        <TuneIcon fontSize="small" />
       </MenuButton>
       <MenuItems
         anchor="top start"

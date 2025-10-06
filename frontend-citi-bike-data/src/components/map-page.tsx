@@ -10,6 +10,7 @@ import {
   useApplyLayers,
   useUpdateMapStyleOnDataChange,
   useUpdateOriginShape,
+  useUpdateInfoModeSelectedCell,
 } from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
 
@@ -17,9 +18,11 @@ import { TotalDisplay } from "./total-display";
 import Popup from "@/map/popup";
 import { addImages } from "@/map/utils";
 import { LayerControl } from "./layer-control";
-import { MapButton } from "@/map/map-button";
+
 import { DateControl } from "./date-control";
 import { DisplaySettings } from "./display-settings";
+import { InteractionModeToggle } from "./interaction-mode-toggle";
+import { Legend } from "./legend";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -29,6 +32,7 @@ export const MapPage: React.FC = () => {
   useUpdateMapStyleOnDataChange(map, mapLoaded);
   useApplyLayers(map, mapLoaded);
   useUpdateOriginShape(map, mapLoaded);
+  useUpdateInfoModeSelectedCell(map, mapLoaded);
   useAddPMTilesProtocol();
   const handleIdle = useCallback(() => {
     if (loading) {
@@ -77,17 +81,19 @@ export const MapPage: React.FC = () => {
         <div className="fixed top-4 z-10 flex w-full items-center justify-center md:hidden">
           <DateControl />
         </div>
-        <div className="fixed bottom-4 right-4 z-10 flex flex-col gap-4">
-          <TotalDisplay />
-
+        <div className="fixed bottom-4 right-4 z-10 flex flex-col items-end gap-4">
+          <Legend />
           <div className="hidden md:flex">
             <DateControl />
           </div>
+          <TotalDisplay />
         </div>
         <div className="fixed bottom-4 left-4 z-10 flex flex-col gap-2">
           <LayerControl map={map} mapLoaded={mapLoaded} />
           <DisplaySettings />
-          
+          <div className="md:hidden">
+            <InteractionModeToggle />
+          </div>
         </div>
       </div>
       <Popup map={map} />
