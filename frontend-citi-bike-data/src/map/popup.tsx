@@ -18,7 +18,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   // a ref to hold the popup instance
   const popupRef = useRef<Popup>();
   // a ref for an element to hold the popup's content
-  const contentRef = useRef(document.createElement("div"));
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const query = useTripCountData();
   const tripCounts = query.data?.data.trip_counts || {};
   const { hoveredFeature, setHoveredFeature } = usePopupStateStore();
@@ -27,6 +27,14 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   const loading = query.isLoading;
   const hoveredTripCount = tripCounts[hoveredFeature?.id as string] || 0;
   const hexColor = getHexagonColor(hoveredTripCount, scale);
+
+  // Initialize contentRef with a div element on mount
+  useEffect(() => {
+    if (!contentRef.current) {
+      contentRef.current = document.createElement("div");
+    }
+  }, []);
+
   // instantiate the popup on mount, remove it on unmount
   useEffect(() => {
     if (!map.current) return;
@@ -65,7 +73,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
       popupRef.current.remove();
       return;
     }
-
+    if (!contentRef.current) return;
     popupRef.current
       .setLngLat(hoveredFeature.coordinates) // set its position using activeFeature's geometry
       .setDOMContent(contentRef.current) // use contentRef to set the DOM content of the popup
@@ -74,14 +82,15 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   // use a react portal to render the content to show in the popup, assigning it to contentRef
   return (
     <>
-      {createPortal(
-        <PopupContent
-          hoveredTripCount={hoveredTripCount}
-          loading={loading}
-          hexColor={hexColor}
-        />,
-        contentRef.current,
-      )}
+      {contentRef.current &&
+        createPortal(
+          <PopupContent
+            hoveredTripCount={hoveredTripCount}
+            loading={loading}
+            hexColor={hexColor}
+          />,
+          contentRef.current,
+        )}
     </>
   );
 };
