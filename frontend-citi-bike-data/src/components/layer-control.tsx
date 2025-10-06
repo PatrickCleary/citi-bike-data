@@ -3,8 +3,6 @@ import React, { useState } from "react";
 import { Map } from "maplibre-gl";
 import { MutableRefObject } from "react";
 import { Menu, MenuButton, MenuItems } from "@headlessui/react";
-import ArrowUpwardOutlinedIcon from "@mui/icons-material/ArrowUpwardOutlined";
-import ArrowDownwardOutlinedIcon from "@mui/icons-material/ArrowDownwardOutlined";
 import classNames from "classnames";
 import LayersIcon from "@mui/icons-material/Layers";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
@@ -20,8 +18,10 @@ import {
   NJ_RAIL_STATION_LAYER,
   HEX_LAYER,
   HEX_LAYER_LINE,
+  DOCK_LOCATIONS_CURRENT_LAYER,
 } from "@/map/layers";
 import { MapButtonStyle } from "@/map/map-button";
+import { TEXT_1, TEXT_2 } from "./constants";
 
 interface LayerGroup {
   id: string;
@@ -55,11 +55,18 @@ export const LayerControl: React.FC<LayerControlProps> = ({
         NJ_RAIL_STATION_LAYER.id,
       ],
     },
+
     {
       id: "bike",
       name: "CitiBike",
       visible: true,
       layerIds: [HEX_LAYER.id, HEX_LAYER_LINE.id],
+    },
+    {
+      id: "docks",
+      name: "Docks",
+      visible: true,
+      layerIds: [DOCK_LOCATIONS_CURRENT_LAYER.id],
     },
   ]);
 
@@ -141,7 +148,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
       <MenuItems
         anchor="bottom start"
         transition
-        className="z-10 mb-4 origin-bottom-left rounded-lg border border-gray-300 bg-white p-4 shadow-lg [--anchor-gap:theme(spacing.1)] focus:outline-none"
+        className="z-10 flex origin-bottom-left flex-col rounded-lg border border-gray-300 bg-white p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
         <div className="space-y-2">
           {layerGroups.map((group, index) => (
@@ -151,7 +158,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                 <div className="flex flex-col items-center">
                   <div
                     className={classNames(
-                      "group relative h-16 w-16 cursor-pointer overflow-hidden rounded outline-blue-400",
+                      "outline-cb-blue group relative h-16 w-16 cursor-pointer overflow-hidden rounded",
                       group.visible ? "outline" : "outline-hidden",
                     )}
                     style={{
@@ -185,29 +192,16 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                   </div>
 
                   {/* Label below the image */}
-                  <span className="mt-1 text-xs text-gray-700">
+                  <span
+                    className={classNames(
+                      "mt-1 text-xs uppercase text-gray-700",
+                      group.id === "bike"
+                        ? "tracking-wider"
+                        : "tracking-wide",
+                    )}
+                  >
                     {group.name}
                   </span>
-                </div>
-
-                {/* Arrow buttons stacked vertically */}
-                <div className="flex h-16 flex-col gap-1">
-                  <button
-                    onClick={() => moveLayerGroup(group.id, "up")}
-                    disabled={index === 0}
-                    className="h-8 w-8 rounded-md text-gray-900 enabled:hover:bg-blue-200 enabled:hover:text-blue-700 disabled:opacity-50"
-                    title="Move up"
-                  >
-                    <ArrowUpwardOutlinedIcon fontSize="small" />
-                  </button>
-                  <button
-                    onClick={() => moveLayerGroup(group.id, "down")}
-                    disabled={index === layerGroups.length - 1}
-                    className="h-8 w-8 rounded-md text-gray-900 enabled:hover:bg-blue-200 enabled:hover:text-blue-700 disabled:opacity-50"
-                    title="Move down"
-                  >
-                    <ArrowDownwardOutlinedIcon fontSize="small" />
-                  </button>
                 </div>
               </div>
             </div>

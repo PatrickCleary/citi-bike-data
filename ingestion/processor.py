@@ -6,7 +6,7 @@ from supabase import create_client, Client
 import json
 import psycopg2
 
-from file_helpers import process_all_csvs_from_zip_url
+from file_helpers import process_all_csvs_from_zip_data, process_all_csvs_from_zip_url
 from geo_helpers import apply_h3_latlng_to_cell
 
 logger = logging.getLogger(__name__)
@@ -44,24 +44,91 @@ class BikeShareProcessor:
                 )
 
     def fetch_and_process_file(self, file: pd.Series):
+        """
+        Process file that may contain nested zip files.
+        Handles both direct CSVs and zip files containing other zip files.
+        """
+        import zipfile
+        import requests
+        from io import BytesIO
+
         logger.info(f"Processing file: {file['file_name']} for locale {file['locale']}")
         url = f"https://s3.amazonaws.com/tripdata/{file['file_name']}"
-        df_by_file = process_all_csvs_from_zip_url(url, locale=file["locale"])
-        if not df_by_file:
-            logger.info(f"No data processed for {file['file_name']}, skipping upload.")
-        else:
-            output = apply_h3_latlng_to_cell(df_by_file)
-        return output
+
+        try:
+            # Download the file
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+
+            # Check if it's a zip file
+            if not file["file_name"].endswith(".zip"):
+                # Not a zip, process directly
+                df_by_file = process_all_csvs_from_zip_url(url, locale=file["locale"])
+            else:
+                # It's a zip file - check for nested zips
+                outer_zip = zipfile.ZipFile(BytesIO(response.content))
+
+                # Filter out __MACOSX and other system files
+                zip_files = [
+                    name
+                    for name in outer_zip.namelist()
+                    if name.endswith(".zip")
+                    and not name.startswith("__MACOSX")
+                    and not "__MACOSX" in name
+                    and not name.startswith(".")
+                ]
+
+                if not zip_files:
+                    # No nested zips, process normally using existing function
+                    df_by_file = process_all_csvs_from_zip_data(
+                        BytesIO(response.content), locale=file["locale"]
+                    )
+                else:
+                    # Has nested zips - process each one using existing function
+                    logger.info(f"Found {len(zip_files)} nested zip files")
+                    df_by_file = {}
+
+                    for nested_zip_name in zip_files:
+                        logger.info(f"Processing nested zip: {nested_zip_name}")
+
+                        # Extract the nested zip
+                        nested_zip_bytes = outer_zip.read(nested_zip_name)
+
+                        # Use existing function to process the nested zip
+                        nested_results = process_all_csvs_from_zip_data(
+                            BytesIO(nested_zip_bytes), locale=file["locale"]
+                        )
+
+                        # Merge results with unique keys
+                        for csv_name, df in nested_results.items():
+                            # Create unique key with nested zip name
+                            unique_key = f"{nested_zip_name}/{csv_name}"
+                            df_by_file[unique_key] = df
+
+                    outer_zip.close()
+
+            if not df_by_file:
+                logger.info(
+                    f"No data processed for {file['file_name']}, skipping upload."
+                )
+                return None
+            else:
+                output = apply_h3_latlng_to_cell(df_by_file)
+                return output
+
+        except Exception as e:
+            logger.error(f"Error processing {file['file_name']}: {str(e)}")
+            return None
 
     def upload_output_obj(self, output_obj: dict[str, pd.DataFrame], table_name: str):
         for key in output_obj.keys():
             logger.info(f"Uploading {key} with {output_obj[key].shape[0]} records")
-            self.upload_df(output_obj[key], table_name)
+            self.upload_df(output_obj[key], table_name, 10_000)
 
-    def upload_df(self, df: pd.DataFrame, table_name: str, chunk_size=50000):
+    def upload_df(self, df: pd.DataFrame, table_name: str, chunk_size=50_000):
         for i in range(0, len(df), chunk_size):
             logger.info(f"uploading chunk {i/ chunk_size}")
-            chunk = df.iloc[i : i + 50000]
+            chunk = df.iloc[i : i + chunk_size]
             self.bulk_insert_with_staging(chunk, table_name)
 
     def bulk_insert_with_staging(self, df: pd.DataFrame, table_name: str):

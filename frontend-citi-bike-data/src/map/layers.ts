@@ -29,7 +29,7 @@ export const HEX_LAYER: LayerSpecification = {
       "case",
       ["!=", ["feature-state", "opacity"], null],
       ["feature-state", "opacity"],
-      0.5,
+      0.62,
     ],
   },
 };
@@ -217,5 +217,18 @@ export const NJ_RAIL_STATION_LAYER: LayerSpecification = {
 
     "icon-size": 0.5, // Scale the icon
     "icon-allow-overlap": false, // Optional: allow icons to overlap
+  },
+};
+
+export const DOCK_LOCATIONS_CURRENT_LAYER_ID = "dock_locations_current";
+export const DOCK_LOCATIONS_CURRENT_LAYER: LayerSpecification = {
+  id: DOCK_LOCATIONS_CURRENT_LAYER_ID,
+  source: "bike_docks_current",
+  type: "circle",
+  minzoom: 14, // Layer will be hidden at zoom levels less than 10
+  paint: {
+    "circle-color": "#202020",
+    "circle-opacity": 0.7,
+    "circle-radius": 2,
   },
 };

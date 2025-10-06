@@ -9,4 +9,8 @@ export const MAP_CONFIG_DEFAULT: Partial<MapOptions> = {
   attributionControl: false,
 };
 
-export const API_URL = "https://kevndteqglsoslznrntz.supabase.co/functions/v1";
+export const API_URL = "https://kevndteqglsoslznrntz.supabase.co";
+
+
+export const TEXT_1 = 'text-xs uppercase tracking-wider';
+export const TEXT_2 = 'text-xs uppercase tracking-wide';

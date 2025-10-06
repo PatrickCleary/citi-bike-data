@@ -10,6 +10,8 @@ import maplibregl, {
 } from "maplibre-gl";
 import { MutableRefObject, useEffect } from "react";
 import {
+  BIKE_DOCKS_CURRENT_SOURCE,
+  BIKE_DOCKS_CURRENT_SOURCE_ID,
   HEX_SOURCE,
   HEX_SOURCE_ID,
   NJ_LIGHT_RAIL_LINES_SOURCE,
@@ -34,6 +36,7 @@ import {
 import { cellsToMultiPolygon } from "h3-js";
 
 import {
+  DOCK_LOCATIONS_CURRENT_LAYER,
   HEX_LAYER,
   HEX_LAYER_LINE,
   HEX_SOURCE_LAYER_ID,
@@ -84,7 +87,7 @@ const addTransitLayers = (map: MutableRefObject<Map | null>) => {
   );
   mapObj.addSource(NJ_RAIL_LINES_SOURCE_ID, NJ_RAIL_LINES_SOURCE);
   mapObj.addSource(NJ_RAIL_STATIONS_SOURCE_ID, NJ_RAIL_STATIONS_SOURCE);
-
+  mapObj.addSource(BIKE_DOCKS_CURRENT_SOURCE_ID, BIKE_DOCKS_CURRENT_SOURCE);
   mapObj.addLayer(PATH_LINE_LAYER);
   mapObj.addLayer(PATH_STATION_LAYER);
   mapObj.addLayer(NYC_LINE_LAYER);
@@ -93,6 +96,7 @@ const addTransitLayers = (map: MutableRefObject<Map | null>) => {
   mapObj.addLayer(NJ_LIGHT_RAIL_STATION_LAYER);
   mapObj.addLayer(NJ_RAIL_LINE_LAYER);
   mapObj.addLayer(NJ_RAIL_STATION_LAYER);
+  mapObj.addLayer(DOCK_LOCATIONS_CURRENT_LAYER);
 };
 
 const addHexLayer = (
@@ -158,6 +162,10 @@ export const useUpdateMapStyleOnDataChange = (
   const middleValue = (scale[1] + scale[0]) / 2;
   const hexLayer = map.current?.getLayer(HEX_LAYER.id);
   if (scale[0] >= scale[1]) return;
+  if (hexLayer && !departureCountMap) {
+    map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", "#ffffff00");
+    return;
+  }
   if (hexLayer && departureCountMap) {
     map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", [
       "case",
@@ -170,11 +178,11 @@ export const useUpdateMapStyleOnDataChange = (
         ["linear"],
         ["get", ["id"], ["literal", departureCountMap]],
         scale[0],
-        "#1a2a6c",
+        "#58A4CC",
         middleValue,
-        "#b21f1f",
+        "#84649E",
         scale[1],
-        "#fdbb2d",
+        "#7D0B0D",
       ],
     ]);
   }

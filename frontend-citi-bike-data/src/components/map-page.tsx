@@ -74,13 +74,20 @@ export const MapPage: React.FC = () => {
   return (
     <div className="flex h-[100svh] w-[100svw] flex-row font-sans">
       <div className="h-full w-full" ref={mapContainer}>
+        <div className="fixed top-4 z-10 flex w-full items-center justify-center md:hidden">
+          <DateControl />
+        </div>
         <div className="fixed bottom-4 right-4 z-10 flex flex-col gap-4">
           <TotalDisplay />
-          <DateControl />
+
+          <div className="hidden md:flex">
+            <DateControl />
+          </div>
         </div>
         <div className="fixed bottom-4 left-4 z-10 flex flex-col gap-2">
           <LayerControl map={map} mapLoaded={mapLoaded} />
           <DisplaySettings />
+          
         </div>
       </div>
       <Popup map={map} />

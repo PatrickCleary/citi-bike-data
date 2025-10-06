@@ -48,11 +48,18 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
 
   // when activeFeature changes, set the popup's location and content, and add it to the map
   useEffect(() => {
-    if (!hoveredFeature || !popupRef.current) return;
+    if (!popupRef.current) return;
+
+    if (!hoveredFeature) {
+      popupRef.current.remove();
+      return;
+    }
+
     if (hoveredTripCount === 0) {
       popupRef.current.remove();
       return;
     }
+
     popupRef.current
       .setLngLat(hoveredFeature.coordinates) // set its position using activeFeature's geometry
       .setDOMContent(contentRef.current) // use contentRef to set the DOM content of the popup
@@ -95,18 +102,23 @@ export const PopupContent: React.FC<{
   if (noCellsSelected)
     return (
       <PopupDiv>
-        <div className="flex flex-row items-center justify-center gap-2">
+        <div className="flex  flex-row items-center justify-center gap-2 font-sans">
           <ArrDepIcon analysisType={analysisType} />
 
-          {loading ? (
-            <span className="animate-pulse tabular-nums blur-sm">0 trips</span>
-          ) : (
-            <span className="tabular-nums">
-              {formatter.format(hoveredTripCount)} trips
+          <div className="flex flex-row items-center justify-center gap-1">
+            {loading ? (
+              <span className="animate-pulse tabular-nums blur-sm">0</span>
+            ) : (
+              <span className="font-bold tabular-nums tracking-wider">
+                {formatter.format(hoveredTripCount)}{" "}
+              </span>
+            )}
+            <span className="text-xs font-light uppercase tracking-wide">
+              trips
             </span>
-          )}
+          </div>
         </div>
-        <p className="flex flex-row items-center gap-1 text-center text-xs font-light">
+        <p className="flex flex-row items-center gap-1 text-center text-xs font-light uppercase tracking-wide">
           {analysisType === "arrivals" ? "Arriving to" : "Departing from"}
           <span className={spanClassName}>
             <HexagonIcon
@@ -115,7 +127,6 @@ export const PopupContent: React.FC<{
                 color: hexColor,
               }}
             />
-            Cell
           </span>
         </p>
       </PopupDiv>
@@ -123,15 +134,20 @@ export const PopupContent: React.FC<{
 
   return (
     <PopupDiv>
-      <div className="flex flex-row items-center justify-center gap-2">
+      <div className="flex flex-row items-center justify-center gap-2 font-sans">
         <ArrDepIcon analysisType={analysisType} />
-        <span className="tabular-nums">
-          {loading ? (
-            <span className="animate-pulse blur-sm">000 trips</span>
-          ) : (
-            <span>{formatter.format(hoveredTripCount)} trips</span>
-          )}{" "}
-        </span>
+        <div className="flex flex-row items-center gap-1">
+          <span className="font-bold tabular-nums tracking-wider">
+            {loading ? (
+              <span className="animate-pulse blur-sm">000</span>
+            ) : (
+              <span>{formatter.format(hoveredTripCount)}</span>
+            )}
+          </span>
+          <span className="text-xs font-light uppercase tracking-wide">
+            trips
+          </span>
+        </div>
       </div>
       <ArrDepText analysisType={analysisType} hexColor={hexColor} />
     </PopupDiv>
@@ -140,13 +156,13 @@ export const PopupContent: React.FC<{
 
 const PopupDiv: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="border-color-white/50 rounded-2 pointer-events-none flex flex-col items-center rounded-md border-[.5px] bg-white/30 px-2 py-1 text-center text-lg font-bold tabular-nums text-black text-neutral-800 backdrop-blur-md">
+    <div className="border-color-white/50 rounded-2 pointer-events-none flex flex-col items-center rounded-md border-[.5px] bg-white/30 px-2 py-1 text-center font-sans text-lg tabular-nums text-black text-neutral-800 backdrop-blur-md">
       {children}
     </div>
   );
 };
 
-const spanClassName =
+export const spanClassName =
   "bg-cb-lightGray/50 flex flex-row items-center rounded-sm px-1 flex flex-row gap-[2px]";
 const ArrDepText: React.FC<{
   analysisType: "arrivals" | "departures";
@@ -154,11 +170,11 @@ const ArrDepText: React.FC<{
 }> = ({ analysisType, hexColor = "#cccccc" }) => {
   if (analysisType === "arrivals") {
     return (
-      <p className="text-xs font-light">
-        <span className="flex flex-row items-center gap-1">
+      <p className="text-xs font-light uppercase">
+        <span className="flex flex-row items-center gap-1 tracking-wide">
           From
           <span className={spanClassName}>
-            <HexagonOutlinedIcon fontSize="small" /> Selection{" "}
+            <HexagonOutlinedIcon fontSize="small" />
           </span>
           to
           <span className={spanClassName}>
@@ -168,14 +184,13 @@ const ArrDepText: React.FC<{
                 color: hexColor,
               }}
             />
-            Cell
           </span>
         </span>
       </p>
     );
   } else {
     return (
-      <p className="text-xs font-light">
+      <p className="text-xs font-light uppercase">
         <span className="flex flex-row items-center gap-1">
           From
           <span className="bg-cb-lightGray/50 flex flex-row items-center space-x-1 rounded-sm px-1">
@@ -185,11 +200,10 @@ const ArrDepText: React.FC<{
                 color: hexColor,
               }}
             />
-            Cell
           </span>
           to
           <span className={spanClassName}>
-            <HexagonOutlinedIcon fontSize="small" /> Selection{" "}
+            <HexagonOutlinedIcon fontSize="small" />
           </span>
         </span>
       </p>
@@ -225,10 +239,13 @@ const getHexagonColor = (
 
   // Color stops
   const colors = {
-    low: "#1a2a6c", // blue
-    mid: "#b21f1f", // red
-    high: "#fdbb2d", // yellow
+    low: "#58A4CC", // blue
+    mid: "#84649E", // red
+    high: "#7D0B0D", // yellow
   };
+  if (tripCount >= maxScale) {
+    return colors.high;
+  }
 
   // Interpolate between colors based on trip count
   if (tripCount <= middleValue) {

@@ -67,3 +67,10 @@ export const NJ_RAIL_STATIONS_SOURCE: SourceSpecification = {
   type: "vector",
   url: "pmtiles://https://kevndteqglsoslznrntz.supabase.co/storage/v1/object/public/citi-bike-data-bucket/geo_layers/nj_rail_stations.pmtiles",
 };
+
+export const BIKE_DOCKS_CURRENT_SOURCE_ID = "bike_docks_current";
+export const BIKE_DOCKS_CURRENT_SOURCE: SourceSpecification = {
+  type: "geojson",
+
+  data: "/map/docks.geojson",
+};

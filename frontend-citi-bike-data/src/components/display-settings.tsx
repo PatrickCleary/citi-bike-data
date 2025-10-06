@@ -9,12 +9,18 @@ import {
   TabGroup,
   TabList,
 } from "@headlessui/react";
+import PedalBikeRounded from "@mui/icons-material/PedalBikeRounded";
 import TuneIcon from "@mui/icons-material/Tune";
 import classNames from "classnames";
 import React, { MutableRefObject, useRef } from "react";
 
-const tabStyle =
-  "data-[selected]:bg-cb-lightGray data-[hover]:bg-cb-lightGray/50  data-[selected]:data-[hover]:bg-cb-lightGray transition font-light rounded-full focus:outline-none w-32 px-2 py-1 text-gray-900";
+export const buttonHoverStyle =
+  "data-[selected]:bg-cb-blue/30 focus:outline-none data-[focus]:bg-cb-blue/20  data-[selected]:data-[focus]:bg-cb-blue/30 data-[hover]:bg-cb-blue/20  data-[selected]:data-[hover]:bg-cb-blue/30  transition ease-out duration-100";
+
+const tabStyle = classNames(
+  "uppercase tracking-wide text-xs flex flex-row gap-2 justify-center items-center  transition rounded-full focus:outline-none w-32 px-2 py-1 text-gray-900",
+  buttonHoverStyle,
+);
 export const DisplaySettings: React.FC = () => {
   const {
     swapAnalysisType,
@@ -44,26 +50,34 @@ export const DisplaySettings: React.FC = () => {
       <MenuItems
         anchor="top start"
         transition
-        className="z-10 flex origin-bottom-left flex-col rounded-lg border border-gray-300 bg-white p-4 font-thin text-black shadow-lg [--anchor-gap:theme(spacing.1)] focus:outline-none"
+        className="z-10 flex origin-bottom-left flex-col rounded-lg border border-gray-300 bg-white p-6 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
-        <p className="mb-2 text-xs">Aggregation</p>
         <TabGroup
           selectedIndex={selectedIndexAnalysis}
           onChange={() => swapAnalysisType()}
         >
-          <TabList className={"ml-2 flex flex-row gap-2 text-sm text-gray-900"}>
+          <TabList className={"flex flex-row gap-2 text-sm text-gray-900"}>
             <Tab key={"arrivals"} className={tabStyle}>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: "1.25rem" }}
+              >
+                bike_dock
+              </span>
               Arrivals
             </Tab>
             <Tab key={"departures"} className={tabStyle}>
+              <PedalBikeRounded fontSize="small" />
               Departures
             </Tab>
           </TabList>
         </TabGroup>
         <hr className="border-cb-white my-2 border-[0.5px]" />
 
-        <p className="text-xs">Scale</p>
-        <div className="flex w-full flex-col pl-2">
+        <p className="mb-2 text-xs uppercase tracking-wide text-gray-400">
+          Scale
+        </p>
+        <div className="flex w-full flex-col">
           <TabGroup
             selectedIndex={selectedIndexScale}
             onChange={(index) =>
@@ -80,7 +94,7 @@ export const DisplaySettings: React.FC = () => {
             </TabList>
           </TabGroup>
           {scaleType === "custom" && (
-            <div className="mt-2 flex h-8 w-full flex-row items-center justify-between rounded-full bg-gradient-to-r from-[#1a2a6c] via-[#b21f1f] to-[#fdbb2d] px-2 font-semibold tabular-nums text-gray-900">
+            <div className="mt-2 flex h-8 w-full flex-row items-center justify-between rounded-full bg-gradient-to-r from-[#58A4CC9E] via-[#84649E9E] to-[#7D0B0D9E] px-2 font-semibold tabular-nums text-gray-900">
               <Input
                 value={scale[0]}
                 onChange={(e) => {
@@ -93,7 +107,7 @@ export const DisplaySettings: React.FC = () => {
                     "",
                   );
                 }}
-                className="bg-cb-white/50 border-bg-white w-16 rounded-full border-[0.5px] text-center text-sm tabular-nums focus:outline-none"
+                className="bg-cb-white/50 border-bg-white w-16 rounded-full border-[0.5px] text-center text-sm font-medium tabular-nums focus:outline-none"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 ref={inputRef1}
@@ -122,7 +136,7 @@ export const DisplaySettings: React.FC = () => {
                     "",
                   );
                 }}
-                className="bg-cb-white/50 border-bg-white w-16 rounded-full border-[0.5px] text-center text-sm focus:outline-none"
+                className="bg-cb-white/50 border-bg-white w-16 rounded-full border-[0.5px] text-center text-sm font-medium focus:outline-none"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 ref={inputRef2}
@@ -143,11 +157,11 @@ export const DisplaySettings: React.FC = () => {
           )}
           <p
             className={classNames(
-              showError ? "visible" : "invisible",
-              "flex w-full text-center text-xs italic text-red-500",
+              showError ? "flex" : "hidden",
+              "flex w-full text-wrap text-center text-sm text-red-500",
             )}
           >
-            Scale maximum must be greater than minimum
+            Scale max must be greater than scale min
           </p>
         </div>
       </MenuItems>

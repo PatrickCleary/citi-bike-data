@@ -29,6 +29,7 @@ export default {
         cb: {
           white: "#F2F3F0",
           lightGray: "#C3C9CC",
+          blue: '#58A4CC',
         },
         background: "var(--background)",
         foreground: "var(--foreground)",

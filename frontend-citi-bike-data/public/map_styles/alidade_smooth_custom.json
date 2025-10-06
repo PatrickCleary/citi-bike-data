@@ -13,7 +13,7 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "https://api.maptiler.com/tiles/v3-openmaptiles/tiles.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL"
+      "url": "https://tiles.stadiamaps.com/data/openmaptiles.json"
     }
   },
   "sprite": "https://tiles.stadiamaps.com/styles/alidade-smooth/sprite",
