@@ -21,11 +21,8 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   const query = useTripCountData();
   const tripCounts = query.data?.data.trip_counts || {};
   const { hoveredFeature, setHoveredFeature } = usePopupStateStore();
-  const { departureCells, scale } = useMapConfigStore();
+  const {  scale } = useMapConfigStore();
   const { mode } = useInteractionModeStore();
-  const hoveredFeatureIsInSelection = departureCells.includes(
-    hoveredFeature?.id || "",
-  );
   const loading = query.isLoading;
   const hoveredTripCount = tripCounts[hoveredFeature?.id as string] || 0;
   const hexColor = getHexagonColor(hoveredTripCount, scale);
@@ -42,7 +39,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
     });
 
     return () => {
-      popupRef.current.remove();
+      if (popupRef.current) popupRef.current.remove();
     };
   }, [map.current]);
 
@@ -56,7 +53,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
 
   // when activeFeature changes, set the popup's location and content, and add it to the map
   useEffect(() => {
-    if (!popupRef.current) return;
+    if (!popupRef.current || !map.current) return;
 
     if (!hoveredFeature) {
       popupRef.current.remove();
@@ -80,7 +77,6 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
         <PopupContent
           hoveredTripCount={hoveredTripCount}
           loading={loading}
-          hoveredFeatureIsInSelection={hoveredFeatureIsInSelection}
           hexColor={hexColor}
         />,
         contentRef.current,
@@ -94,9 +90,8 @@ export default PopupComponent;
 export const PopupContent: React.FC<{
   loading: boolean;
   hoveredTripCount: number;
-  hoveredFeatureIsInSelection: boolean;
   hexColor: string;
-}> = ({ loading, hoveredTripCount, hoveredFeatureIsInSelection, hexColor }) => {
+}> = ({ loading, hoveredTripCount, hexColor }) => {
   const { analysisType, departureCells } = useMapConfigStore();
   const noCellsSelected = departureCells.length === 0;
   if (noCellsSelected)

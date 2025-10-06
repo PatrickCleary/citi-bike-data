@@ -1,6 +1,5 @@
 import ChevronLeftSharpIcon from "@mui/icons-material/ChevronLeftSharp";
 import ChevronRightSharpIcon from "@mui/icons-material/ChevronRightSharp";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { MapButton } from "@/map/map-button";
 import { useMapConfigStore } from "@/store/store";
 import dayjs, { Dayjs } from "dayjs";

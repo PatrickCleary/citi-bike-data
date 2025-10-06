@@ -21,7 +21,6 @@ import {
   DOCK_LOCATIONS_CURRENT_LAYER,
 } from "@/map/layers";
 import { MapButtonStyle } from "@/map/map-button";
-import { TEXT_1, TEXT_2 } from "./constants";
 
 interface LayerGroup {
   id: string;
@@ -94,51 +93,6 @@ export const LayerControl: React.FC<LayerControlProps> = ({
       }),
     );
   };
-
-  const moveLayerGroup = (groupId: string, direction: "up" | "down") => {
-    if (!map.current || !mapLoaded) return;
-
-    setLayerGroups((prev) => {
-      const newGroups = [...prev];
-      console.log(newGroups);
-      const currentIndex = newGroups.findIndex((g) => g.id === groupId);
-
-      if (direction === "up" && currentIndex > 0) {
-        [newGroups[currentIndex], newGroups[currentIndex - 1]] = [
-          newGroups[currentIndex - 1],
-          newGroups[currentIndex],
-        ];
-      } else if (direction === "down" && currentIndex < newGroups.length - 1) {
-        [newGroups[currentIndex], newGroups[currentIndex + 1]] = [
-          newGroups[currentIndex + 1],
-          newGroups[currentIndex],
-        ];
-      }
-
-      reorderLayersOnMap(newGroups, direction);
-      return newGroups;
-    });
-  };
-
-  const reorderLayersOnMap = (
-    groups: LayerGroup[],
-    direction: "up" | "down",
-  ) => {
-    if (!map.current) return;
-
-    groups.forEach((group) => {
-      group.layerIds.forEach((layerId) => {
-        if (map.current?.getLayer(layerId)) {
-          try {
-            map.current.moveLayer(layerId);
-          } catch (error) {
-            console.warn(`Could not move layer ${layerId}:`, error);
-          }
-        }
-      });
-    });
-  };
-
   return (
     <Menu>
       <MenuButton className={classNames(MapButtonStyle, "focus:outline-none")}>
@@ -151,7 +105,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
         className="z-10 flex origin-bottom-left flex-col rounded-lg border border-gray-300 bg-white p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
         <div className="space-y-2">
-          {layerGroups.map((group, index) => (
+          {layerGroups.map((group) => (
             <div key={group.id} className="flex flex-col">
               <div className="flex items-start gap-2">
                 {/* Image with visibility toggle */}

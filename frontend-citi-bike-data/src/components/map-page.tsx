@@ -12,7 +12,6 @@ import {
   useUpdateOriginShape,
   useUpdateInfoModeSelectedCell,
 } from "@/map/map-config";
-import { useMapConfigStore } from "@/store/store";
 
 import { TotalDisplay } from "./total-display";
 import Popup from "@/map/popup";

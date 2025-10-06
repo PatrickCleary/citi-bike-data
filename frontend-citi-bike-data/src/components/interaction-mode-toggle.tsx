@@ -12,7 +12,7 @@ export const InteractionModeToggle: React.FC = () => {
   const { mode, toggleMode } = useInteractionModeStore();
   const { departureCells, setDepartureCells } = useMapConfigStore();
   const noCellsSelected = departureCells.length === 0;
-  ("flex h-12 w-12 items-center justify-center rounded-md border-[0.5px] bg-white/30 drop-shadow-lg backdrop-blur-md transition border-gray-900 text-gray-900");
+
   return (
     <div className="flex flex-row gap-2">
       <Switch

@@ -29,7 +29,7 @@ export const HEX_LAYER: LayerSpecification = {
     "fill-color": "#FF000000",
     "fill-opacity": [
       "case",
-      ["!=", ["feature-state", "opacity"], null],
+      ["!=", ["feature-state", "opacity"], ["literal", null]],
       ["feature-state", "opacity"],
       DEFAULT_HEX_OPACITY,
     ],
@@ -94,24 +94,6 @@ export const linePaintStyle = {
   "line-color": "#808080",
   "line-opacity": 0.5,
   "line-width": 1,
-};
-
-// // const NJ_TRANSIT_STATION_LAYER_ID = "nj_transit_stations_layer";
-// export const NJ_TRANSIT_STATIONS_SOURCE_LAYER = "nj_transit_stations";
-
-// export const NJ_TRANSIT_STATIONS_LAYER: LayerSpecification = {
-//   id: NJ_TRANSIT_STATION_LAYER_ID,
-//   source: NJ_TRANSIT_SOURCE_ID,
-//   "source-layer": NJ_TRANSIT_STATIONS_SOURCE_LAYER,
-//   type: "circle",
-//   paint: stationPaintStyle,
-// };
-
-const PATH_LINE_COLOR_MAP = {
-  3: "#5172CA",
-  2: "#7DD024",
-  1: "#E64035",
-  4: "#EF9425",
 };
 
 const PATH_LINE_LAYER_ID = "path_lines_layer";
