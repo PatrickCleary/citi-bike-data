@@ -28,14 +28,18 @@ export const DateControl: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center font-sans">
-      <p className="text-xl font-bold text-gray-900 tracking-wider">{month}</p>
+      <h1 className="text-3xl font-bold text-gray-900 [text-shadow:_-1px_-1px_0_#fff,_1px_-1px_0_#fff,_-1px_1px_0_#fff,_1px_1px_0_#fff]">
+        {month}
+      </h1>
       <div className="flex flex-row gap-1">
         <MapButton
-          disabled={!isMonthYearValid(
-            query,
-            monthObj.subtract(1, "year").month(),
-            monthObj.subtract(1, "year").year(),
-          )}
+          disabled={
+            !isMonthYearValid(
+              query,
+              monthObj.subtract(1, "year").month(),
+              monthObj.subtract(1, "year").year(),
+            )
+          }
           onClick={() => {
             setMonth(monthObj.subtract(1, "year"));
           }}
@@ -46,11 +50,13 @@ export const DateControl: React.FC = () => {
           </div>
         </MapButton>
         <MapButton
-          disabled={!isMonthYearValid(
-            query,
-            monthObj.subtract(1, "month").month(),
-            monthObj.subtract(1, "month").year(),
-          )}
+          disabled={
+            !isMonthYearValid(
+              query,
+              monthObj.subtract(1, "month").month(),
+              monthObj.subtract(1, "month").year(),
+            )
+          }
           onClick={() => {
             setMonth(monthObj.subtract(1, "month"));
           }}
@@ -59,11 +65,13 @@ export const DateControl: React.FC = () => {
         </MapButton>
         <CalendarInput />
         <MapButton
-          disabled={!isMonthYearValid(
-            query,
-            monthObj.add(1, "month").month(),
-            monthObj.add(1, "month").year(),
-          )}
+          disabled={
+            !isMonthYearValid(
+              query,
+              monthObj.add(1, "month").month(),
+              monthObj.add(1, "month").year(),
+            )
+          }
           onClick={() => {
             setMonth(monthObj.add(1, "month"));
           }}
@@ -71,11 +79,13 @@ export const DateControl: React.FC = () => {
           <ChevronRightSharpIcon fontSize="small" />
         </MapButton>
         <MapButton
-          disabled={!isMonthYearValid(
-            query,
-            monthObj.add(1, "year").month(),
-            monthObj.add(1, "year").year(),
-          )}
+          disabled={
+            !isMonthYearValid(
+              query,
+              monthObj.add(1, "year").month(),
+              monthObj.add(1, "year").year(),
+            )
+          }
           onClick={() => {
             setMonth(monthObj.add(1, "year"));
           }}

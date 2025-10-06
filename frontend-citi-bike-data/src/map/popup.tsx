@@ -8,7 +8,7 @@ import { useMapConfigStore } from "@/store/store";
 import HexagonOutlinedIcon from "@mui/icons-material/HexagonOutlined";
 import PedalBikeRoundedIcon from "@mui/icons-material/PedalBikeRounded";
 import HexagonIcon from "@mui/icons-material/Hexagon";
-import ArrowCircleRightRoundedIcon from "@mui/icons-material/ArrowCircleRightRounded";
+import { useInteractionModeStore } from "@/store/interaction-mode-store";
 interface PopupProps {
   map: MutableRefObject<Map | null>;
 }
@@ -20,9 +20,9 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   const contentRef = useRef(document.createElement("div"));
   const query = useTripCountData();
   const tripCounts = query.data?.data.trip_counts || {};
-  const totalTrips = query.data?.data.sum_all_values || {};
-  const { hoveredFeature } = usePopupStateStore();
+  const { hoveredFeature, setHoveredFeature } = usePopupStateStore();
   const { departureCells, scale } = useMapConfigStore();
+  const { mode } = useInteractionModeStore();
   const hoveredFeatureIsInSelection = departureCells.includes(
     hoveredFeature?.id || "",
   );
@@ -45,6 +45,14 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
       popupRef.current.remove();
     };
   }, [map.current]);
+
+  // Clear popup when switching to selection mode
+  useEffect(() => {
+    if (mode === "selection") {
+      popupRef.current?.remove();
+      setHoveredFeature(null);
+    }
+  }, [mode, setHoveredFeature]);
 
   // when activeFeature changes, set the popup's location and content, and add it to the map
   useEffect(() => {
@@ -72,7 +80,6 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
         <PopupContent
           hoveredTripCount={hoveredTripCount}
           loading={loading}
-          totalTrips={totalTrips}
           hoveredFeatureIsInSelection={hoveredFeatureIsInSelection}
           hexColor={hexColor}
         />,
@@ -87,22 +94,15 @@ export default PopupComponent;
 export const PopupContent: React.FC<{
   loading: boolean;
   hoveredTripCount: number;
-  totalTrips: number;
   hoveredFeatureIsInSelection: boolean;
   hexColor: string;
-}> = ({
-  loading,
-  hoveredTripCount,
-  totalTrips,
-  hoveredFeatureIsInSelection,
-  hexColor,
-}) => {
+}> = ({ loading, hoveredTripCount, hoveredFeatureIsInSelection, hexColor }) => {
   const { analysisType, departureCells } = useMapConfigStore();
   const noCellsSelected = departureCells.length === 0;
   if (noCellsSelected)
     return (
       <PopupDiv>
-        <div className="flex  flex-row items-center justify-center gap-2 font-sans">
+        <div className="flex flex-row items-center justify-center gap-2 font-sans">
           <ArrDepIcon analysisType={analysisType} />
 
           <div className="flex flex-row items-center justify-center gap-1">
@@ -113,13 +113,13 @@ export const PopupContent: React.FC<{
                 {formatter.format(hoveredTripCount)}{" "}
               </span>
             )}
-            <span className="text-xs font-light uppercase tracking-wide">
+            <span className="text-xs font-medium uppercase tracking-wide">
               trips
             </span>
           </div>
         </div>
         <p className="flex flex-row items-center gap-1 text-center text-xs font-light uppercase tracking-wide">
-          {analysisType === "arrivals" ? "Arriving to" : "Departing from"}
+          {analysisType === "arrivals" ? "Arrived here" : "Departed here"}
           <span className={spanClassName}>
             <HexagonIcon
               fontSize="small"
@@ -144,7 +144,7 @@ export const PopupContent: React.FC<{
               <span>{formatter.format(hoveredTripCount)}</span>
             )}
           </span>
-          <span className="text-xs font-light uppercase tracking-wide">
+          <span className="text-xs font-medium uppercase tracking-wide">
             trips
           </span>
         </div>
@@ -156,7 +156,7 @@ export const PopupContent: React.FC<{
 
 const PopupDiv: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="border-color-white/50 rounded-2 pointer-events-none flex flex-col items-center rounded-md border-[.5px] bg-white/30 px-2 py-1 text-center font-sans text-lg tabular-nums text-black text-neutral-800 backdrop-blur-md">
+    <div className="border-cb-white/50 rounded-2 pointer-events-none flex flex-col items-center rounded-md border-[.5px] bg-white/30 px-2 py-1 text-center font-sans text-lg tabular-nums text-black text-neutral-800 drop-shadow-lg backdrop-blur-md">
       {children}
     </div>
   );

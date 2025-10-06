@@ -142,7 +142,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
   return (
     <Menu>
       <MenuButton className={classNames(MapButtonStyle, "focus:outline-none")}>
-        <LayersIcon />
+        <LayersIcon fontSize="small" />
       </MenuButton>
 
       <MenuItems
@@ -195,9 +195,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                   <span
                     className={classNames(
                       "mt-1 text-xs uppercase text-gray-700",
-                      group.id === "bike"
-                        ? "tracking-wider"
-                        : "tracking-wide",
+                      group.id === "bike" ? "tracking-wider" : "tracking-wide",
                     )}
                   >
                     {group.name}

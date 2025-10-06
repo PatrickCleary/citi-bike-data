@@ -14,6 +14,8 @@ import {
 } from "./sources";
 import { GENERAL_IMAGES } from "./images";
 
+export const DEFAULT_HEX_OPACITY = 0.62;
+
 const HEX_LAYER_ID = "nyc_jc_hex_tiles_layer";
 const HEX_LAYER_LINE_ID = "nyc_jc_hex_tiles_line_layer";
 export const HEX_SOURCE_LAYER_ID = "nyc_jc_hexagons";
@@ -29,7 +31,7 @@ export const HEX_LAYER: LayerSpecification = {
       "case",
       ["!=", ["feature-state", "opacity"], null],
       ["feature-state", "opacity"],
-      0.62,
+      DEFAULT_HEX_OPACITY,
     ],
   },
 };
@@ -53,6 +55,18 @@ export const ORIGIN_LAYER_LINE: LayerSpecification = {
   paint: {
     "line-width": 4,
     "line-color": "#000000",
+  },
+};
+
+export const INFO_MODE_SELECTED_LAYER_ID = "info_mode_selected_hex_layer";
+
+export const INFO_MODE_SELECTED_LAYER: LayerSpecification = {
+  id: INFO_MODE_SELECTED_LAYER_ID,
+  source: "info_mode_selected_hex",
+  type: "line",
+  paint: {
+    "line-width": 3,
+    "line-color": "#ffffff",
   },
 };
 
