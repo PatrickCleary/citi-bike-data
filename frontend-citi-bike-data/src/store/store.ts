@@ -57,5 +57,5 @@ export const useUpdateScaleMax = () => {
       const highestValue = query.data.data.highest_value;
       setScale([1, highestValue]);
     }
-  }, [query.data, scaleType]);
+  }, [query.data, scaleType, setScale]);
 };

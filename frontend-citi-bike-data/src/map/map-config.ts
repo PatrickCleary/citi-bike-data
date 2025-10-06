@@ -6,7 +6,8 @@ import maplibregl, {
   GeoJSONFeature,
   Map,
   Event,
-  MapEventType,
+  MapMouseEvent,
+  LngLatLike,
 } from "maplibre-gl";
 import { MutableRefObject, useEffect } from "react";
 import { useInteractionModeStore } from "@/store/interaction-mode-store";
@@ -59,9 +60,11 @@ import {
 import { useMapConfigStore } from "@/store/store";
 
 export type EventHandler = {
-  eventType: MapEventType;
+  eventType: "click" | "mousemove" | "mouseleave";
   layer: string;
-  handler: (e: Event & { features?: GeoJSONFeature[] }) => void;
+  handler: (
+    e: Event & { features?: GeoJSONFeature[]; lngLat: LngLatLike },
+  ) => void;
 };
 export const useApplyLayers = (
   map: MutableRefObject<Map | null>,
@@ -199,12 +202,14 @@ const getCellEventHandlers = (
   addOrRemoveDepartureCell: (cell: string) => void,
   setHoveredFeature: (feature: HoveredFeature | null) => void,
 ): {
-  eventType: MapEventType;
+  eventType: "click" | "mousemove" | "mouseleave";
   layer: string;
-  handler: (e: Event & { features?: GeoJSONFeature[] }) => void;
+  handler: (
+    e: Event & { features?: GeoJSONFeature[]; lngLat: LngLatLike },
+  ) => void;
 }[] => {
-  let hoveredFeatureId: null | number = null;
-  let hoverTimeout = null;
+  let hoveredFeatureId: null | string = null;
+  let hoverTimeout: NodeJS.Timeout | null = null;
   const isMobile = isMobileDevice();
 
   const handlers: EventHandler[] = [
@@ -214,7 +219,7 @@ const getCellEventHandlers = (
       handler: (e) => {
         const cellId = e.features?.[0].id;
         if (typeof cellId !== "string") return;
-        const coordinates = e.lngLat;
+        const coordinates = (e as MapMouseEvent).lngLat;
         const h3Id = cellId as string;
 
         // On desktop: always select cell on click (no mode concept)
@@ -252,11 +257,11 @@ const getCellEventHandlers = (
   if (!isMobile) {
     handlers.push(
       {
-        eventType: "mousemove",
+        eventType: "mousemove" as const,
         layer: HEX_LAYER.id,
         handler: (e) => {
           const feature = e.features?.[0];
-          if (!feature?.id) return;
+          if (!feature?.id || !map.current) return;
 
           const coordinates = e.lngLat;
           const h3Id = feature.id as string;
@@ -353,7 +358,7 @@ export const useAddPMTilesProtocol = () => {
 };
 
 export const useUpdateOriginShape = (
-  map: MutableRefObject<Map>,
+  map: MutableRefObject<Map | null>,
   mapLoaded: boolean,
 ) => {
   const { departureCells } = useMapConfigStore();
@@ -370,7 +375,7 @@ export const useUpdateOriginShape = (
 };
 
 export const useUpdateInfoModeSelectedCell = (
-  map: MutableRefObject<Map>,
+  map: MutableRefObject<Map | null>,
   mapLoaded: boolean,
 ) => {
   const { infoModeSelectedCell } = usePopupStateStore();
@@ -393,9 +398,9 @@ const convertCellsToGeoJSON = (
 ): GeoJSON.FeatureCollection<GeoJSON.Geometry> => {
   const polygons = cellsToMultiPolygon(cells, true);
   const features = polygons.map((polygon) => ({
-    type: "Feature",
+    type: "Feature" as const,
     geometry: {
-      type: "Polygon",
+      type: "Polygon" as const,
       coordinates: polygon,
     },
     properties: {},
@@ -408,7 +413,7 @@ const convertCellsToGeoJSON = (
 
 // Helper function to animate opacity
 const animateOpacity = (
-  map: MutableRefObject<Map>,
+  map: MutableRefObject<Map | null>,
   featureId: string,
   startOpacity: number,
   endOpacity: number,
@@ -418,7 +423,7 @@ const animateOpacity = (
 
   const startTime = performance.now();
 
-  const animate = (currentTime) => {
+  const animate = (currentTime: DOMHighResTimeStamp) => {
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1);
 
