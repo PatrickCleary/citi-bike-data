@@ -75,10 +75,9 @@ export const CalendarInput: React.FC = () => {
       <PopoverPanel
         transition
         anchor="bottom"
-        className="z-10 bg-white/5 text-sm/6 transition duration-200 ease-in-out [--anchor-gap:theme(spacing.1)] data-[closed]:translate-y-1 data-[closed]:opacity-0"
+        className="z-10 transition duration-200 ease-in-out [--anchor-gap:theme(spacing.1)] data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
         <div className="bg-cb-white border-cb-lightGray rounded-lg border-[0.5px] p-3 text-gray-900">
-          <label className="font-thin">Month</label>
           <div className="flex w-full gap-2">
             <Listbox
               value={selectedMonthLocal}
@@ -86,10 +85,10 @@ export const CalendarInput: React.FC = () => {
             >
               <ListboxButton className="border-cb-lightGray/50 w-32 rounded-md border bg-white/5 px-3 py-2 text-left text-center text-gray-900 focus:outline-none">
                 {MONTHS[selectedMonthLocal]}
-              </ListboxButton>
+              </ListboxButton>F
               <ListboxOptions
                 anchor="top"
-                className="bg-cb-white border-cb-lightGray z-20 mt-2 max-h-60 w-[var(--button-width)] w-full origin-top-left overflow-auto rounded-lg border border-[0.5px] border-white/10 text-gray-900 [--anchor-gap:theme(spacing.1)] [--anchor-gap:theme(spacing.3)]"
+                className="bg-cb-white border-cb-lightGray z-20 mt-2 max-h-60 w-[var(--button-width)] origin-top-left overflow-auto rounded-lg border border-[0.5px] border-white/10 text-gray-900 [--anchor-gap:theme(spacing.1)] [--anchor-gap:theme(spacing.3)]"
               >
                 {MONTHS.map((month, index) => {
                   const isAfterMax = isMonthYearAfterMax(index, selectedYear);
@@ -112,7 +111,7 @@ export const CalendarInput: React.FC = () => {
               </ListboxButton>
               <ListboxOptions
                 anchor="top"
-                className="bg-cb-white border-cb-lightGray z-20 mt-2 max-h-60 w-[var(--button-width)] w-full origin-top-left overflow-auto rounded-lg border border-[0.5px] border-white/10 text-gray-900 [--anchor-gap:theme(spacing.1)] [--anchor-gap:theme(spacing.3)]"
+                className="bg-cb-white border-cb-lightGray z-20 mt-2 max-h-60 w-[var(--button-width)] origin-top-left overflow-auto rounded-lg border border-[0.5px] border-white/10 text-gray-900 [--anchor-gap:theme(spacing.1)] [--anchor-gap:theme(spacing.3)]"
               >
                 {YEARS.map((year) => {
                   const isAfterMax = isMonthYearAfterMax(
@@ -132,13 +131,13 @@ export const CalendarInput: React.FC = () => {
               </ListboxOptions>
             </Listbox>
           </div>
-          <div className="mt-1 h-5 text-center">
+          {/* <div className="mt-1 h-5 text-center">
             {error && (
               <p className="text-sm font-light text-red-600">
                 No data available for this month
               </p>
             )}
-          </div>
+          </div> */}
         </div>
       </PopoverPanel>
     </Popover>

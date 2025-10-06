@@ -224,11 +224,11 @@ export const DOCK_LOCATIONS_CURRENT_LAYER_ID = "dock_locations_current";
 export const DOCK_LOCATIONS_CURRENT_LAYER: LayerSpecification = {
   id: DOCK_LOCATIONS_CURRENT_LAYER_ID,
   source: "bike_docks_current",
-  type: "symbol",
+  type: "circle",
   minzoom: 14, // Layer will be hidden at zoom levels less than 10
-  layout: {
-    "icon-image": GENERAL_IMAGES.DOCK, // Reference the icon by ID
-    // "icon-size": 0.75, // Scale the icon
-    "icon-allow-overlap": true, // Optional: allow icons to overlap
+  paint: {
+    "circle-color": "#202020",
+    "circle-opacity": 0.7,
+    "circle-radius": 2,
   },
 };

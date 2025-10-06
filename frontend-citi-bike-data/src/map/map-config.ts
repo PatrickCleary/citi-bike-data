@@ -162,6 +162,10 @@ export const useUpdateMapStyleOnDataChange = (
   const middleValue = (scale[1] + scale[0]) / 2;
   const hexLayer = map.current?.getLayer(HEX_LAYER.id);
   if (scale[0] >= scale[1]) return;
+  if (hexLayer && !departureCountMap) {
+    map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", "#ffffff00");
+    return;
+  }
   if (hexLayer && departureCountMap) {
     map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", [
       "case",

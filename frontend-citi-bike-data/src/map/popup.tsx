@@ -171,7 +171,7 @@ const ArrDepText: React.FC<{
   if (analysisType === "arrivals") {
     return (
       <p className="text-xs font-light uppercase">
-        <span className="flex flex-row items-center gap-1">
+        <span className="flex flex-row tracking-wider items-center gap-1">
           From
           <span className={spanClassName}>
             <HexagonOutlinedIcon fontSize="small" />

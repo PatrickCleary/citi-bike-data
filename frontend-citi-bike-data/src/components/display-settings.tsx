@@ -45,7 +45,7 @@ export const DisplaySettings: React.FC = () => {
       <MenuItems
         anchor="top start"
         transition
-        className="z-10 flex origin-bottom-left flex-col rounded-lg border border-gray-300 bg-white p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
+        className="z-10 flex origin-bottom-left flex-col rounded-lg border border-gray-300 bg-white p-6 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
         <TabGroup
           selectedIndex={selectedIndexAnalysis}
@@ -69,7 +69,7 @@ export const DisplaySettings: React.FC = () => {
         </TabGroup>
         <hr className="border-cb-white my-2 border-[0.5px]" />
 
-        <p className="mb-2 text-xs uppercase tracking-wide">Scale</p>
+        <p className="mb-2 text-xs text-gray-400 uppercase tracking-wide">Scale</p>
         <div className="flex w-full flex-col pl-2">
           <TabGroup
             selectedIndex={selectedIndexScale}
