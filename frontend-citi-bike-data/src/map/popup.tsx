@@ -1,3 +1,4 @@
+"use client";
 import { MutableRefObject, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import maplibregl, { Map, Popup } from "maplibre-gl";
@@ -21,7 +22,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   const query = useTripCountData();
   const tripCounts = query.data?.data.trip_counts || {};
   const { hoveredFeature, setHoveredFeature } = usePopupStateStore();
-  const {  scale } = useMapConfigStore();
+  const { scale } = useMapConfigStore();
   const { mode } = useInteractionModeStore();
   const loading = query.isLoading;
   const hoveredTripCount = tripCounts[hoveredFeature?.id as string] || 0;
