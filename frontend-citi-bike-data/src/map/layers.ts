@@ -221,10 +221,20 @@ export const DOCK_LOCATIONS_CURRENT_LAYER: LayerSpecification = {
   id: DOCK_LOCATIONS_CURRENT_LAYER_ID,
   source: "bike_docks_current",
   type: "circle",
-  minzoom: 14, // Layer will be hidden at zoom levels less than 10
+  minzoom: 10, // Layer will be hidden at zoom levels less than 10
   paint: {
-    "circle-color": "#202020",
+    "circle-color": "#20202080",
     "circle-opacity": 0.7,
-    "circle-radius": 2,
+    "circle-radius": [
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      10,
+      0.5, // Radius of 1 at zoom level 12
+      14,
+      2, // Radius of 2 at zoom level 14
+      16,
+      4, // Radius of 2 at zoom level 14
+    ],
   },
 };
