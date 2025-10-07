@@ -5,7 +5,7 @@ import { HoveredFeature, usePopupStateStore } from "@/store/popup-store";
 import maplibregl, {
   GeoJSONFeature,
   Map,
-Event,
+  Event,
   MapMouseEvent,
   LngLatLike,
 } from "maplibre-gl";
@@ -156,6 +156,7 @@ export const useTripCountData = () => {
     queryKey: ["tripCounts", departureCells, selectedMonth, analysisType],
     queryFn: () =>
       getTripCountData(departureCells, selectedMonth, analysisType),
+    enabled: !!selectedMonth,
   });
   return query;
 };
