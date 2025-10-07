@@ -14,7 +14,7 @@ export const InteractionModeToggle: React.FC = () => {
   const noCellsSelected = departureCells.length === 0;
 
   return (
-    <div className="flex flex-row gap-2">
+    <div className="flex flex-row gap-2 pointer-events-auto">
       <Switch
         checked={mode === "popup"}
         onChange={toggleMode}

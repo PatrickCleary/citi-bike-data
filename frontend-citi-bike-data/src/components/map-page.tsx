@@ -23,6 +23,7 @@ import { DisplaySettings } from "./display-settings";
 import { InteractionModeToggle } from "./interaction-mode-toggle";
 import { Legend } from "./legend";
 import { useFetchLatestDate } from "@/store/store";
+import IconLogo from "@/icons/icon";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -79,23 +80,27 @@ export const MapPage: React.FC = () => {
   return (
     <div className="flex h-[100svh] w-[100svw] flex-row font-sans">
       <div className="h-full w-full" ref={mapContainer}>
-        <div className="fixed top-4 z-10 flex w-full items-center justify-center md:hidden">
-          <DateControl />
+        <div className="md:bg-cb-white/50 md:border-cb-white/50 fixed left-4 top-4 z-10 flex flex-row items-center gap-2 rounded-md backdrop-blur-sm md:border md:border-[0.5px] md:px-1 md:py-1">
+          <IconLogo className="drop-shadow-md md:hidden" width={32} />
+          <IconLogo className="drop-shadow- hidden md:flex" width={32} />
+          <h1 className="hidden font-sans text-lg font-light tracking-wide text-[#396c87] md:flex">
+            CitiBike Data
+          </h1>
         </div>
-        <div className="fixed bottom-4 right-4 z-10 flex flex-col items-end gap-4">
-          <div className="hidden md:flex">
-            <DateControl />
+        <div className="fixed top-4 z-10 flex w-full flex-col items-center gap-4 md:bottom-4 md:left-auto md:right-4 md:top-auto md:w-fit md:items-end">
+          <div className="w-fit">
+            <TotalDisplay />
           </div>
-          <TotalDisplay />
         </div>
-        <div className="fixed bottom-4 left-4 z-10 flex flex-col gap-2">
+        <div className="pointer-events-none fixed bottom-4 left-4 z-10 flex flex-col gap-2">
           <Legend />
 
           <LayerControl map={map} mapLoaded={mapLoaded} />
           <DisplaySettings />
-          <div className="md:hidden">
+          <div className="w-fit md:hidden">
             <InteractionModeToggle />
           </div>
+          <DateControl />
         </div>
       </div>
       <Popup map={map} />
