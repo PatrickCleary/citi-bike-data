@@ -18,13 +18,12 @@ const getDisplayText = (
 };
 
 export const TotalDisplay: React.FC = () => {
-  const { analysisType, departureCells } =
-    useMapConfigStore();
+  const { analysisType, departureCells } = useMapConfigStore();
   const query = useTripCountData();
   const totalTrips = query.data?.data.sum_all_values || 0;
 
   return (
-    <div className="flex w-full flex-col items-end rounded-md bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-lg backdrop-blur-md">
+    <div className="flex w-full cursor-default flex-col flex-col-reverse items-center rounded-md bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-lg backdrop-blur-md md:w-48 md:flex-col md:items-end">
       <p className="flex w-full justify-start gap-[2px] rounded-sm font-light uppercase tracking-wider">
         {getDisplayText(analysisType, departureCells)}
         {departureCells.length > 0 && (
@@ -34,7 +33,7 @@ export const TotalDisplay: React.FC = () => {
           </span>
         )}
       </p>
-      <div className="flex w-full flex-row items-start justify-start gap-1 text-left">
+      <div className="flex w-full flex-row justify-center gap-1 text-left md:justify-start">
         {query.isLoading ? (
           <span className="animate-pulse text-xl blur-sm">0</span>
         ) : (

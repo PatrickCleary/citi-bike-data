@@ -45,14 +45,19 @@ export const LayerControl: React.FC<LayerControlProps> = ({
   };
   return (
     <Menu>
-      <MenuButton className={classNames(MapButtonStyle, "focus:outline-none")}>
+      <MenuButton
+        className={classNames(
+          MapButtonStyle,
+          "pointer-events-auto focus:outline-none",
+        )}
+      >
         <LayersIcon fontSize="small" />
       </MenuButton>
 
       <MenuItems
         anchor="bottom start"
         transition
-        className="z-10 flex origin-bottom-left flex-col items-center rounded-lg border border-gray-300 bg-white p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
+        className="z-10 flex pointer-events-auto origin-bottom-left flex-col items-center rounded-lg border border-gray-300 bg-white p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
         <div className="flex flex-col items-center space-y-2">
           {layerGroups.map((group) => (

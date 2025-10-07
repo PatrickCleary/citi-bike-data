@@ -44,13 +44,18 @@ export const DisplaySettings: React.FC = () => {
 
   return (
     <Menu>
-      <MenuButton className={classNames(MapButtonStyle, "focus:outline-none")}>
+      <MenuButton
+        className={classNames(
+          MapButtonStyle,
+          "pointer-events-auto focus:outline-none",
+        )}
+      >
         <TuneIcon fontSize="small" />
       </MenuButton>
       <MenuItems
         anchor="top start"
         transition
-        className="z-10 flex origin-bottom-left flex-col rounded-lg border border-gray-300 bg-white p-6 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
+        className="border-cb-lightGray bg-cb-white pointer-events-auto z-10 flex origin-bottom-left flex-col rounded-lg border-[0.5px] p-6 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
         <TabGroup
           selectedIndex={selectedIndexAnalysis}
@@ -72,9 +77,9 @@ export const DisplaySettings: React.FC = () => {
             </Tab>
           </TabList>
         </TabGroup>
-        <hr className="border-cb-white my-2 border-[0.5px]" />
+        <hr className="bg-cb-lightGray my-2" />
 
-        <p className="mb-2 text-xs uppercase tracking-wide text-gray-400">
+        <p className="mb-2 cursor-default text-xs uppercase tracking-wide text-gray-400">
           Scale
         </p>
         <div className="flex w-full flex-col">
@@ -158,7 +163,7 @@ export const DisplaySettings: React.FC = () => {
           <p
             className={classNames(
               showError ? "flex" : "hidden",
-              "flex w-full text-wrap text-center text-sm text-red-500",
+              "flex w-full cursor-default text-wrap text-center text-sm text-red-500",
             )}
           >
             Scale max must be greater than scale min

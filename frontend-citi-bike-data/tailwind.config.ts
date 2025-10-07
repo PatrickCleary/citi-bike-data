@@ -11,7 +11,7 @@ export default {
   theme: {
     extend: {
       dropShadow: {
-        "cb-mini": "0px 0px 5px rgba(0, 0, 0, .3)",
+        "cb-mini": "0px 0px 5px rgba(0, 0, 0, .05)",
       },
       fontFamily: {
         sans: [
