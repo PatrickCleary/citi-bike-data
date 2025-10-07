@@ -156,6 +156,7 @@ export const useTripCountData = () => {
     queryKey: ["tripCounts", departureCells, selectedMonth, analysisType],
     queryFn: () =>
       getTripCountData(departureCells, selectedMonth, analysisType),
+    enabled: !!selectedMonth,
   });
   return query;
 };

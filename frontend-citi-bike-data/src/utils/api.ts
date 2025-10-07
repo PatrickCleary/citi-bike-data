@@ -12,9 +12,10 @@ export type TripCountResult = {
 
 export const getTripCountData = async (
   referenceCellIds: string[],
-  targetMonth: string,
+  targetMonth: string | undefined,
   analysisType: AnalysisType,
-): Promise<TripCountResult> => {
+): Promise<TripCountResult | undefined> => {
+  if (!targetMonth) return undefined;
   const data = await fetch(API_URL + "/functions/v1/trip-counts", {
     headers: {
       "Content-Type": "application/json",
