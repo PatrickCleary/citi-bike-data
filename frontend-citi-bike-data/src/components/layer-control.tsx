@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { Map } from "maplibre-gl";
 import { MutableRefObject } from "react";
 import { Menu, MenuButton, MenuItems } from "@headlessui/react";
@@ -7,27 +7,8 @@ import classNames from "classnames";
 import LayersIcon from "@mui/icons-material/Layers";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
-import {
-  PATH_LINE_LAYER,
-  PATH_STATION_LAYER,
-  NYC_LINE_LAYER,
-  NYC_STATION_LAYER,
-  NJ_LIGHT_RAIL_LINE_LAYER,
-  NJ_LIGHT_RAIL_STATION_LAYER,
-  NJ_RAIL_LINE_LAYER,
-  NJ_RAIL_STATION_LAYER,
-  HEX_LAYER,
-  HEX_LAYER_LINE,
-  DOCK_LOCATIONS_CURRENT_LAYER,
-} from "@/map/layers";
 import { MapButtonStyle } from "@/map/map-button";
-
-interface LayerGroup {
-  id: string;
-  name: string;
-  visible: boolean;
-  layerIds: string[];
-}
+import { useLayerVisibilityStore } from "@/store/layer-visibility-store";
 
 interface LayerControlProps {
   map: MutableRefObject<Map | null>;
@@ -38,60 +19,29 @@ export const LayerControl: React.FC<LayerControlProps> = ({
   map,
   mapLoaded,
 }) => {
-  const [layerGroups, setLayerGroups] = useState<LayerGroup[]>([
-    {
-      id: "transit",
-      name: "Transit",
-      visible: true,
-      layerIds: [
-        PATH_LINE_LAYER.id,
-        PATH_STATION_LAYER.id,
-        NYC_LINE_LAYER.id,
-        NYC_STATION_LAYER.id,
-        NJ_LIGHT_RAIL_LINE_LAYER.id,
-        NJ_LIGHT_RAIL_STATION_LAYER.id,
-        NJ_RAIL_LINE_LAYER.id,
-        NJ_RAIL_STATION_LAYER.id,
-      ],
-    },
+  const { layerGroups, toggleLayerGroup, layersAdded } =
+    useLayerVisibilityStore();
 
-    {
-      id: "bike",
-      name: "CitiBike",
-      visible: true,
-      layerIds: [HEX_LAYER.id, HEX_LAYER_LINE.id],
-    },
-    {
-      id: "docks",
-      name: "Docks",
-      visible: true,
-      layerIds: [DOCK_LOCATIONS_CURRENT_LAYER.id],
-    },
-  ]);
+  // Sync store state with map visibility when map loads or layer visibility changes
+  useEffect(() => {
+    if (!map.current || !mapLoaded || !layersAdded) return;
 
-  const toggleLayerGroup = (groupId: string) => {
-    if (!map.current || !mapLoaded) return;
-
-    setLayerGroups((prev) =>
-      prev.map((group) => {
-        if (group.id === groupId) {
-          const newVisible = !group.visible;
-
-          group.layerIds.forEach((layerId) => {
-            if (map.current?.getLayer(layerId)) {
-              map.current.setLayoutProperty(
-                layerId,
-                "visibility",
-                newVisible ? "visible" : "none",
-              );
-            }
-          });
-
-          return { ...group, visible: newVisible };
+    layerGroups.forEach((group) => {
+      group.layerIds.forEach((layerId) => {
+        if (map.current?.getLayer(layerId)) {
+          map.current.setLayoutProperty(
+            layerId,
+            "visibility",
+            group.visible ? "visible" : "none",
+          );
         }
-        return group;
-      }),
-    );
+      });
+    });
+  }, [map, mapLoaded, layerGroups, layersAdded]);
+
+  const handleToggle = (groupId: string) => {
+    if (!map.current || !mapLoaded) return;
+    toggleLayerGroup(groupId);
   };
   return (
     <Menu>
@@ -102,17 +52,20 @@ export const LayerControl: React.FC<LayerControlProps> = ({
       <MenuItems
         anchor="bottom start"
         transition
-        className="z-10 flex origin-bottom-left flex-col rounded-lg border border-gray-300 bg-white p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
+        className="z-10 flex origin-bottom-left flex-col items-center rounded-lg border border-gray-300 bg-white p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
-        <div className="space-y-2">
+        <div className="flex flex-col items-center space-y-2">
           {layerGroups.map((group) => (
-            <div key={group.id} className="flex flex-col">
-              <div className="flex items-start gap-2">
+            <div key={group.id} className="flex w-full flex-col">
+              <div className="flex w-full items-start gap-2">
                 {/* Image with visibility toggle */}
-                <div className="flex flex-col items-center">
+                <button
+                  className="group flex w-full flex-col items-center"
+                  onClick={() => handleToggle(group.id)}
+                >
                   <div
                     className={classNames(
-                      "outline-cb-blue group relative h-16 w-16 cursor-pointer overflow-hidden rounded",
+                      "outline-cb-blue relative h-16 w-full cursor-pointer overflow-hidden rounded",
                       group.visible ? "outline" : "outline-hidden",
                     )}
                     style={{
@@ -120,24 +73,24 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                     }}
-                    onClick={() => toggleLayerGroup(group.id)}
                   >
                     {/* Overlay that lightens on hover */}
                     <div
                       className={classNames(
-                        "absolute inset-0 bg-white opacity-0 transition-opacity group-hover:opacity-30",
+                        "bg-cb-blue absolute inset-0 opacity-0 transition-opacity group-hover:opacity-30",
                       )}
                     ></div>
+                    {/* data-[selected]:bg-cb-blue/30 data-[focus]:bg-cb-blue/20  data-[selected]:data-[focus]:bg-cb-blue/30 */}
 
                     {/* Icon on top of overlay */}
                     <div className="absolute inset-0 z-10 flex items-center justify-center">
                       {!group.visible ? (
-                        <VisibilityOutlinedIcon
+                        <VisibilityOffOutlinedIcon
                           className="invisible text-gray-700 group-hover:visible group-hover:text-gray-900"
                           fontSize="small"
                         />
                       ) : (
-                        <VisibilityOffOutlinedIcon
+                        <VisibilityOutlinedIcon
                           className="invisible text-gray-700 group-hover:visible group-hover:text-gray-900"
                           fontSize="small"
                         />
@@ -148,13 +101,16 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                   {/* Label below the image */}
                   <span
                     className={classNames(
-                      "mt-1 text-xs uppercase text-gray-700",
+                      "group-hover:bg-cb-blue/20 mt-1 rounded-full px-2 text-xs uppercase text-gray-700 transition duration-100 ease-out",
                       group.id === "bike" ? "tracking-wider" : "tracking-wide",
+                      group.visible
+                        ? "bg-cb-blue/30 group-hover:bg-cb-blue/30"
+                        : "",
                     )}
                   >
                     {group.name}
                   </span>
-                </div>
+                </button>
               </div>
             </div>
           ))}

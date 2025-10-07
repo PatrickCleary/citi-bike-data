@@ -58,6 +58,7 @@ import {
   PATH_STATION_LAYER,
 } from "./layers";
 import { useMapConfigStore } from "@/store/store";
+import { useLayerVisibilityStore } from "@/store/layer-visibility-store";
 
 export type EventHandler = {
   eventType: "click" | "mousemove" | "mouseleave";
@@ -70,18 +71,22 @@ export const useApplyLayers = (
   map: MutableRefObject<Map | null>,
   mapLoaded: boolean,
 ) => {
+  const { setLayersAdded } = useLayerVisibilityStore();
   const { addOrRemoveDepartureCell } = useMapConfigStore();
   const { setHoveredFeature } = usePopupStateStore();
   useEffect(() => {
     if (!mapLoaded) return;
-    addHexLayer(map, addOrRemoveDepartureCell, setHoveredFeature);
     addTransitLayers(map);
+    addDockLayer(map);
+    addHexLayer(map, addOrRemoveDepartureCell, setHoveredFeature);
+    setLayersAdded(true);
   }, [mapLoaded, map, addOrRemoveDepartureCell, setHoveredFeature]);
 };
 
 const addTransitLayers = (map: MutableRefObject<Map | null>) => {
   if (!map.current) return;
   const mapObj = map.current;
+
   // Sources: pat
   mapObj.addSource(PATH_LINES_SOURCE_ID, PATH_LINES_SOURCE);
   mapObj.addSource(PATH_STATIONS_SOURCE_ID, PATH_STATIONS_SOURCE);
@@ -94,7 +99,6 @@ const addTransitLayers = (map: MutableRefObject<Map | null>) => {
   );
   mapObj.addSource(NJ_RAIL_LINES_SOURCE_ID, NJ_RAIL_LINES_SOURCE);
   mapObj.addSource(NJ_RAIL_STATIONS_SOURCE_ID, NJ_RAIL_STATIONS_SOURCE);
-  mapObj.addSource(BIKE_DOCKS_CURRENT_SOURCE_ID, BIKE_DOCKS_CURRENT_SOURCE);
   mapObj.addLayer(PATH_LINE_LAYER);
   mapObj.addLayer(PATH_STATION_LAYER);
   mapObj.addLayer(NYC_LINE_LAYER);
@@ -103,6 +107,11 @@ const addTransitLayers = (map: MutableRefObject<Map | null>) => {
   mapObj.addLayer(NJ_LIGHT_RAIL_STATION_LAYER);
   mapObj.addLayer(NJ_RAIL_LINE_LAYER);
   mapObj.addLayer(NJ_RAIL_STATION_LAYER);
+};
+const addDockLayer = (map: MutableRefObject<Map | null>) => {
+  if (!map.current) return;
+  const mapObj = map.current;
+  mapObj.addSource(BIKE_DOCKS_CURRENT_SOURCE_ID, BIKE_DOCKS_CURRENT_SOURCE);
   mapObj.addLayer(DOCK_LOCATIONS_CURRENT_LAYER);
 };
 
