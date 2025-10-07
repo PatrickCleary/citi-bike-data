@@ -81,13 +81,14 @@ export const MapPage: React.FC = () => {
           <DateControl />
         </div>
         <div className="fixed bottom-4 right-4 z-10 flex flex-col items-end gap-4">
-          <Legend />
           <div className="hidden md:flex">
             <DateControl />
           </div>
           <TotalDisplay />
         </div>
         <div className="fixed bottom-4 left-4 z-10 flex flex-col gap-2">
+          <Legend />
+
           <LayerControl map={map} mapLoaded={mapLoaded} />
           <DisplaySettings />
           <div className="md:hidden">

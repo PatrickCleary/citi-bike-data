@@ -10,6 +10,9 @@ export default {
   ],
   theme: {
     extend: {
+      dropShadow: {
+        "cb-mini": "0px 0px 5px rgba(0, 0, 0, .3)",
+      },
       fontFamily: {
         sans: [
           "Outfit",
@@ -30,7 +33,7 @@ export default {
         cb: {
           white: "#F2F3F0",
           lightGray: "#C3C9CC",
-          blue: '#58A4CC',
+          blue: "#58A4CC",
         },
         background: "var(--background)",
         foreground: "var(--foreground)",
