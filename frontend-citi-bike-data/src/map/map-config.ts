@@ -5,7 +5,7 @@ import { HoveredFeature, usePopupStateStore } from "@/store/popup-store";
 import maplibregl, {
   GeoJSONFeature,
   Map,
-  Event,
+Event,
   MapMouseEvent,
   LngLatLike,
 } from "maplibre-gl";

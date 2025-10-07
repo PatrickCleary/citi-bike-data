@@ -1,18 +1,20 @@
 import { useTripCountData } from "@/map/map-config";
+import { getMaxDate } from "@/utils/api";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { create } from "zustand";
 
 interface Store {
   departureCells: string[];
   departureCountMap: Record<string, number> | null;
-  selectedMonth: string;
+  selectedMonth: string | undefined;
   analysisType: "departures" | "arrivals";
   scaleType: "dynamic" | "custom";
   scale: [number, number];
   setScaleType: (type: "dynamic" | "custom") => void;
   setScale: (max: [number, number]) => void;
   swapAnalysisType: () => void;
-  setSelectedMonth: (month: string) => void;
+  setSelectedMonth: (month: string | undefined) => void;
   setDepartureCountMap: (map: Record<string, number>) => void;
   setDepartureCells: (departureCells: string[]) => void;
   addOrRemoveDepartureCell: (cell: string) => void;
@@ -21,7 +23,7 @@ interface Store {
 export const useMapConfigStore = create<Store>((set) => ({
   departureCells: [],
   departureCountMap: null,
-  selectedMonth: "2025-07-01",
+  selectedMonth: undefined,
   analysisType: "arrivals",
   scaleType: "dynamic",
   scale: [1, 100],
@@ -58,4 +60,18 @@ export const useUpdateScaleMax = () => {
       setScale([1, highestValue]);
     }
   }, [query.data, scaleType, setScale]);
+};
+
+export const useFetchLatestDate = () => {
+  const { setSelectedMonth } = useMapConfigStore();
+
+  const query = useQuery({
+    queryKey: ["max_date"],
+    queryFn: getMaxDate,
+  });
+  useEffect(() => {
+    if (query.isLoading) setSelectedMonth(undefined);
+    if (query.isError) setSelectedMonth(undefined);
+    if (query.data) setSelectedMonth(query.data);
+  }, [query.data, setSelectedMonth]);
 };

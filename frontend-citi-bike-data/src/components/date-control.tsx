@@ -7,7 +7,8 @@ import { CalendarInput, isMonthYearValid } from "./calendar-input";
 import { useQuery } from "@tanstack/react-query";
 import { getMaxDate } from "@/utils/api";
 
-export const getMonthDisplayText = (date: string) => {
+export const getMonthDisplayText = (date: string | undefined) => {
+  if (!date) return "";
   const dateObj = dayjs(date);
   const month = dateObj.format("MMM YYYY");
   return month.toUpperCase();
@@ -27,7 +28,7 @@ export const DateControl: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center font-sans">
-      <h1 className="text-3xl font-bold text-gray-900 [text-shadow:_-1px_-1px_0_#fff,_1px_-1px_0_#fff,_-1px_1px_0_#fff,_1px_1px_0_#fff]">
+      <h1 className="text-lg font-bold text-gray-900 [text-shadow:_-1px_-1px_0_#fff,_1px_-1px_0_#fff,_-1px_1px_0_#fff,_1px_1px_0_#fff]">
         {month}
       </h1>
       <div className="flex flex-row gap-1">

@@ -22,6 +22,7 @@ import { DateControl } from "./date-control";
 import { DisplaySettings } from "./display-settings";
 import { InteractionModeToggle } from "./interaction-mode-toggle";
 import { Legend } from "./legend";
+import { useFetchLatestDate } from "@/store/store";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -30,6 +31,7 @@ export const MapPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   useUpdateMapStyleOnDataChange(map, mapLoaded);
   useApplyLayers(map, mapLoaded);
+  useFetchLatestDate();
   useUpdateOriginShape(map, mapLoaded);
   useUpdateInfoModeSelectedCell(map, mapLoaded);
   useAddPMTilesProtocol();
