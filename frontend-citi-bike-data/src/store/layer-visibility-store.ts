@@ -60,34 +60,32 @@ const defaultLayerGroups: LayerGroup[] = [
   },
 ];
 
-export const useLayerVisibilityStore = create<LayerVisibilityStore>(
-  (set, get) => ({
-    layerGroups: defaultLayerGroups,
-    layersAdded: false,
-    setLayersAdded: (added: boolean) => set({ layersAdded: added }),
+export const useLayerVisibilityStore = create<LayerVisibilityStore>((set) => ({
+  layerGroups: defaultLayerGroups,
+  layersAdded: false,
+  setLayersAdded: (added: boolean) => set({ layersAdded: added }),
 
-    toggleLayerGroup: (groupId: string) => {
-      set((state) => ({
-        layerGroups: state.layerGroups.map((group) =>
-          group.id === groupId ? { ...group, visible: !group.visible } : group,
-        ),
-      }));
-    },
+  toggleLayerGroup: (groupId: string) => {
+    set((state) => ({
+      layerGroups: state.layerGroups.map((group) =>
+        group.id === groupId ? { ...group, visible: !group.visible } : group,
+      ),
+    }));
+  },
 
-    setLayerGroupVisibility: (groupId: string, visible: boolean) => {
-      set((state) => ({
-        layerGroups: state.layerGroups.map((group) =>
-          group.id === groupId ? { ...group, visible } : group,
-        ),
-      }));
-    },
+  setLayerGroupVisibility: (groupId: string, visible: boolean) => {
+    set((state) => ({
+      layerGroups: state.layerGroups.map((group) =>
+        group.id === groupId ? { ...group, visible } : group,
+      ),
+    }));
+  },
 
-    // Future URL params implementation placeholder
-    initializeFromUrlParams: () => {
-      // TODO: Parse URL params and update layer visibility
-      // Example: ?layers=transit,bike (only these visible)
-      // or ?hide=docks (hide specific layers)
-      // This will be implemented in a future update
-    },
-  }),
-);
+  // Future URL params implementation placeholder
+  initializeFromUrlParams: () => {
+    // TODO: Parse URL params and update layer visibility
+    // Example: ?layers=transit,bike (only these visible)
+    // or ?hide=docks (hide specific layers)
+    // This will be implemented in a future update
+  },
+}));
