@@ -14,21 +14,21 @@ export const InteractionModeToggle: React.FC = () => {
   const noCellsSelected = departureCells.length === 0;
 
   return (
-    <div className="flex flex-row gap-2 pointer-events-auto">
+    <div className="pointer-events-auto flex flex-row gap-2">
       <Switch
         checked={mode === "popup"}
         onChange={toggleMode}
         className={
-          "border-cb-lightGray flex h-12 w-24 flex-row rounded-md border-[0.5px] bg-white/30 text-gray-900 shadow-lg drop-shadow-lg backdrop-blur-md transition"
+          "border-cb-lightGray flex h-12 w-24 flex-row overflow-hidden rounded-md border-[0.5px] bg-white/30 text-gray-900 drop-shadow-md backdrop-blur-md transition"
         }
       >
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-md ${mode === "popup" ? "bg-white drop-shadow-lg" : "bg-transparent"} text-gray-900 transition`}
+          className={`flex h-12 w-12 items-center justify-center rounded-md ${mode === "popup" ? "bg-white drop-shadow-md" : "bg-transparent"} text-gray-900 transition`}
         >
           <PinRoundedIcon fontSize="small" />
         </div>
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-md ${mode === "popup" ? "bg-transparent" : "bg-white drop-shadow-lg"} text-gray-900 transition`}
+          className={`flex h-12 w-12 items-center justify-center rounded-md ${mode === "popup" ? "bg-transparent" : "bg-white drop-shadow-md"} text-gray-900 transition`}
         >
           <SelectHexIcon fontSize="small" />
         </div>
