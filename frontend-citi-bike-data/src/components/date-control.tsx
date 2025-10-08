@@ -15,7 +15,6 @@ export const getMonthDisplayText = (date: string | undefined) => {
 };
 export const DateControl: React.FC = () => {
   const { selectedMonth, setSelectedMonth } = useMapConfigStore();
-  const month = getMonthDisplayText(selectedMonth);
   const monthObj = dayjs(selectedMonth);
   const setMonth = (date: Dayjs) => {
     setSelectedMonth(date.format("YYYY-MM-DD"));

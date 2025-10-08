@@ -5,7 +5,6 @@ import { spanClassName } from "@/map/popup";
 import HexagonOutlinedIcon from "@mui/icons-material/HexagonOutlined";
 import { AnalysisType } from "@/utils/api";
 import dayjs from "dayjs";
-import { start } from "repl";
 import classNames from "classnames";
 
 const getDisplayText = (
@@ -23,13 +22,12 @@ const getDisplayText = (
 export const TotalDisplay: React.FC = () => {
   const { analysisType, departureCells, selectedMonth } = useMapConfigStore();
   const dateObj = dayjs(selectedMonth);
-  const startDate = dateObj.startOf("month").format("MMMM YYYY");
-  const endDate = dateObj.endOf("month").format("MMM D, YYYY");
+  const startDate = dateObj.format("MMMM YYYY");
   const query = useTripCountData();
   const totalTrips = query.data?.data.sum_all_values || 0;
 
   return (
-    <div className="border-cb-white/40 flex w-full cursor-default flex-col  items-center rounded-md border-[0.5px] bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md md:w-48 md:flex-col md:items-start">
+    <div className="border-cb-white/40 flex w-full cursor-default flex-col items-center rounded-md border-[0.5px] bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md md:w-48 md:flex-col md:items-start">
       <p className="flex w-full justify-center gap-[2px] rounded-sm font-light uppercase tracking-wider text-gray-500 md:justify-start">
         {getDisplayText(analysisType, departureCells)}
         {departureCells.length > 0 && (
