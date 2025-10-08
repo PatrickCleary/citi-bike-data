@@ -228,7 +228,6 @@ export const useUpdateMapStyleOnDataChange = (
   const { scale: scale } = useMapConfigStore();
   if (!mapLoaded) return;
   const departureCountMap = query.data?.data.trip_counts;
-  const middleValue = (scale[1] + scale[0]) / 2;
   const hexLayer = map.current?.getLayer(HEX_LAYER.id);
   if (scale[0] >= scale[1]) return;
   // Don't hide hex layer while loading - keep previous data visible

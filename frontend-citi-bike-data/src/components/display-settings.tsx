@@ -15,7 +15,7 @@ import classNames from "classnames";
 import React, { MutableRefObject, useRef } from "react";
 
 export const buttonHoverStyle =
-  "data-[selected]:bg-cb-bluePurple/30 focus:outline-none data-[focus]:bg-cb-bluePurple/20  data-[selected]:data-[focus]:bg-cb-bluePurple/30 data-[hover]:bg-cb-bluePurple/20  data-[selected]:data-[hover]:bg-cb-bluePurple/30  transition ease-out duration-100";
+  "data-[selected]:bg-cb-blue/30 focus:outline-none data-[focus]:bg-cb-blue/20  data-[selected]:data-[focus]:bg-cb-blue/30 data-[hover]:bg-cb-blue/20  data-[selected]:data-[hover]:bg-cb-blue/30  transition ease-out duration-100";
 
 const tabStyle = classNames(
   "uppercase tracking-wide text-xs flex flex-row gap-2 justify-center items-center  transition rounded-full focus:outline-none w-32 px-2 py-1 text-gray-900",
