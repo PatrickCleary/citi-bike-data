@@ -58,7 +58,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
       <MenuItems
         anchor="bottom start"
         transition
-        className="pointer-events-auto z-10 flex origin-bottom-left flex-col items-center rounded-lg border border-gray-300 bg-white p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
+        className="bg-cb-white pointer-events-auto z-10 flex origin-bottom-left flex-col items-center rounded-lg border-[0.5px] border-cb-lightGray p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
         <div className="flex flex-col items-center space-y-2">
           {layerGroups.map((group) => (
@@ -71,7 +71,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                 >
                   <div
                     className={classNames(
-                      "outline-cb-blue relative h-16 w-full cursor-pointer overflow-hidden rounded",
+                      "outline-cb-bluePurple relative h-16 w-full cursor-pointer overflow-hidden rounded",
                       group.visible ? "outline" : "outline-hidden",
                     )}
                     style={{
@@ -83,10 +83,9 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                     {/* Overlay that lightens on hover */}
                     <div
                       className={classNames(
-                        "bg-cb-blue absolute inset-0 opacity-0 transition-opacity group-hover:opacity-30",
+                        "bg-cb-bluePurple absolute inset-0 opacity-0 transition-opacity group-hover:opacity-30",
                       )}
                     ></div>
-                    {/* data-[selected]:bg-cb-blue/30 data-[focus]:bg-cb-blue/20  data-[selected]:data-[focus]:bg-cb-blue/30 */}
 
                     {/* Icon on top of overlay */}
                     <div className="absolute inset-0 z-10 flex items-center justify-center">
@@ -107,10 +106,10 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                   {/* Label below the image */}
                   <span
                     className={classNames(
-                      "group-hover:bg-cb-blue/20 mt-1 rounded-full px-2 text-xs uppercase text-gray-700 transition duration-100 ease-out",
+                      "group-hover:bg-cb-bluePurple/20 mt-1 rounded-full px-2 text-xs uppercase text-gray-700 transition duration-100 ease-out",
                       group.id === "bike" ? "tracking-wider" : "tracking-wide",
                       group.visible
-                        ? "bg-cb-blue/30 group-hover:bg-cb-blue/30"
+                        ? "bg-cb-bluePurple/30 group-hover:bg-cb-bluePurple/30"
                         : "",
                     )}
                   >

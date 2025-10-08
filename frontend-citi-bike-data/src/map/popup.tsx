@@ -224,7 +224,6 @@ const ArrDepIcon: React.FC<{ analysisType: "arrivals" | "departures" }> = ({
   }
   return <PedalBikeRoundedIcon />;
 };
-
 // Helper function to calculate hexagon color based on trip count and scale
 const getHexagonColor = (
   tripCount: number | undefined,
@@ -232,7 +231,7 @@ const getHexagonColor = (
 ): string => {
   const [minScale, maxScale] = scale;
   if (tripCount === undefined) {
-    return "#F2F3F0"; // transparent for undefined trip counts
+    return "#F2F3F0"; // default color for undefined trip counts
   }
 
   // Return transparent for values outside the scale
@@ -240,28 +239,51 @@ const getHexagonColor = (
     return "#ffffff00";
   }
 
-  const middleValue = (minScale + maxScale) / 2;
+  // Apply logarithmic transformation
+  const logMin = Math.log(minScale + 1);
+  const logMax = Math.log(maxScale + 1);
+  const logValue = Math.log(tripCount + 1);
+  const logRange = logMax - logMin;
 
-  // Color stops
-  const colors = {
-    low: "#58A4CC", // blue
-    mid: "#84649E", // red
-    high: "#7D0B0D", // yellow
-  };
-  if (tripCount >= maxScale) {
-    return colors.high;
+  // Color stops with viridis palette (7 stops for smooth gradients)
+  const colorStops: Array<{ position: number; color: string }> = [
+    { position: 0, color: "#440154" }, // 0% - dark purple
+    { position: 0.15, color: "#482878" }, // 15% - purple
+    { position: 0.3, color: "#3e4989" }, // 30% - blue-purple
+    { position: 0.45, color: "#31688e" }, // 45% - blue
+    { position: 0.6, color: "#26828e" }, // 60% - teal
+    { position: 0.75, color: "#35b779" }, // 75% - green
+    { position: 0.9, color: "#6ece58" }, // 90% - light green
+    { position: 1, color: "#fde725" }, // 100% - yellow
+  ];
+
+  // Calculate normalized position in log space (0 to 1)
+  const normalizedPosition = (logValue - logMin) / logRange;
+
+  // Clamp to [0, 1]
+  const clampedPosition = Math.max(0, Math.min(1, normalizedPosition));
+
+  // Find the two color stops to interpolate between
+  let lowerStop = colorStops[0];
+  let upperStop = colorStops[colorStops.length - 1];
+
+  for (let i = 0; i < colorStops.length - 1; i++) {
+    if (
+      clampedPosition >= colorStops[i].position &&
+      clampedPosition <= colorStops[i + 1].position
+    ) {
+      lowerStop = colorStops[i];
+      upperStop = colorStops[i + 1];
+      break;
+    }
   }
 
-  // Interpolate between colors based on trip count
-  if (tripCount <= middleValue) {
-    // Interpolate between low and mid
-    const t = (tripCount - minScale) / (middleValue - minScale);
-    return interpolateColor(colors.low, colors.mid, t);
-  } else {
-    // Interpolate between mid and high
-    const t = (tripCount - middleValue) / (maxScale - middleValue);
-    return interpolateColor(colors.mid, colors.high, t);
-  }
+  // Calculate interpolation factor between the two stops
+  const t =
+    (clampedPosition - lowerStop.position) /
+    (upperStop.position - lowerStop.position);
+
+  return interpolateColor(lowerStop.color, upperStop.color, t);
 };
 
 // Helper function to interpolate between two hex colors
