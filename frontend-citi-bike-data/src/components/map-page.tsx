@@ -14,6 +14,7 @@ import {
   useUpdateInfoModeSelectedCell,
   usePrefetchTripCountData,
 } from "@/map/map-config";
+import { useLocationMarker } from "@/map/use-location-marker";
 
 import { TotalDisplay } from "./total-display";
 import Popup from "@/map/popup";
@@ -26,6 +27,8 @@ import { DeleteButton, InteractionModeToggle } from "./interaction-mode-toggle";
 import { Legend } from "./legend";
 import { useFetchLatestDate } from "@/store/store";
 import IconLogo from "@/icons/icon";
+import { LocationSearchModal } from "./location-search-modal";
+import { LocationSearchControl } from "./location-search-control";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -39,6 +42,7 @@ export const MapPage: React.FC = () => {
   useUpdateInfoModeSelectedCell(map, mapLoaded);
   useAddPMTilesProtocol();
   usePrefetchTripCountData();
+  useLocationMarker(map, mapLoaded);
   const handleIdle = useCallback(() => {
     if (loading) {
       setLoading(false);
@@ -98,9 +102,10 @@ export const MapPage: React.FC = () => {
         </div>
         <div className="pointer-events-none fixed bottom-4 left-4 z-10 flex flex-col gap-2">
           <Legend />
-
           <LayerControl map={map} mapLoaded={mapLoaded} />
           <DisplaySettings />
+          <LocationSearchControl />
+
           <div className="w-fit md:hidden">
             <InteractionModeToggle />
           </div>
@@ -111,6 +116,7 @@ export const MapPage: React.FC = () => {
         </div>
       </div>
       <Popup map={map} />
+      <LocationSearchModal />
     </div>
   );
 };

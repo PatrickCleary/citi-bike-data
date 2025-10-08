@@ -44,7 +44,7 @@ export const TotalDisplay: React.FC = () => {
           <span className="animate-pulse text-xl blur-sm">0</span>
         ) : (
           <p>
-            <span className="text-xl tabular-nums tracking-wider">
+            <span className="text-xl tabular-nums tracking-wider text-gray-900">
               {totalTrips.toLocaleString()}
             </span>
           </p>

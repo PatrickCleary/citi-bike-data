@@ -1,7 +1,7 @@
 import type { LngLatLike, MapOptions } from "maplibre-gl";
 
-export const BOTTOM_LEFT: LngLatLike = [-74.0848, 40.6304];
-export const TOP_RIGHT: LngLatLike = [-73.7877, 40.8916];
+export const BOTTOM_LEFT: [number, number] = [-74.0848, 40.6304];
+export const TOP_RIGHT: [number, number] = [-73.7877, 40.8916];
 export const MAX_BOUNDS: [LngLatLike, LngLatLike] = [
   [-75, 40], // Southwest corner
   [-72, 42], // Northeast corner
