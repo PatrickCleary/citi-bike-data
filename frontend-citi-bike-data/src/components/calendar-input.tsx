@@ -89,10 +89,10 @@ export const CalendarInput: React.FC = () => {
         anchor="bottom"
         className="z-10 drop-shadow-md transition duration-200 ease-in-out [--anchor-gap:theme(spacing.1)] data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
-        <div className="bg-cb-white rounded-lg border-[0.5px] p-3 text-gray-900 backdrop-blur-sm">
+        <div className="bg-cb-white border-cb-lightGray rounded-lg border-[0.5px] p-3 text-gray-900 backdrop-blur-sm">
           <div className="flex w-full gap-2">
             <Listbox value={selectedDateObj.month()} onChange={updateMonth}>
-              <ListboxButton className="bg-cb-lightGray/10 data-[focus]:bg-cb-white data-[hover]:bg-cb-white w-32 rounded-md border border-black px-3 py-2 text-left text-center font-light tracking-wide text-gray-900 focus:outline-none">
+              <ListboxButton className="bg-cb-lightGray/10 data-[focus]:bg-cb-white data-[hover]:bg-cb-white border-cb-lightGray w-32 rounded-md border-[0.5px] px-3 py-2 text-left text-center font-light tracking-wide text-gray-700 focus:outline-none data-[focus]:text-gray-900">
                 {MONTHS[selectedDateObj.month()]}
               </ListboxButton>
               <ListboxOptions
@@ -121,7 +121,7 @@ export const CalendarInput: React.FC = () => {
               </ListboxOptions>
             </Listbox>
             <Listbox value={selectedDateObj.year()} onChange={updateYear}>
-              <ListboxButton className="bg-cb-lightGray/10 data-[focus]:bg-cb-white data-[hover]:bg-cb-white w-32 rounded-md border border-black px-3 py-2 text-left text-center font-light tabular-nums tracking-wide text-gray-900 focus:outline-none">
+              <ListboxButton className="bg-cb-lightGray/10 data-[focus]:bg-cb-white data-[hover]:bg-cb-white border-cb-lightGray w-32 rounded-md border-[0.5px] px-3 py-2 text-left text-center font-light tracking-wide text-gray-700 focus:outline-none data-[focus]:text-gray-900">
                 {selectedDateObj.year()}
               </ListboxButton>
               <ListboxOptions

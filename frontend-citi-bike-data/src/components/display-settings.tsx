@@ -100,7 +100,14 @@ export const DisplaySettings: React.FC = () => {
             </TabList>
           </TabGroup>
           {scaleType === "custom" && (
-            <div className="mt-2 flex h-8 w-full flex-row items-center justify-between rounded-full bg-gradient-to-r from-[#58A4CC9E] via-[#84649E9E] to-[#7D0B0D9E] px-2 font-semibold tabular-nums text-gray-900">
+            <div
+              className="mt-2 flex h-8 w-full flex-row items-center justify-between rounded-full bg-gradient-to-r px-2 font-semibold tabular-nums text-gray-900"
+              style={{
+                background: `linear-gradient(to right, 
+                  #440154, #482878, #3e4989, #31688e, 
+                  #26828e, #35b779, #6ece58, #fde725)`,
+              }}
+            >
               <Input
                 value={scale[0]}
                 onChange={(e) => {

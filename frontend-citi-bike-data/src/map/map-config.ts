@@ -228,7 +228,6 @@ export const useUpdateMapStyleOnDataChange = (
   const { scale: scale } = useMapConfigStore();
   if (!mapLoaded) return;
   const departureCountMap = query.data?.data.trip_counts;
-  const middleValue = (scale[1] + scale[0]) / 2;
   const hexLayer = map.current?.getLayer(HEX_LAYER.id);
   if (scale[0] >= scale[1]) return;
   // Don't hide hex layer while loading - keep previous data visible
@@ -241,22 +240,36 @@ export const useUpdateMapStyleOnDataChange = (
     return;
   }
   if (hexLayer && departureCountMap) {
+    const logMin = Math.log(scale[0] + 1);
+    const logMax = Math.log(scale[1] + 1);
+    const logRange = logMax - logMin;
+
     map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", [
       "case",
       ["!", ["has", ["id"], ["literal", departureCountMap]]],
-      "#ffffff00", // Transparent color for features without an 'id'
+      "#ffffff00",
       ["<", ["get", ["id"], ["literal", departureCountMap]], scale[0]],
-      "#ffffff00", // Transparent color for values under scaleMax[0]
+      "#ffffff00",
       [
         "interpolate",
         ["linear"],
-        ["get", ["id"], ["literal", departureCountMap]],
-        scale[0],
-        "#58A4CC",
-        middleValue,
-        "#84649E",
-        scale[1],
-        "#7D0B0D",
+        ["ln", ["+", ["get", ["id"], ["literal", departureCountMap]], 1]],
+        logMin,
+        "#440154", // 0% - dark purple
+        logMin + logRange * 0.15,
+        "#482878", // 15% - purple
+        logMin + logRange * 0.3,
+        "#3e4989", // 30% - blue-purple
+        logMin + logRange * 0.45,
+        "#31688e", // 45% - blue
+        logMin + logRange * 0.6,
+        "#26828e", // 60% - teal
+        logMin + logRange * 0.75,
+        "#35b779", // 75% - green
+        logMin + logRange * 0.9,
+        "#6ece58", // 90% - light green
+        logMax,
+        "#fde725", // 100% - yellow
       ],
     ]);
   }
