@@ -35,9 +35,9 @@ export const LocationSearchModal: React.FC = () => {
 
   return (
     <Dialog open={isOpen} onClose={handleClose} className="relative z-50">
-      <DialogBackdrop className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
+      <DialogBackdrop className="fixed inset-0 bg-black/30 backdrop-blur-sm " />
       <div className="fixed inset-0 flex w-screen items-start justify-center p-4 pt-20">
-        <DialogPanel className="w-full max-w-2xl rounded-lg bg-white drop-shadow-2xl">
+        <DialogPanel className="w-full max-w-2xl rounded-lg bg-white font-light drop-shadow-2xl">
           <div className="border-b border-gray-200 p-4">
             <div className="relative">
               <SearchRoundedIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -71,7 +71,7 @@ export const LocationSearchModal: React.FC = () => {
                 onClick={() => handleSelectLocation(result)}
                 className="hover:bg-cb-green/30 focus:bg-cb-green/20 w-full border-b border-gray-100 px-4 py-3 text-left transition last:border-b-0 focus:outline-none"
               >
-                <div className="font-medium text-gray-900">{result.name}</div>
+                <div className="font-light text-gray-900">{result.name}</div>
                 <div className="text-sm text-gray-500">{result.label}</div>
               </button>
             ))}
