@@ -1537,3 +1537,53 @@
 2025-10-06 12:46:48,416 - INFO - New file: index.html (locale: NYC, modified: 2017-01-18 22:23:41+00:00)
 2025-10-06 12:46:48,417 - INFO - New files saved to new_files.csv
 2025-10-06 12:46:48,417 - INFO - File fetch process completed successfully
+2025-10-08 12:06:35,889 - INFO - Starting file fetch process...
+2025-10-08 12:06:35,942 - INFO - Supabase client initialized successfully
+2025-10-08 12:06:35,942 - INFO - Fetching unprocessed files...
+2025-10-08 12:06:36,164 - INFO - HTTP Request: GET https://kevndteqglsoslznrntz.supabase.co/rest/v1/processed_files?select=%2A "HTTP/2 200 OK"
+2025-10-08 12:06:36,594 - INFO - Found 8 new files to process
+2025-10-08 12:06:36,594 - INFO - New file: 2018-citibike-tripdata.zip (locale: NYC, modified: 2024-02-22 14:26:20+00:00)
+2025-10-08 12:06:36,595 - INFO - New file: JC-201509-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:34+00:00)
+2025-10-08 12:06:36,595 - INFO - New file: JC-201608-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:41+00:00)
+2025-10-08 12:06:36,595 - INFO - New file: JC-201609-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:42+00:00)
+2025-10-08 12:06:36,595 - INFO - New file: JC-201610-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:42+00:00)
+2025-10-08 12:06:36,595 - INFO - New file: JC-201611-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:43+00:00)
+2025-10-08 12:06:36,595 - INFO - New file: JC-201612-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:43+00:00)
+2025-10-08 12:06:36,595 - INFO - New file: index.html (locale: NYC, modified: 2017-01-18 22:23:41+00:00)
+2025-10-08 12:06:36,597 - INFO - New files saved to new_files.csv
+2025-10-08 12:06:36,597 - INFO - File fetch process completed successfully
+2025-10-08 12:07:24,831 - INFO - Starting file fetch process...
+2025-10-08 12:07:24,891 - INFO - Supabase client initialized successfully
+2025-10-08 12:07:24,891 - INFO - Fetching unprocessed files...
+2025-10-08 12:07:25,037 - INFO - HTTP Request: GET https://kevndteqglsoslznrntz.supabase.co/rest/v1/processed_files?select=%2A "HTTP/2 200 OK"
+2025-10-08 12:07:25,374 - INFO - Found 15 new files to process
+2025-10-08 12:07:25,374 - INFO - New file: 2018-citibike-tripdata.zip (locale: NYC, modified: 2024-02-22 14:26:20+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: JC-201509-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:34+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: JC-201601-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:38+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: JC-201602-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:38+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: JC-201603-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:39+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: JC-201604-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:39+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: JC-201605-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:40+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: JC-201606-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:40+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: JC-201607-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:41+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: JC-201608-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:41+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: JC-201609-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:42+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: JC-201610-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:42+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: JC-201611-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:43+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: JC-201612-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:43+00:00)
+2025-10-08 12:07:25,375 - INFO - New file: index.html (locale: NYC, modified: 2017-01-18 22:23:41+00:00)
+2025-10-08 12:07:25,377 - INFO - New files saved to new_files.csv
+2025-10-08 12:07:25,377 - INFO - File fetch process completed successfully
+2025-10-08 12:14:43,531 - INFO - Starting file fetch process...
+2025-10-08 12:14:43,594 - INFO - Supabase client initialized successfully
+2025-10-08 12:14:43,594 - INFO - Fetching unprocessed files...
+2025-10-08 12:14:43,811 - INFO - HTTP Request: GET https://kevndteqglsoslznrntz.supabase.co/rest/v1/processed_files?select=%2A "HTTP/2 200 OK"
+2025-10-08 12:14:44,184 - INFO - Found 6 new files to process
+2025-10-08 12:14:44,184 - INFO - New file: 2018-citibike-tripdata.zip (locale: NYC, modified: 2024-02-22 14:26:20+00:00)
+2025-10-08 12:14:44,184 - INFO - New file: JC-201509-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:34+00:00)
+2025-10-08 12:14:44,184 - INFO - New file: JC-201510-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:35+00:00)
+2025-10-08 12:14:44,185 - INFO - New file: JC-201511-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:37+00:00)
+2025-10-08 12:14:44,185 - INFO - New file: JC-201512-citibike-tripdata.csv.zip (locale: JC, modified: 2017-04-06 21:01:38+00:00)
+2025-10-08 12:14:44,185 - INFO - New file: index.html (locale: NYC, modified: 2017-01-18 22:23:41+00:00)
+2025-10-08 12:14:44,186 - INFO - New files saved to new_files.csv
+2025-10-08 12:14:44,187 - INFO - File fetch process completed successfully

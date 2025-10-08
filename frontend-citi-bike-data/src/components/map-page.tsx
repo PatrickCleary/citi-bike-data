@@ -4,6 +4,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Map, MapSourceDataEvent } from "maplibre-gl";
+import { isMobileDevice } from "@/utils/mobile-detection";
 import { MAP_CONFIG_DEFAULT } from "./constants";
 import {
   useAddPMTilesProtocol,
@@ -21,7 +22,7 @@ import { LayerControl } from "./layer-control";
 
 import { DateControl } from "./date-control";
 import { DisplaySettings } from "./display-settings";
-import { InteractionModeToggle } from "./interaction-mode-toggle";
+import { DeleteButton, InteractionModeToggle } from "./interaction-mode-toggle";
 import { Legend } from "./legend";
 import { useFetchLatestDate } from "@/store/store";
 import IconLogo from "@/icons/icon";
@@ -79,6 +80,7 @@ export const MapPage: React.FC = () => {
       map.current?.off("sourcedataloading", handleLoading);
     };
   }, [mapLoaded, handleIdle, handleLoading]);
+  const isMobile = isMobileDevice();
   return (
     <div className="flex h-[100svh] w-[100svw] flex-row font-sans">
       <div className="h-full w-full" ref={mapContainer}>
@@ -102,7 +104,10 @@ export const MapPage: React.FC = () => {
           <div className="w-fit md:hidden">
             <InteractionModeToggle />
           </div>
-          <DateControl />
+          <div className="flex flex-row gap-2 pointer-events-auto">
+            <DateControl />
+            {!isMobile && <DeleteButton />}
+          </div>
         </div>
       </div>
       <Popup map={map} />

@@ -3,6 +3,7 @@ import classNames from "classnames";
 interface MapButtonProps {
   onClick: () => void;
   disabled?: boolean;
+  title?: string;
   children?: React.ReactNode;
 }
 
@@ -12,10 +13,12 @@ export const MapButtonStyle =
 export const MapButton: React.FC<MapButtonProps> = ({
   disabled,
   onClick,
+  title,
   children,
 }) => {
   return (
     <button
+      title={title}
       disabled={disabled}
       className={classNames(
         "flex h-12 w-12 items-center justify-center rounded-md border-[0.5px] bg-white/30 drop-shadow-md backdrop-blur-md transition",
