@@ -69,11 +69,11 @@ export const DisplaySettings: React.FC = () => {
               >
                 bike_dock
               </span>
-              Arrivals
+              Drop-offs
             </Tab>
             <Tab key={"departures"} className={tabStyle}>
               <PedalBikeRounded fontSize="small" />
-              Departures
+              Pickups
             </Tab>
           </TabList>
         </TabGroup>

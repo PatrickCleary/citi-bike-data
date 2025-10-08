@@ -27,10 +27,7 @@ export const DateControl: React.FC = () => {
   });
 
   return (
-    <div className="pointer-events-auto flex flex-row-reverse items-center gap-2 font-sans md:flex-col md:gap-0">
-      <h1 className="cursor-default text-lg font-bold text-gray-900 [text-shadow:_-1px_-1px_0_#fff,_1px_-1px_0_#fff,_-1px_1px_0_#fff,_1px_1px_0_#fff]">
-        {month}
-      </h1>
+    <div className="pointer-events-auto font-sans">
       <div className="flex flex-row gap-1">
         <MapButton
           disabled={

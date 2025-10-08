@@ -11,6 +11,8 @@ import {
   useUpdateMapStyleOnDataChange,
   useUpdateOriginShape,
   useUpdateInfoModeSelectedCell,
+  usePrefetchTripCountData,
+  useTripCountData,
 } from "@/map/map-config";
 
 import { TotalDisplay } from "./total-display";
@@ -30,12 +32,14 @@ export const MapPage: React.FC = () => {
   const mapContainer: MutableRefObject<HTMLDivElement | null> = useRef(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
+  const tripCountQuery = useTripCountData();
   useUpdateMapStyleOnDataChange(map, mapLoaded);
   useApplyLayers(map, mapLoaded);
   useFetchLatestDate();
   useUpdateOriginShape(map, mapLoaded);
   useUpdateInfoModeSelectedCell(map, mapLoaded);
   useAddPMTilesProtocol();
+  usePrefetchTripCountData();
   const handleIdle = useCallback(() => {
     if (loading) {
       setLoading(false);

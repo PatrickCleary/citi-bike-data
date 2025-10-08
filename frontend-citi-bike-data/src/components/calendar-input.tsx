@@ -17,6 +17,7 @@ import dayjs from "dayjs";
 import { useMapConfigStore } from "@/store/store";
 import classNames from "classnames";
 import { buttonHoverStyle } from "./display-settings";
+import { getMonthDisplayText } from "./date-control";
 
 const MONTHS = [
   "January",
@@ -76,8 +77,13 @@ export const CalendarInput: React.FC = () => {
 
   return (
     <Popover>
-      <PopoverButton className={MapButtonStyle}>
+      <PopoverButton
+        className={
+          "border-cb-lightGray flex h-12 w-20 flex-col tracking-wide items-center justify-center rounded-md border-[0.5px] bg-white/30 px-2 tabular-nums text-gray-900 drop-shadow-md backdrop-blur-md transition hover:bg-white/60"
+        }
+      >
         <CalendarMonthIcon fontSize="small" />
+        {getMonthDisplayText(selectedMonth)}
       </PopoverButton>
       <PopoverPanel
         transition

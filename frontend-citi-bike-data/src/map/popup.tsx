@@ -124,7 +124,7 @@ export const PopupContent: React.FC<{
           </div>
         </div>
         <p className="flex flex-row items-center gap-1 text-center text-xs font-light uppercase tracking-wide">
-          {analysisType === "arrivals" ? "Arrived here" : "Departed here"}
+          {analysisType === "arrivals" ? "arrived here" : "began from"}
           <span className={spanClassName}>
             <HexagonIcon
               fontSize="small"
@@ -150,7 +150,7 @@ export const PopupContent: React.FC<{
             )}
           </span>
           <span className="text-xs font-medium uppercase tracking-wide">
-            trips
+            Trips
           </span>
         </div>
       </div>
