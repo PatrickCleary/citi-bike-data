@@ -58,7 +58,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
       <MenuItems
         anchor="bottom start"
         transition
-        className="bg-cb-white pointer-events-auto z-10 flex origin-bottom-left flex-col items-center rounded-lg border-[0.5px] border-cb-lightGray p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
+        className="bg-cb-white border-cb-lightGray pointer-events-auto z-10 flex origin-bottom-left flex-col items-center rounded-lg border-[0.5px] p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
         <div className="flex flex-col items-center space-y-2">
           {layerGroups.map((group) => (
