@@ -26,9 +26,10 @@ export const DateControl: React.FC = () => {
   });
 
   return (
-    <div className="pointer-events-auto font-sans">
+    <div className="pointer-events-auto flex flex-row font-sans">
       <div className="flex flex-row gap-1">
         <MapButton
+          title="Previous Year"
           disabled={
             !isMonthYearValid(
               query,
@@ -46,6 +47,7 @@ export const DateControl: React.FC = () => {
           </div>
         </MapButton>
         <MapButton
+          title="Previous Month"
           disabled={
             !isMonthYearValid(
               query,
@@ -61,6 +63,7 @@ export const DateControl: React.FC = () => {
         </MapButton>
         <CalendarInput />
         <MapButton
+          title="Next Month"
           disabled={
             !isMonthYearValid(
               query,
@@ -75,6 +78,7 @@ export const DateControl: React.FC = () => {
           <ChevronRightSharpIcon fontSize="small" />
         </MapButton>
         <MapButton
+          title="Next Year"
           disabled={
             !isMonthYearValid(
               query,

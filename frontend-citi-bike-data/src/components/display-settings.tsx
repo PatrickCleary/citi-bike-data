@@ -45,6 +45,7 @@ export const DisplaySettings: React.FC = () => {
   return (
     <Menu>
       <MenuButton
+        title="Display Settings"
         className={classNames(
           MapButtonStyle,
           "pointer-events-auto focus:outline-none",
