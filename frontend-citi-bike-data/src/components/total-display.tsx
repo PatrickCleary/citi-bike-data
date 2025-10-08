@@ -23,7 +23,7 @@ export const TotalDisplay: React.FC = () => {
   const totalTrips = query.data?.data.sum_all_values || 0;
 
   return (
-    <div className="flex w-full cursor-default flex-col flex-col-reverse items-center rounded-md bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-lg backdrop-blur-md md:w-48 md:flex-col md:items-end">
+    <div className="flex w-full cursor-default flex-col flex-col-reverse items-center rounded-md bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md md:w-48 md:flex-col md:items-end">
       <p className="flex w-full justify-center gap-[2px] rounded-sm font-light uppercase tracking-wider md:justify-start">
         {getDisplayText(analysisType, departureCells)}
         {departureCells.length > 0 && (

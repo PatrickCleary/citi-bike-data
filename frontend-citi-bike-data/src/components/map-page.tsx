@@ -80,10 +80,10 @@ export const MapPage: React.FC = () => {
   return (
     <div className="flex h-[100svh] w-[100svw] flex-row font-sans">
       <div className="h-full w-full" ref={mapContainer}>
-        <div className="md:bg-cb-white/50 md:border-cb-white/50 fixed left-4 top-4 z-10 flex flex-row items-center gap-2 rounded-md backdrop-blur-sm md:border md:border-[0.5px] md:px-1 md:py-1">
-          <IconLogo className="drop-shadow-md md:hidden" width={32} />
-          <IconLogo className="drop-shadow- hidden md:flex" width={32} />
-          <h1 className="hidden font-sans text-lg font-light tracking-wide text-[#396c87] md:flex">
+        <div className="md:bg-cb-white/50 fixed left-4 top-4 z-10 flex flex-row items-center overflow-hidden rounded-md drop-shadow-md backdrop-blur-sm">
+          <IconLogo className="md:hidden" width={32} />
+          <IconLogo className="hidden drop-shadow-md md:flex" width={32} />
+          <h1 className="hidden px-2 font-sans text-lg font-light tracking-wide text-[#396c87] md:flex">
             CitiBike Data
           </h1>
         </div>

@@ -82,7 +82,7 @@ export const CalendarInput: React.FC = () => {
       <PopoverPanel
         transition
         anchor="bottom"
-        className="z-10 drop-shadow-lg transition duration-200 ease-in-out [--anchor-gap:theme(spacing.1)] data-[closed]:translate-y-1 data-[closed]:opacity-0"
+        className="z-10 drop-shadow-md transition duration-200 ease-in-out [--anchor-gap:theme(spacing.1)] data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
         <div className="bg-cb-white rounded-lg border-[0.5px] p-3 text-gray-900 backdrop-blur-sm">
           <div className="flex w-full gap-2">
@@ -92,7 +92,7 @@ export const CalendarInput: React.FC = () => {
               </ListboxButton>
               <ListboxOptions
                 anchor="top"
-                className="bg-cb-white border-cb-lightGray z-20 mt-2 max-h-60 w-[var(--button-width)] origin-top-left overflow-auto rounded-lg border border-[0.5px] border-white/10 text-gray-900 drop-shadow-lg [--anchor-gap:theme(spacing.1)] [--anchor-gap:theme(spacing.3)]"
+                className="bg-cb-white border-cb-lightGray z-20 mt-2 max-h-60 w-[var(--button-width)] origin-top-left overflow-auto rounded-lg border border-[0.5px] border-white/10 text-gray-900 drop-shadow-md [--anchor-gap:theme(spacing.1)] [--anchor-gap:theme(spacing.3)]"
               >
                 {MONTHS.map((month, index) => {
                   const isValid = isMonthYearValid(
@@ -121,7 +121,7 @@ export const CalendarInput: React.FC = () => {
               </ListboxButton>
               <ListboxOptions
                 anchor="top"
-                className="bg-cb-white border-cb-lightGray z-20 mt-2 max-h-60 w-[var(--button-width)] origin-top-left overflow-auto rounded-lg border border-[0.5px] border-white/10 text-gray-900 drop-shadow-lg [--anchor-gap:theme(spacing.1)] [--anchor-gap:theme(spacing.3)]"
+                className="bg-cb-white border-cb-lightGray z-20 mt-2 max-h-60 w-[var(--button-width)] origin-top-left overflow-auto rounded-lg border border-[0.5px] border-white/10 text-gray-900 drop-shadow-md [--anchor-gap:theme(spacing.1)] [--anchor-gap:theme(spacing.3)]"
               >
                 {YEARS.map((year) => {
                   const isValid = isMonthYearValid(
