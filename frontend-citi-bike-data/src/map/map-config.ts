@@ -1,5 +1,5 @@
 import { Protocol } from "pmtiles";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getTripCountData } from "@/utils/api";
 import { HoveredFeature, usePopupStateStore } from "@/store/popup-store";
 import maplibregl, {
@@ -12,6 +12,7 @@ import maplibregl, {
 import { MutableRefObject, useEffect } from "react";
 import { useInteractionModeStore } from "@/store/interaction-mode-store";
 import { isMobileDevice } from "@/utils/mobile-detection";
+import dayjs from "dayjs";
 import {
   BIKE_DOCKS_CURRENT_SOURCE,
   BIKE_DOCKS_CURRENT_SOURCE_ID,
@@ -158,16 +159,65 @@ const removeHexLayer = (mapObj: Map, eventHandlers: EventHandler[]) => {
   mapObj.removeSource(HEX_SOURCE_ID);
 };
 
+// Helper function to calculate months to prefetch
+const getMonthsToPrefetch = (selectedMonth: string | undefined): string[] => {
+  if (!selectedMonth) return [];
+
+  const date = dayjs(selectedMonth);
+  const months: string[] = [];
+
+  // Previous month
+  months.push(date.subtract(1, "month").format("YYYY-MM-DD"));
+
+  // Next month
+  months.push(date.add(1, "month").format("YYYY-MM-DD"));
+
+  // Same month previous year
+  months.push(date.subtract(1, "year").format("YYYY-MM-DD"));
+
+  // Same month next year
+  months.push(date.add(1, "year").format("YYYY-MM-DD"));
+
+  return months;
+};
+export const TRIP_COUNT_QUERY_KEY = "tripCounts";
+
 export const useTripCountData = () => {
   const { departureCells, selectedMonth, analysisType } = useMapConfigStore();
 
   const query = useQuery({
-    queryKey: ["tripCounts", departureCells, selectedMonth, analysisType],
+    queryKey: [
+      TRIP_COUNT_QUERY_KEY,
+      departureCells,
+      selectedMonth,
+      analysisType,
+    ],
     queryFn: () =>
       getTripCountData(departureCells, selectedMonth, analysisType),
     enabled: !!selectedMonth,
   });
   return query;
+};
+
+// Hook to prefetch adjacent months and years
+export const usePrefetchTripCountData = () => {
+  const queryClient = useQueryClient();
+  const { departureCells, selectedMonth, analysisType } = useMapConfigStore();
+
+  useEffect(() => {
+    if (!selectedMonth) return;
+
+    const monthsToPrefetch = getMonthsToPrefetch(selectedMonth);
+
+    // Prefetch each month
+    monthsToPrefetch.forEach((month) => {
+      queryClient.prefetchQuery({
+        queryKey: [TRIP_COUNT_QUERY_KEY, departureCells, month, analysisType],
+        queryFn: () => getTripCountData(departureCells, month, analysisType),
+        staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+      });
+    });
+  }, [queryClient, departureCells, selectedMonth, analysisType]);
 };
 
 export const useUpdateMapStyleOnDataChange = (
@@ -181,8 +231,13 @@ export const useUpdateMapStyleOnDataChange = (
   const middleValue = (scale[1] + scale[0]) / 2;
   const hexLayer = map.current?.getLayer(HEX_LAYER.id);
   if (scale[0] >= scale[1]) return;
-  if (hexLayer && !departureCountMap) {
+  // Don't hide hex layer while loading - keep previous data visible
+  if (hexLayer && !departureCountMap && !query.isLoading) {
     map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", "#ffffff00");
+    return;
+  }
+  // If loading, don't update the layer (keep previous state)
+  if (query.isLoading) {
     return;
   }
   if (hexLayer && departureCountMap) {

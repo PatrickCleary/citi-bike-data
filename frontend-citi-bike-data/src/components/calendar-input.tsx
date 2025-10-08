@@ -9,14 +9,13 @@ import {
   PopoverPanel,
 } from "@headlessui/react";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-
-import { MapButtonStyle } from "@/map/map-button";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { getMaxDate } from "@/utils/api";
 import dayjs from "dayjs";
 import { useMapConfigStore } from "@/store/store";
 import classNames from "classnames";
 import { buttonHoverStyle } from "./display-settings";
+import { getMonthDisplayText } from "./date-control";
 
 const MONTHS = [
   "January",
@@ -76,8 +75,13 @@ export const CalendarInput: React.FC = () => {
 
   return (
     <Popover>
-      <PopoverButton className={MapButtonStyle}>
+      <PopoverButton
+        className={
+          "border-cb-lightGray flex h-12 w-20 flex-col items-center justify-center rounded-md border-[0.5px] bg-white/30 px-2 tabular-nums tracking-wide text-gray-900 drop-shadow-md backdrop-blur-md transition hover:bg-white/60"
+        }
+      >
         <CalendarMonthIcon fontSize="small" />
+        {getMonthDisplayText(selectedMonth)}
       </PopoverButton>
       <PopoverPanel
         transition

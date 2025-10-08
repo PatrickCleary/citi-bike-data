@@ -11,6 +11,7 @@ import {
   useUpdateMapStyleOnDataChange,
   useUpdateOriginShape,
   useUpdateInfoModeSelectedCell,
+  usePrefetchTripCountData,
 } from "@/map/map-config";
 
 import { TotalDisplay } from "./total-display";
@@ -36,6 +37,7 @@ export const MapPage: React.FC = () => {
   useUpdateOriginShape(map, mapLoaded);
   useUpdateInfoModeSelectedCell(map, mapLoaded);
   useAddPMTilesProtocol();
+  usePrefetchTripCountData();
   const handleIdle = useCallback(() => {
     if (loading) {
       setLoading(false);
