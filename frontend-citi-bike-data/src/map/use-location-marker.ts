@@ -43,7 +43,9 @@ export const useLocationMarker = (
 
     // Update marker location
     if (selectedLocation) {
-      const source = mapInstance.getSource(MARKER_SOURCE_ID);
+      const source = mapInstance.getSource(
+        MARKER_SOURCE_ID,
+      ) as maplibregl.GeoJSONSource;
       if (source && source.type === "geojson") {
         source.setData({
           type: "FeatureCollection",
@@ -68,7 +70,9 @@ export const useLocationMarker = (
       });
     } else {
       // Clear marker
-      const source = mapInstance.getSource(MARKER_SOURCE_ID);
+      const source = mapInstance.getSource(
+        MARKER_SOURCE_ID,
+      ) as maplibregl.GeoJSONSource;
       if (source && source.type === "geojson") {
         source.setData({
           type: "FeatureCollection",
