@@ -5,14 +5,12 @@ import { Switch } from "@headlessui/react";
 import PinRoundedIcon from "@mui/icons-material/PinRounded";
 import SelectHexIcon from "@/icons/select-hex";
 import { MapButton } from "@/map/map-button";
-import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+
 import { useMapConfigStore } from "@/store/store";
 import TrashHexIcon from "@/icons/trash-hex";
 
 export const InteractionModeToggle: React.FC = () => {
   const { mode, toggleMode } = useInteractionModeStore();
-  const { departureCells, setDepartureCells } = useMapConfigStore();
-  const noCellsSelected = departureCells.length === 0;
 
   return (
     <div className="pointer-events-auto flex flex-row gap-2">
