@@ -91,7 +91,7 @@ export const MapPage: React.FC = () => {
         <div className="md:bg-cb-white/50 fixed left-4 top-4 z-10 flex flex-row items-center overflow-hidden rounded-md drop-shadow-md backdrop-blur-sm">
           <IconLogo className="md:hidden" width={32} />
           <IconLogo className="hidden drop-shadow-md md:flex" width={32} />
-          <h1 className="text-cb-blue hidden px-2 font-sans text-lg font-light tracking-wide md:flex">
+          <h1 className="text-cb-blue font-sans hidden px-2 font-sans text-lg font-light tracking-wide md:flex">
             CitiBike Data
           </h1>
         </div>

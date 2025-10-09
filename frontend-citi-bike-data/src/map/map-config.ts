@@ -32,6 +32,8 @@ import {
   NYC_LINES_SOURCE_ID,
   NYC_STATIONS_SOURCE,
   NYC_STATIONS_SOURCE_ID,
+  NYC_BIKE_LANES_SOURCE,
+  NYC_BIKE_LANES_SOURCE_ID,
   ORIGIN_SOURCE,
   ORIGIN_SOURCE_ID,
   PATH_LINES_SOURCE,
@@ -52,6 +54,7 @@ import {
   NJ_LIGHT_RAIL_STATION_LAYER,
   NJ_RAIL_LINE_LAYER,
   NJ_RAIL_STATION_LAYER,
+  NYC_BIKE_LANE_LAYER,
   NYC_LINE_LAYER,
   NYC_STATION_LAYER,
   ORIGIN_LAYER_LINE,
@@ -77,6 +80,7 @@ export const useApplyLayers = (
   const { setHoveredFeature } = usePopupStateStore();
   useEffect(() => {
     if (!mapLoaded) return;
+    addBikeLaneLayer(map);
     addTransitLayers(map);
     addDockLayer(map);
     addHexLayer(map, addOrRemoveDepartureCell, setHoveredFeature);
@@ -109,11 +113,19 @@ const addTransitLayers = (map: MutableRefObject<Map | null>) => {
   mapObj.addLayer(NJ_RAIL_LINE_LAYER);
   mapObj.addLayer(NJ_RAIL_STATION_LAYER);
 };
+
 const addDockLayer = (map: MutableRefObject<Map | null>) => {
   if (!map.current) return;
   const mapObj = map.current;
   mapObj.addSource(BIKE_DOCKS_CURRENT_SOURCE_ID, BIKE_DOCKS_CURRENT_SOURCE);
   mapObj.addLayer(DOCK_LOCATIONS_CURRENT_LAYER);
+};
+
+const addBikeLaneLayer = (map: MutableRefObject<Map | null>) => {
+  if (!map.current) return;
+  const mapObj = map.current;
+  mapObj.addSource(NYC_BIKE_LANES_SOURCE_ID, NYC_BIKE_LANES_SOURCE);
+  mapObj.addLayer(NYC_BIKE_LANE_LAYER);
 };
 
 const addHexLayer = (

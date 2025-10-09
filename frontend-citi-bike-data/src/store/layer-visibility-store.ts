@@ -58,6 +58,12 @@ const defaultLayerGroups: LayerGroup[] = [
     visible: false,
     layerIds: [DOCK_LOCATIONS_CURRENT_LAYER.id],
   },
+  {
+    id: "bike_lanes",
+    name: "Bike Lanes (Oct '25)",
+    visible: false,
+    layerIds: ["nyc_bike_lanes_layer"],
+  },
 ];
 
 export const useLayerVisibilityStore = create<LayerVisibilityStore>((set) => ({
