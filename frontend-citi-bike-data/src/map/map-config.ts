@@ -563,7 +563,6 @@ const animateCellsByTripCount = (
 
     // Animation parameters
     const totalDuration = 2000; // Total animation duration in ms
-    const staggerDelay = totalDuration / sortedCells.length; // Delay between each cell
 
     // Initially set all cells to opacity 0
     sortedCells.forEach((cellId) => {
