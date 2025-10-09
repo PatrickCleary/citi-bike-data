@@ -9,7 +9,7 @@ import maplibregl, {
   MapMouseEvent,
   LngLatLike,
 } from "maplibre-gl";
-import { MutableRefObject, useEffect, useRef } from "react";
+import { MutableRefObject, useEffect } from "react";
 import { useInteractionModeStore } from "@/store/interaction-mode-store";
 import { isMobileDevice } from "@/utils/mobile-detection";
 import dayjs from "dayjs";
@@ -196,14 +196,9 @@ export const useTripCountData = () => {
       getTripCountData(departureCells, selectedMonth, analysisType),
     enabled: !!selectedMonth,
   });
-
-  const currentData = query.data?.data.trip_counts;
-
-  return {
-    ...query,
-    currentData,
-  };
+  return query;
 };
+
 // Hook to prefetch adjacent months and years
 export const usePrefetchTripCountData = () => {
   const queryClient = useQueryClient();
@@ -225,219 +220,61 @@ export const usePrefetchTripCountData = () => {
   }, [queryClient, departureCells, selectedMonth, analysisType]);
 };
 
-// Helper function to update hex layer colors without animation
-const updateHexLayerColors = (
-  map: MutableRefObject<Map | null>,
-  departureCountMap: Record<string, number>,
-  scale: [number, number],
-  opacityMap?: Record<string, number>,
-) => {
-  if (!map.current) return;
-
-  const logMin = Math.log(scale[0] + 1);
-  const logMax = Math.log(scale[1] + 1);
-  const logRange = logMax - logMin;
-
-  map.current.setPaintProperty(HEX_LAYER.id, "fill-color", [
-    "case",
-    ["!", ["has", ["id"], ["literal", departureCountMap]]],
-    "#ffffff00",
-    ["<", ["get", ["id"], ["literal", departureCountMap]], scale[0]],
-    "#ffffff00",
-    [
-      "interpolate",
-      ["linear"],
-      ["ln", ["+", ["get", ["id"], ["literal", departureCountMap]], 1]],
-      logMin,
-      "#440154", // 0% - dark purple
-      logMin + logRange * 0.15,
-      "#482878", // 15% - purple
-      logMin + logRange * 0.3,
-      "#3e4989", // 30% - blue-purple
-      logMin + logRange * 0.45,
-      "#31688e", // 45% - blue
-      logMin + logRange * 0.6,
-      "#26828e", // 60% - teal
-      logMin + logRange * 0.75,
-      "#35b779", // 75% - green
-      logMin + logRange * 0.9,
-      "#6ece58", // 90% - light green
-      logMax,
-      "#fde725", // 100% - yellow
-    ],
-  ]);
-
-  // Set opacity separately if provided
-  if (opacityMap) {
-    map.current.setPaintProperty(HEX_LAYER.id, "fill-opacity", [
-      "case",
-      ["!", ["has", ["id"], ["literal", opacityMap]]],
-      0,
-      ["get", ["id"], ["literal", opacityMap]],
-    ]);
-  }
-};
-
-// Helper function to calculate opacity for each cell during animation
-const interpolateOpacity = (
-  oldData: Record<string, number> | null,
-  newData: Record<string, number>,
-  progress: number,
-): Record<string, number> => {
-  const result: Record<string, number> = {};
-
-  // Get all unique keys from both datasets
-  const allKeys = new Set([
-    ...Object.keys(oldData ?? {}),
-    ...Object.keys(newData),
-  ]);
-
-  allKeys.forEach((key) => {
-    const oldValue = oldData?.[key] || 0;
-    const newValue = newData[key] || 0;
-
-    const hadValue = oldValue > 0;
-    const hasValue = newValue > 0;
-
-    if (!hadValue && hasValue) {
-      // Fading in: opacity goes from 0 to 1
-      result[key] = progress;
-    } else if (hadValue && !hasValue) {
-      // Fading out: opacity goes from 1 to 0
-      result[key] = DEFAULT_HEX_OPACITY - progress;
-    } else if (hasValue) {
-      // Cell has value in both states: full opacity
-      result[key] = DEFAULT_HEX_OPACITY;
-    } else {
-      // No value in either state: transparent
-      result[key] = 0;
-    }
-  });
-
-  return result;
-};
-
-// Helper function to interpolate between two data objects
-const interpolateData = (
-  oldData: Record<string, number> | null,
-  newData: Record<string, number>,
-  progress: number,
-): Record<string, number> => {
-  const result: Record<string, number> = {};
-
-  // Get all unique keys from both datasets
-  const allKeys = new Set([
-    ...Object.keys(oldData ?? {}),
-    ...Object.keys(newData),
-  ]);
-
-  allKeys.forEach((key) => {
-    const oldValue = oldData?.[key] || 0;
-    const newValue = newData[key] || 0;
-
-    const hadValue = oldValue > 0;
-    const hasValue = newValue > 0;
-
-    if (!hadValue && hasValue) {
-      // Cell is appearing: use final value immediately (opacity will handle fade-in)
-      result[key] = newValue;
-    } else {
-      // Cell is changing value or disappearing: interpolate normally
-      result[key] = oldValue + (newValue - oldValue) * progress;
-    }
-  });
-
-  return result;
-};
-
-// Helper function to animate the transition between two data states
-const animateDataTransition = (
-  map: MutableRefObject<Map | null>,
-  oldData: Record<string, number> | null,
-  newData: Record<string, number>,
-  scale: [number, number],
-  animationFrameRef: MutableRefObject<number | null>,
-  onComplete?: () => void,
-  duration = 200, // Animation duration in milliseconds
-) => {
-  if (!map.current) return;
-
-  const startTime = performance.now();
-
-  const animate = (currentTime: DOMHighResTimeStamp) => {
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-
-    // Easing function (ease-in-out for smooth animation)
-    const easeInOut =
-      progress < 0.5
-        ? 2 * progress * progress
-        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-
-    // Interpolate between old and new data
-    const interpolatedData = interpolateData(oldData, newData, easeInOut);
-    const interpolatedOpacity = interpolateOpacity(oldData, newData, easeInOut);
-
-    // Update the map with interpolated data and opacity
-    updateHexLayerColors(map, interpolatedData, scale, interpolatedOpacity);
-
-    if (progress < 1) {
-      animationFrameRef.current = requestAnimationFrame(animate);
-    } else {
-      animationFrameRef.current = null;
-      // Call completion callback after animation finishes
-      onComplete?.();
-    }
-  };
-
-  animationFrameRef.current = requestAnimationFrame(animate);
-};
 export const useUpdateMapStyleOnDataChange = (
   map: MutableRefObject<Map | null>,
   mapLoaded: boolean,
 ) => {
   const query = useTripCountData();
-  const { scale } = useMapConfigStore();
-  const animationFrameRef = useRef<number | null>(null);
-  const previousDataRef = useRef<Record<string, number> | null>(null);
+  const { scale: scale } = useMapConfigStore();
+  if (!mapLoaded) return;
+  const departureCountMap = query.data?.data.trip_counts;
+  const hexLayer = map.current?.getLayer(HEX_LAYER.id);
+  if (scale[0] >= scale[1]) return;
+  // Don't hide hex layer while loading - keep previous data visible
+  if (hexLayer && !departureCountMap && !query.isLoading) {
+    map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", "#ffffff00");
+    return;
+  }
+  // If loading, don't update the layer (keep previous state)
+  if (query.isLoading) {
+    return;
+  }
+  if (hexLayer && departureCountMap) {
+    const logMin = Math.log(scale[0] + 1);
+    const logMax = Math.log(scale[1] + 1);
+    const logRange = logMax - logMin;
 
-  useEffect(() => {
-    if (!mapLoaded || scale[0] >= scale[1]) return;
-    const hexLayer = map.current?.getLayer(HEX_LAYER.id);
-
-    // Hide layer if no data and not loading
-    if (hexLayer && !query.currentData && !query.isLoading) {
-      map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", "#ffffff00");
-      return;
-    }
-
-    // Keep previous state while loading
-    if (query.isLoading) return;
-
-    if (hexLayer && query.currentData) {
-      // Cancel any ongoing animation
-      if (animationFrameRef.current) {
-        console.log("cancel");
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-
-      // Animate with previous data (or null on first load)
-      console.log("enter");
-      animateDataTransition(
-        map,
-        previousDataRef.current,
-        query.currentData,
-        scale,
-        animationFrameRef,
-        () => {
-          // Update previous data only after animation completes
-          previousDataRef.current = { ...query.currentData };
-        },
-      );
-    }
-  }, [query.currentData, scale, mapLoaded, query.isLoading]);
+    map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", [
+      "case",
+      ["!", ["has", ["id"], ["literal", departureCountMap]]],
+      "#ffffff00",
+      ["<", ["get", ["id"], ["literal", departureCountMap]], scale[0]],
+      "#ffffff00",
+      [
+        "interpolate",
+        ["linear"],
+        ["ln", ["+", ["get", ["id"], ["literal", departureCountMap]], 1]],
+        logMin,
+        "#440154", // 0% - dark purple
+        logMin + logRange * 0.15,
+        "#482878", // 15% - purple
+        logMin + logRange * 0.3,
+        "#3e4989", // 30% - blue-purple
+        logMin + logRange * 0.45,
+        "#31688e", // 45% - blue
+        logMin + logRange * 0.6,
+        "#26828e", // 60% - teal
+        logMin + logRange * 0.75,
+        "#35b779", // 75% - green
+        logMin + logRange * 0.9,
+        "#6ece58", // 90% - light green
+        logMax,
+        "#fde725", // 100% - yellow
+      ],
+    ]);
+  }
 };
+
 const getCellEventHandlers = (
   map: MutableRefObject<Map | null>,
   addOrRemoveDepartureCell: (cell: string) => void,

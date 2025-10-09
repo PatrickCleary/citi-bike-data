@@ -88,7 +88,6 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
             hoveredTripCount={hoveredTripCount}
             loading={loading}
             hexColor={hexColor}
-            id={hoveredFeature?.id as string}
           />,
           contentRef.current,
         )}
@@ -102,8 +101,7 @@ export const PopupContent: React.FC<{
   loading: boolean;
   hoveredTripCount: number;
   hexColor: string;
-  id: string;
-}> = ({ loading, hoveredTripCount, hexColor, id }) => {
+}> = ({ loading, hoveredTripCount, hexColor }) => {
   const { analysisType, departureCells } = useMapConfigStore();
   const noCellsSelected = departureCells.length === 0;
   if (noCellsSelected)
@@ -111,7 +109,7 @@ export const PopupContent: React.FC<{
       <PopupDiv>
         <div className="flex flex-row items-center justify-center gap-2 font-sans">
           <ArrDepIcon analysisType={analysisType} />
-          <p>{id}</p>
+
           <div className="flex flex-row items-center justify-center gap-1">
             {loading ? (
               <span className="animate-pulse tabular-nums blur-sm">0</span>
@@ -140,7 +138,6 @@ export const PopupContent: React.FC<{
 
   return (
     <PopupDiv>
-      <p>{id}</p>
       <div className="flex flex-row items-center justify-center gap-2 font-sans">
         <ArrDepIcon analysisType={analysisType} />
         <div className="flex flex-row items-center gap-1">
