@@ -39,7 +39,7 @@ import {
   PATH_STATIONS_SOURCE,
   PATH_STATIONS_SOURCE_ID,
 } from "./sources";
-import { cellsToMultiPolygon } from "h3-js";
+import { cellsToMultiPolygon, cellToLatLng } from "h3-js";
 
 import {
   DEFAULT_HEX_OPACITY,
@@ -226,6 +226,7 @@ export const useUpdateMapStyleOnDataChange = (
 ) => {
   const query = useTripCountData();
   const { scale: scale } = useMapConfigStore();
+  const { layersAdded } = useLayerVisibilityStore();
   if (!mapLoaded) return;
   const departureCountMap = query.data?.data.trip_counts;
   const hexLayer = map.current?.getLayer(HEX_LAYER.id);
@@ -272,6 +273,11 @@ export const useUpdateMapStyleOnDataChange = (
         "#fde725", // 100% - yellow
       ],
     ]);
+
+    // Only trigger animation if layers are fully added
+    if (layersAdded) {
+      animateCellsByTripCount(map, departureCountMap);
+    }
   }
 };
 
@@ -524,4 +530,70 @@ const animateOpacity = (
   };
 
   requestAnimationFrame(animate);
+};
+
+// Track if we've already animated the initial load
+let hasAnimatedInitialLoad = false;
+
+// Helper function to animate cells appearing from top to bottom (north to south)
+const animateCellsByTripCount = (
+  map: MutableRefObject<Map | null>,
+  tripCounts: Record<string, number>,
+) => {
+  if (!map.current) return;
+
+  // Only animate once on initial load
+  if (hasAnimatedInitialLoad) return;
+  hasAnimatedInitialLoad = true;
+
+  // Wait for next frame to ensure layer is fully rendered
+  requestAnimationFrame(() => {
+    // Sort cells from northeast to southwest (by lat + lng)
+    const sortedCells = Object.keys(tripCounts)
+      .map((cellId) => {
+        const [lat, lng] = cellToLatLng(cellId);
+        // Add random offset for variation
+        const randomOffset = (Math.random() - 0.5) * 0.02;
+        // Combine lat and lng to create northeast to southwest diagonal
+        const diagonal = lat + lng + randomOffset;
+        return { cellId, diagonal };
+      })
+      .sort((a, b) => b.diagonal - a.diagonal) // Sort by diagonal descending (NE to SW)
+      .map(({ cellId }) => cellId);
+
+    // Animation parameters
+    const totalDuration = 2000; // Total animation duration in ms
+    const staggerDelay = totalDuration / sortedCells.length; // Delay between each cell
+
+    // Initially set all cells to opacity 0
+    sortedCells.forEach((cellId) => {
+      map.current?.setFeatureState(
+        {
+          source: HEX_SOURCE_ID,
+          sourceLayer: HEX_SOURCE_LAYER_ID,
+          id: cellId,
+        },
+        { opacity: 0 },
+      );
+    });
+
+    // Show each cell at full opacity with a staggered delay from top to bottom
+    const initialDelay = 100; // Small delay to ensure layer is ready
+    sortedCells.forEach((cellId, index) => {
+      // Linear timing - constant speed from top to bottom
+      const progress = index / (sortedCells.length - 1);
+      const delay = initialDelay + progress * totalDuration;
+
+      setTimeout(() => {
+        map.current?.setFeatureState(
+          {
+            source: HEX_SOURCE_ID,
+            sourceLayer: HEX_SOURCE_LAYER_ID,
+            id: cellId,
+          },
+          { opacity: DEFAULT_HEX_OPACITY },
+        );
+      }, delay);
+    });
+  });
 };
