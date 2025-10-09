@@ -302,6 +302,7 @@ const getCellEventHandlers = (
       layer: HEX_LAYER.id,
       handler: (e) => {
         const cellId = e.features?.[0].id;
+        console.log(cellId);
         if (typeof cellId !== "string") return;
         const coordinates = (e as MapMouseEvent).lngLat;
         const h3Id = cellId as string;
@@ -563,7 +564,6 @@ const animateCellsByTripCount = (
 
     // Animation parameters
     const totalDuration = 2000; // Total animation duration in ms
-    const staggerDelay = totalDuration / sortedCells.length; // Delay between each cell
 
     // Initially set all cells to opacity 0
     sortedCells.forEach((cellId) => {

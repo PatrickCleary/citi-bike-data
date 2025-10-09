@@ -15,34 +15,6 @@ interface ExampleAnalysis {
   departureCells: string[];
   month: string;
 }
-
-const EXAMPLE_ANALYSES: ExampleAnalysis[] = [
-  {
-    title: "Manhattan Commute",
-    description: "Morning commute patterns from Midtown",
-    departureCells: ["89c2595969fffff", "89c2595968fffff"],
-    month: "2024-09",
-  },
-  {
-    title: "Brooklyn Bridge Area",
-    description: "Popular tourist and commuter routes",
-    departureCells: ["89c25951edfffff", "89c25951ecfffff"],
-    month: "2024-08",
-  },
-  {
-    title: "Central Park Loop",
-    description: "Recreational rides around Central Park",
-    departureCells: ["89c2595b4dfffff", "89c2595b4cfffff"],
-    month: "2024-07",
-  },
-  {
-    title: "Lower Manhattan",
-    description: "Financial district commute patterns",
-    departureCells: ["89c25951e5fffff", "89c25951e4fffff"],
-    month: "2024-06",
-  },
-];
-
 interface FAQItem {
   question: string;
   answer: string;
@@ -108,45 +80,6 @@ const FAQDropdown: React.FC = () => {
   );
 };
 
-const ExampleAnalysisGrid: React.FC = () => {
-  const { setDepartureCells, setSelectedMonth } = useMapConfigStore();
-  const { setIsOpen } = useIntroModalStore();
-
-  const handleSelectExample = (example: ExampleAnalysis) => {
-    setDepartureCells(example.departureCells);
-    setSelectedMonth(example.month);
-    setIsOpen(false);
-  };
-
-  return (
-    <div className="space-y-3">
-      <h3 className="text-lg font-normal text-gray-900">Try These Examples</h3>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {EXAMPLE_ANALYSES.map((example, index) => (
-          <button
-            key={index}
-            onClick={() => handleSelectExample(example)}
-            className="hover:border-cb-blue focus:border-cb-blue focus:ring-cb-blue/30 group rounded-lg border-2 border-gray-200 bg-white p-4 text-left transition focus:outline-none focus:ring-2"
-          >
-            <h4 className="text-cb-blue mb-1 font-normal group-hover:underline">
-              {example.title}
-            </h4>
-            <p className="text-sm font-light text-gray-600">
-              {example.description}
-            </p>
-            <p className="mt-2 text-xs text-gray-400">
-              {new Date(example.month + "-01").toLocaleDateString("en-US", {
-                month: "long",
-                year: "numeric",
-              })}
-            </p>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 export const IntroModal: React.FC = () => {
   const { isOpen, setIsOpen, markAsVisited } = useIntroModalStore();
 
@@ -196,9 +129,6 @@ export const IntroModal: React.FC = () => {
                 or try one of the example analyses below to get started.
               </p>
             </div>
-
-            {/* Example Analyses Grid */}
-            <ExampleAnalysisGrid />
 
             {/* FAQ Dropdown */}
             <FAQDropdown />
