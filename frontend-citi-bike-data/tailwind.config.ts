@@ -12,6 +12,7 @@ export default {
     extend: {
       dropShadow: {
         "cb-mini": "0px 0px 5px rgba(0, 0, 0, .05)",
+        "cb-hex": "0px 0px 1px rgba(0, 0, 0, .35)",
       },
       fontFamily: {
         sans: [

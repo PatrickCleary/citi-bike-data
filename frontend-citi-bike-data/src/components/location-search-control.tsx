@@ -8,7 +8,7 @@ export const LocationSearchControl: React.FC = () => {
     useLocationSearchStore();
 
   return (
-    <div className="pointer-events-auto flex flex-row gap-2">
+    <div className="pointer-events-auto flex w-fit flex-row gap-2">
       <MapButton onClick={() => setIsOpen(true)} title="Search for a location">
         <SearchRoundedIcon fontSize="small" />
       </MapButton>
