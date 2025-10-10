@@ -3,40 +3,11 @@ import { useIntroModalStore } from "@/store/intro-modal-store";
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
 import { useState, useEffect } from "react";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import Image from "next/image";
 import IconLogo from "@/icons/icon";
 import { isMobileDevice } from "@/utils/mobile-detection";
-
-interface FAQItem {
-  question: string;
-  answer: string;
-}
-
-const FAQ_ITEMS: FAQItem[] = [
-  {
-    question: "What data is shown on this map?",
-    answer:
-      "This map visualizes CitiBike trip data from New York City, showing departure and arrival patterns across different locations and time periods.",
-  },
-  {
-    question: "How do I use the map?",
-    answer:
-      "Click on hexagonal cells to select departure locations, then view where riders traveled to or from. Use the date selector to explore different time periods, and toggle between arrivals and departures.",
-  },
-  {
-    question: "What are the hexagons?",
-    answer:
-      "The map uses H3 hexagons to aggregate trip data into geographic cells. This provides a consistent way to visualize trip patterns across the city.",
-  },
-  {
-    question: "How recent is the data?",
-    answer:
-      "The data is updated monthly with the latest available CitiBike trip information from NYC Open Data.",
-  },
-];
 
 const WalkthroughCarousel: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
