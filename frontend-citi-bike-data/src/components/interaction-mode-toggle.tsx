@@ -22,14 +22,14 @@ export const InteractionModeToggle: React.FC = () => {
         }
       >
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-md ${mode === "popup" ? "bg-white drop-shadow-md" : "bg-transparent"} text-gray-900 transition`}
-        >
-          <PinRoundedIcon fontSize="small" />
-        </div>
-        <div
           className={`flex h-12 w-12 items-center justify-center rounded-md ${mode === "popup" ? "bg-transparent" : "bg-white drop-shadow-md"} text-gray-900 transition`}
         >
           <SelectHexIcon fontSize="small" />
+        </div>
+        <div
+          className={`flex h-12 w-12 items-center justify-center rounded-md ${mode === "popup" ? "bg-white drop-shadow-md" : "bg-transparent"} text-gray-900 transition`}
+        >
+          <PinRoundedIcon fontSize="small" />
         </div>
       </Switch>
       <DeleteButton />

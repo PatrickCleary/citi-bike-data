@@ -1,7 +1,6 @@
 import { useTripCountData } from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
 
-import { spanClassName } from "@/map/popup";
 import HexagonOutlinedIcon from "@mui/icons-material/HexagonOutlined";
 import { AnalysisType } from "@/utils/api";
 import dayjs from "dayjs";
@@ -31,11 +30,9 @@ export const TotalDisplay: React.FC = () => {
       <p className="flex w-full justify-center gap-[2px] rounded-sm font-light uppercase tracking-wider text-gray-500 md:justify-start">
         {getDisplayText(analysisType, departureCells)}
         {departureCells.length > 0 && (
-          <span
-            className={classNames(spanClassName, "font-semibold text-gray-900")}
-          >
+          <span className={classNames("flex items-center text-gray-900")}>
             <span>area</span>
-            <HexagonOutlinedIcon fontSize="small" />
+            <HexagonOutlinedIcon fontSize="small" className="ml-1" />
           </span>
         )}
       </p>

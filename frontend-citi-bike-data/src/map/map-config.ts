@@ -308,6 +308,7 @@ const getCellEventHandlers = (
       layer: HEX_LAYER.id,
       handler: (e) => {
         const cellId = e.features?.[0].id;
+        console.log(cellId);
         if (typeof cellId !== "string") return;
         const coordinates = (e as MapMouseEvent).lngLat;
         const h3Id = cellId as string;
