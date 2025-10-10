@@ -9,7 +9,7 @@ import maplibregl, {
   MapMouseEvent,
   LngLatLike,
 } from "maplibre-gl";
-import { MutableRefObject, useEffect } from "react";
+import { MutableRefObject, useEffect, useState } from "react";
 import { useInteractionModeStore } from "@/store/interaction-mode-store";
 import { isMobileDevice } from "@/utils/mobile-detection";
 import dayjs from "dayjs";
@@ -39,13 +39,14 @@ import {
   PATH_STATIONS_SOURCE,
   PATH_STATIONS_SOURCE_ID,
 } from "./sources";
-import { cellsToMultiPolygon, cellToLatLng } from "h3-js";
+import { cellsToMultiPolygon } from "h3-js";
 
 import {
   DEFAULT_HEX_OPACITY,
   DOCK_LOCATIONS_CURRENT_LAYER,
   HEX_LAYER,
   HEX_LAYER_LINE,
+  HEX_LAYER_GLOW,
   HEX_SOURCE_LAYER_ID,
   INFO_MODE_SELECTED_LAYER,
   NJ_LIGHT_RAIL_LINE_LAYER,
@@ -60,6 +61,7 @@ import {
 } from "./layers";
 import { useMapConfigStore } from "@/store/store";
 import { useLayerVisibilityStore } from "@/store/layer-visibility-store";
+import { animateCellsByTripCount } from "./animation";
 
 export type EventHandler = {
   eventType: "click" | "mousemove" | "mouseleave";
@@ -78,8 +80,8 @@ export const useApplyLayers = (
   useEffect(() => {
     if (!mapLoaded) return;
     addTransitLayers(map);
-    addDockLayer(map);
     addHexLayer(map, addOrRemoveDepartureCell, setHoveredFeature);
+    addDockLayer(map);
     setLayersAdded(true);
   }, [mapLoaded, map, addOrRemoveDepartureCell, setHoveredFeature]);
 };
@@ -138,6 +140,7 @@ const addHexLayer = (
   // mapObj.addLayer(SUBWAY_LINE_LAYER);
   // mapObj.addLayer(NJ_TRANSIT_STATIONS_LAYER);
   mapObj.addLayer(HEX_LAYER);
+  mapObj.addLayer(HEX_LAYER_GLOW);
   mapObj.addLayer(HEX_LAYER_LINE);
   mapObj.addLayer(ORIGIN_LAYER_LINE);
   mapObj.addLayer(INFO_MODE_SELECTED_LAYER);
@@ -195,6 +198,7 @@ export const useTripCountData = () => {
     queryFn: () =>
       getTripCountData(departureCells, selectedMonth, analysisType),
     enabled: !!selectedMonth,
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
   });
   return query;
 };
@@ -225,6 +229,7 @@ export const useUpdateMapStyleOnDataChange = (
   mapLoaded: boolean,
 ) => {
   const query = useTripCountData();
+  const [initialLoad, setInitialLoad] = useState(false);
   const { scale: scale } = useMapConfigStore();
   const { layersAdded } = useLayerVisibilityStore();
   if (!mapLoaded) return;
@@ -275,8 +280,9 @@ export const useUpdateMapStyleOnDataChange = (
     ]);
 
     // Only trigger animation if layers are fully added
-    if (layersAdded) {
+    if (layersAdded && !initialLoad) {
       animateCellsByTripCount(map, departureCountMap);
+      setInitialLoad(true);
     }
   }
 };
@@ -531,69 +537,4 @@ const animateOpacity = (
   };
 
   requestAnimationFrame(animate);
-};
-
-// Track if we've already animated the initial load
-let hasAnimatedInitialLoad = false;
-
-// Helper function to animate cells appearing from top to bottom (north to south)
-const animateCellsByTripCount = (
-  map: MutableRefObject<Map | null>,
-  tripCounts: Record<string, number>,
-) => {
-  if (!map.current) return;
-
-  // Only animate once on initial load
-  if (hasAnimatedInitialLoad) return;
-  hasAnimatedInitialLoad = true;
-
-  // Wait for next frame to ensure layer is fully rendered
-  requestAnimationFrame(() => {
-    // Sort cells from northeast to southwest (by lat + lng)
-    const sortedCells = Object.keys(tripCounts)
-      .map((cellId) => {
-        const [lat, lng] = cellToLatLng(cellId);
-        // Add random offset for variation
-        const randomOffset = (Math.random() - 0.5) * 0.02;
-        // Combine lat and lng to create northeast to southwest diagonal
-        const diagonal = lat + lng + randomOffset;
-        return { cellId, diagonal };
-      })
-      .sort((a, b) => b.diagonal - a.diagonal) // Sort by diagonal descending (NE to SW)
-      .map(({ cellId }) => cellId);
-
-    // Animation parameters
-    const totalDuration = 2000; // Total animation duration in ms
-
-    // Initially set all cells to opacity 0
-    sortedCells.forEach((cellId) => {
-      map.current?.setFeatureState(
-        {
-          source: HEX_SOURCE_ID,
-          sourceLayer: HEX_SOURCE_LAYER_ID,
-          id: cellId,
-        },
-        { opacity: 0 },
-      );
-    });
-
-    // Show each cell at full opacity with a staggered delay from top to bottom
-    const initialDelay = 100; // Small delay to ensure layer is ready
-    sortedCells.forEach((cellId, index) => {
-      // Linear timing - constant speed from top to bottom
-      const progress = index / (sortedCells.length - 1);
-      const delay = initialDelay + progress * totalDuration;
-
-      setTimeout(() => {
-        map.current?.setFeatureState(
-          {
-            source: HEX_SOURCE_ID,
-            sourceLayer: HEX_SOURCE_LAYER_ID,
-            id: cellId,
-          },
-          { opacity: DEFAULT_HEX_OPACITY },
-        );
-      }, delay);
-    });
-  });
 };
