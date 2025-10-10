@@ -1,7 +1,6 @@
 import { useTripCountData } from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
 
-import { spanClassName } from "@/map/popup";
 import HexagonOutlinedIcon from "@mui/icons-material/HexagonOutlined";
 import { AnalysisType } from "@/utils/api";
 import dayjs from "dayjs";

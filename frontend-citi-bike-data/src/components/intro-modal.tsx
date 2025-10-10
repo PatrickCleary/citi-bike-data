@@ -1,24 +1,15 @@
 "use client";
 import { useIntroModalStore } from "@/store/intro-modal-store";
-import { useMapConfigStore } from "@/store/store";
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
 import { useState, useEffect } from "react";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
-import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import Icon from "@mui/material/Icon";
 import Image from "next/image";
 import IconLogo from "@/icons/icon";
 import { isMobileDevice } from "@/utils/mobile-detection";
 
-interface ExampleAnalysis {
-  title: string;
-  description: string;
-  departureCells: string[];
-  month: string;
-}
 interface FAQItem {
   question: string;
   answer: string;
@@ -68,7 +59,9 @@ const WalkthroughCarousel: React.FC = () => {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-base font-normal text-gray-900">How to Use the App</h3>
+      <h3 className="text-base font-normal text-gray-900">
+        How to Use the App
+      </h3>
       <div className="relative mx-auto max-w-lg">
         {/* Carousel Container */}
         <div className="relative overflow-hidden rounded-lg">
@@ -119,43 +112,6 @@ const WalkthroughCarousel: React.FC = () => {
             />
           ))}
         </div>
-      </div>
-    </div>
-  );
-};
-
-const FAQDropdown: React.FC = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-  return (
-    <div className="space-y-2">
-      <h3 className="text-lg font-normal text-gray-900">
-        Frequently Asked Questions
-      </h3>
-      <div className="space-y-2">
-        {FAQ_ITEMS.map((item, index) => (
-          <div
-            key={index}
-            className="overflow-hidden rounded-md border border-gray-200"
-          >
-            <button
-              onClick={() => setOpenIndex(openIndex === index ? null : index)}
-              className="flex w-full items-center justify-between bg-gray-50 px-4 py-3 text-left transition hover:bg-gray-100"
-            >
-              <span className="font-light text-gray-900">{item.question}</span>
-              <ExpandMoreRoundedIcon
-                className={`h-5 w-5 text-gray-500 transition-transform ${
-                  openIndex === index ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-            {openIndex === index && (
-              <div className="bg-white px-4 py-3">
-                <p className="font-light text-gray-600">{item.answer}</p>
-              </div>
-            )}
-          </div>
-        ))}
       </div>
     </div>
   );
