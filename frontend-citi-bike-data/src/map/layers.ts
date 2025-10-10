@@ -26,7 +26,12 @@ export const HEX_LAYER: LayerSpecification = {
   "source-layer": HEX_SOURCE_LAYER_ID,
   type: "fill",
   paint: {
-    "fill-color": "#FF000000",
+    "fill-color": [
+      "case",
+      ["!=", ["feature-state", "color"], ["literal", null]],
+      ["feature-state", "color"],
+      "#FF000000",
+    ],
     "fill-opacity": [
       "case",
       ["!=", ["feature-state", "opacity"], ["literal", null]],
@@ -43,6 +48,30 @@ export const HEX_LAYER_LINE: LayerSpecification = {
   type: "line",
   paint: {
     "line-color": "#ffffff20",
+  },
+};
+
+// Glow layer for pulse effect
+const HEX_LAYER_GLOW_ID = "nyc_jc_hex_tiles_glow_layer";
+export const HEX_LAYER_GLOW: LayerSpecification = {
+  id: HEX_LAYER_GLOW_ID,
+  source: HEX_SOURCE_ID,
+  "source-layer": HEX_SOURCE_LAYER_ID,
+  type: "line",
+  paint: {
+    "line-color": [
+      "case",
+      ["!=", ["feature-state", "glowColor"], ["literal", null]],
+      ["feature-state", "glowColor"],
+      "#ffffff00",
+    ],
+    "line-width": [
+      "case",
+      ["!=", ["feature-state", "glowWidth"], ["literal", null]],
+      ["feature-state", "glowWidth"],
+      0,
+    ],
+    "line-blur": 4,
   },
 };
 
@@ -223,7 +252,7 @@ export const DOCK_LOCATIONS_CURRENT_LAYER: LayerSpecification = {
   type: "circle",
   minzoom: 10, // Layer will be hidden at zoom levels less than 10
   paint: {
-    "circle-color": "#20202080",
+    "circle-color": "#202020a0",
     "circle-opacity": 0.7,
     "circle-radius": [
       "interpolate",
