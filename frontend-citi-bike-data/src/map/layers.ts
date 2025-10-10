@@ -252,7 +252,7 @@ export const DOCK_LOCATIONS_CURRENT_LAYER: LayerSpecification = {
   type: "circle",
   minzoom: 10, // Layer will be hidden at zoom levels less than 10
   paint: {
-    "circle-color": "#202020a0",
+    "circle-color": "#202020",
     "circle-opacity": 0.7,
     "circle-radius": [
       "interpolate",
