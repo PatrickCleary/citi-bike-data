@@ -61,6 +61,11 @@ export const NJ_LIGHT_RAIL_LINES_SOURCE: SourceSpecification = {
   type: "vector",
   url: "pmtiles://https://kevndteqglsoslznrntz.supabase.co/storage/v1/object/public/citi-bike-data-bucket/geo_layers/nj_light_rail_lines.pmtiles",
 };
+export const NYC_BIKE_LANES_SOURCE_ID = "nyc_bike_lanes";
+export const NYC_BIKE_LANES_SOURCE: SourceSpecification = {
+  type: "vector",
+  url: "pmtiles://https://kevndteqglsoslznrntz.supabase.co/storage/v1/object/public/citi-bike-data-bucket/geo_layers/nyc_bike_lanes.pmtiles",
+};
 export const NJ_LIGHT_RAIL_STATIONS_SOURCE_ID = "nj_light_rail_stations";
 export const NJ_LIGHT_RAIL_STATIONS_SOURCE: SourceSpecification = {
   type: "vector",

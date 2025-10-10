@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getMaxDate } from "@/utils/api";
 
 export const getMonthDisplayText = (date: string | undefined) => {
-  if (!date) return "";
+  if (!date) return undefined;
   const dateObj = dayjs(date);
   const month = dateObj.format("MMM YYYY");
   return month.toUpperCase();
@@ -26,10 +26,9 @@ export const DateControl: React.FC = () => {
   });
 
   return (
-    <div className="pointer-events-auto flex flex-row font-sans">
+    <div className="pointer-events-auto font-sans">
       <div className="flex flex-row gap-1">
         <MapButton
-          title="Previous Year"
           disabled={
             !isMonthYearValid(
               query,
@@ -47,7 +46,6 @@ export const DateControl: React.FC = () => {
           </div>
         </MapButton>
         <MapButton
-          title="Previous Month"
           disabled={
             !isMonthYearValid(
               query,
@@ -63,7 +61,6 @@ export const DateControl: React.FC = () => {
         </MapButton>
         <CalendarInput />
         <MapButton
-          title="Next Month"
           disabled={
             !isMonthYearValid(
               query,
@@ -78,7 +75,6 @@ export const DateControl: React.FC = () => {
           <ChevronRightSharpIcon fontSize="small" />
         </MapButton>
         <MapButton
-          title="Next Year"
           disabled={
             !isMonthYearValid(
               query,
