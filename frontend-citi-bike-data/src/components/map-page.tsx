@@ -109,10 +109,11 @@ export const MapPage: React.FC = () => {
           </div>
           <div className="pointer-events-auto flex flex-row gap-2">
             <DateControl />
-            {!isMobile && <DeleteButton />}
           </div>
         </div>
       </div>
+      {!isMobile && <DeleteButton />}
+
       <Popup map={map} />
       <LocationSearchModal />
       <IntroModal />
