@@ -142,7 +142,7 @@ export const IntroModal: React.FC = () => {
               onClick={handleClose}
               className="group flex w-full flex-row items-center justify-center gap-2 rounded-lg bg-cb-blue py-4 text-cb-white transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:brightness-90 active:scale-95"
             >
-              Let's go
+              {"Let's go!"}
             </button>
 
             {/* Contact and Copyright */}
