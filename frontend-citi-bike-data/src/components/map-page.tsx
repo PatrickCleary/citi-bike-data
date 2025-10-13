@@ -5,7 +5,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Map, MapSourceDataEvent } from "maplibre-gl";
 import { isMobileDevice } from "@/utils/mobile-detection";
-import { MAP_CONFIG_DEFAULT } from "./constants";
+import { DESKTOP_BOUNDS, MAP_CONFIG_DEFAULT, MOBILE_BOUNDS } from "./constants";
 import {
   useAddPMTilesProtocol,
   useApplyLayers,
@@ -65,6 +65,7 @@ export const MapPage: React.FC = () => {
 
     map.current = new Map({
       ...MAP_CONFIG_DEFAULT,
+      bounds: isMobileDevice() ? MOBILE_BOUNDS : DESKTOP_BOUNDS,
       container: mapContainer.current,
     });
     map.current?.on("load", async () => {
@@ -86,6 +87,7 @@ export const MapPage: React.FC = () => {
       map.current?.off("sourcedataloading", handleLoading);
     };
   }, [mapLoaded, handleIdle, handleLoading]);
+
   const isMobile = isMobileDevice();
   return (
     <div className="flex h-[100svh] w-[100svw] flex-row font-sans">
