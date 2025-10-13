@@ -1,16 +1,34 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
+import Script from "next/script";
 
 import "./globals.css";
 import Providers from "./providers";
 
-export const metadata: Metadata = {
-  title: "CitiBike Data",
-  description: "A web app to visualize CitiBike data",
-};
 const outfit = Outfit({
   subsets: ["latin"],
 });
+
+export const metadata: Metadata = {
+  title: "CitiBike Data",
+  description: "A web app to visualize CitiBike data",
+  openGraph: {
+    title: "CitiBike Data",
+    description: "A web app to visualize CitiBike data",
+    url: "https://citibike.com",
+    siteName: "CitiBike Data",
+    images: [
+      {
+        url: "https://citibikedata.com/preview.jpg",
+        width: 1200,
+        height: 630,
+        alt: "CitiBike Data preview card",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+};
 
 export default function RootLayout({
   children,
@@ -32,7 +50,20 @@ export default function RootLayout({
         />
       </head>
       <body className={outfit.className}>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-CN6RVMTMGV"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-CN6RVMTMGV');
+          `}
+        </Script>
         <Providers>{children}</Providers>
+        <span className="material-symbols-outlined hidden">bike_dock</span>;
       </body>
     </html>
   );

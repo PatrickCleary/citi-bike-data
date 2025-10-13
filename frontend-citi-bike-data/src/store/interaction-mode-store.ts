@@ -9,7 +9,7 @@ interface InteractionModeStore {
 }
 
 export const useInteractionModeStore = create<InteractionModeStore>((set) => ({
-  mode: "popup",
+  mode: "selection",
   setMode: (mode) => set({ mode }),
   toggleMode: () =>
     set((state) => ({

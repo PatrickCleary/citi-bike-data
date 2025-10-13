@@ -125,14 +125,13 @@ export const PopupContent: React.FC<{
         </div>
         <p className="flex flex-row items-center gap-1 text-center text-xs font-light uppercase tracking-wide">
           {analysisType === "arrivals" ? "arrived here" : "began from"}
-          <span className={spanClassName}>
-            <HexagonIcon
-              fontSize="small"
-              style={{
-                color: hexColor,
-              }}
-            />
-          </span>
+          <HexagonIcon
+            fontSize="small"
+            style={{
+              color: hexColor,
+            }}
+            className="drop-shadow-cb-hex"
+          />
         </p>
       </PopupDiv>
     );
@@ -178,18 +177,18 @@ const ArrDepText: React.FC<{
       <p className="text-xs font-light uppercase">
         <span className="flex flex-row items-center gap-1 tracking-wide">
           From
-          <span className={spanClassName}>
-            <HexagonOutlinedIcon fontSize="small" />
-          </span>
+          <HexagonOutlinedIcon
+            fontSize="small"
+            className="drop-shadow-cb-hex"
+          />
           to
-          <span className={spanClassName}>
-            <HexagonIcon
-              fontSize="small"
-              style={{
-                color: hexColor,
-              }}
-            />
-          </span>
+          <HexagonIcon
+            fontSize="small"
+            className="drop-shadow-cb-hex"
+            style={{
+              color: hexColor,
+            }}
+          />
         </span>
       </p>
     );
@@ -198,18 +197,18 @@ const ArrDepText: React.FC<{
       <p className="text-xs font-light uppercase">
         <span className="flex flex-row items-center gap-1">
           From
-          <span className="bg-cb-lightGray/50 flex flex-row items-center space-x-1 rounded-sm px-1">
-            <HexagonIcon
-              fontSize="small"
-              style={{
-                color: hexColor,
-              }}
-            />
-          </span>
+          <HexagonIcon
+            fontSize="small"
+            style={{
+              color: hexColor,
+            }}
+            className="drop-shadow-cb-hex"
+          />
           to
-          <span className={spanClassName}>
-            <HexagonOutlinedIcon fontSize="small" />
-          </span>
+          <HexagonOutlinedIcon
+            fontSize="small"
+            className="drop-shadow-cb-hex"
+          />
         </span>
       </p>
     );

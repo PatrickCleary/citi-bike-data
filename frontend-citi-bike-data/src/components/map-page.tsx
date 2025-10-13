@@ -5,7 +5,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Map, MapSourceDataEvent } from "maplibre-gl";
 import { isMobileDevice } from "@/utils/mobile-detection";
-import { MAP_CONFIG_DEFAULT } from "./constants";
+import { DESKTOP_BOUNDS, MAP_CONFIG_DEFAULT, MOBILE_BOUNDS } from "./constants";
 import {
   useAddPMTilesProtocol,
   useApplyLayers,
@@ -29,6 +29,8 @@ import { useFetchLatestDate } from "@/store/store";
 import IconLogo from "@/icons/icon";
 import { LocationSearchModal } from "./location-search-modal";
 import { LocationSearchControl } from "./location-search-control";
+import { IntroModal } from "./intro-modal";
+import { useIntroModalStore } from "@/store/intro-modal-store";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -63,12 +65,12 @@ export const MapPage: React.FC = () => {
 
     map.current = new Map({
       ...MAP_CONFIG_DEFAULT,
+      bounds: isMobileDevice() ? MOBILE_BOUNDS : DESKTOP_BOUNDS,
       container: mapContainer.current,
     });
     map.current?.on("load", async () => {
       await addImages(map);
 
-      // map.current?.removeControl(map.current?.attributionControl);
       map.current?.addControl(new maplibregl.AttributionControl(), "top-right");
       setMapLoaded(true);
     });
@@ -84,19 +86,14 @@ export const MapPage: React.FC = () => {
       map.current?.off("sourcedataloading", handleLoading);
     };
   }, [mapLoaded, handleIdle, handleLoading]);
+
   const isMobile = isMobileDevice();
   return (
     <div className="flex h-[100svh] w-[100svw] flex-row font-sans">
       <div className="h-full w-full" ref={mapContainer}>
-        <div className="md:bg-cb-white/50 fixed left-4 top-4 z-10 flex flex-row items-center overflow-hidden rounded-md drop-shadow-md backdrop-blur-sm">
-          <IconLogo className="md:hidden" width={32} />
-          <IconLogo className="hidden drop-shadow-md md:flex" width={32} />
-          <h1 className="text-cb-blue font-sans hidden px-2 font-sans text-lg font-light tracking-wide md:flex">
-            CitiBike Data
-          </h1>
-        </div>
-        <div className="fixed top-4 z-10 flex w-full flex-col items-center gap-4 md:bottom-4 md:left-auto md:right-4 md:top-auto md:w-fit md:items-end">
-          <div className="w-fit">
+        <Logo />
+        <div className="pointer-events-none fixed top-4 z-10 flex w-full flex-col items-center gap-4 md:left-1/2 md:top-4 md:-translate-x-1/2 md:flex-row md:justify-center">
+          <div className="pointer-events-auto w-fit">
             <TotalDisplay />
           </div>
         </div>
@@ -111,12 +108,32 @@ export const MapPage: React.FC = () => {
           </div>
           <div className="pointer-events-auto flex flex-row gap-2">
             <DateControl />
-            {!isMobile && <DeleteButton />}
           </div>
         </div>
       </div>
+      {!isMobile && <DeleteButton />}
+
       <Popup map={map} />
       <LocationSearchModal />
+      <IntroModal />
     </div>
+  );
+};
+
+export const Logo: React.FC = () => {
+  const { setIsOpen } = useIntroModalStore();
+
+  return (
+    <button
+      onClick={() => setIsOpen(true)}
+      className="fixed left-4 top-4 z-10 flex flex-row items-center overflow-hidden rounded-md drop-shadow-md backdrop-blur-sm transition hover:bg-cb-white/70 active:scale-95 md:bg-cb-white/50"
+      aria-label="Open introduction modal"
+    >
+      <IconLogo className="md:hidden" width={32} />
+      <IconLogo className="hidden drop-shadow-md md:flex" width={32} />
+      <h1 className="hidden px-2 font-sans text-lg font-light tracking-wide text-cb-blue md:flex">
+        CitiBike Data
+      </h1>
+    </button>
   );
 };

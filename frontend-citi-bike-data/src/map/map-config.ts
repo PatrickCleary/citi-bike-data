@@ -9,7 +9,7 @@ import maplibregl, {
   MapMouseEvent,
   LngLatLike,
 } from "maplibre-gl";
-import { MutableRefObject, useEffect } from "react";
+import { MutableRefObject, useEffect, useState } from "react";
 import { useInteractionModeStore } from "@/store/interaction-mode-store";
 import { isMobileDevice } from "@/utils/mobile-detection";
 import dayjs from "dayjs";
@@ -48,6 +48,7 @@ import {
   DOCK_LOCATIONS_CURRENT_LAYER,
   HEX_LAYER,
   HEX_LAYER_LINE,
+  HEX_LAYER_GLOW,
   HEX_SOURCE_LAYER_ID,
   INFO_MODE_SELECTED_LAYER,
   NJ_LIGHT_RAIL_LINE_LAYER,
@@ -63,6 +64,8 @@ import {
 } from "./layers";
 import { useMapConfigStore } from "@/store/store";
 import { useLayerVisibilityStore } from "@/store/layer-visibility-store";
+import { animateCellsByTripCount } from "./animation";
+import { useIntroModalStore } from "@/store/intro-modal-store";
 
 export type EventHandler = {
   eventType: "click" | "mousemove" | "mouseleave";
@@ -82,8 +85,8 @@ export const useApplyLayers = (
     if (!mapLoaded) return;
     addBikeLaneLayer(map);
     addTransitLayers(map);
-    addDockLayer(map);
     addHexLayer(map, addOrRemoveDepartureCell, setHoveredFeature);
+    addDockLayer(map);
     setLayersAdded(true);
   }, [mapLoaded, map, addOrRemoveDepartureCell, setHoveredFeature]);
 };
@@ -144,12 +147,8 @@ const addHexLayer = (
   mapObj.addSource(HEX_SOURCE_ID, HEX_SOURCE);
   mapObj.addSource(ORIGIN_SOURCE_ID, ORIGIN_SOURCE);
   mapObj.addSource(INFO_MODE_SELECTED_SOURCE_ID, INFO_MODE_SELECTED_SOURCE);
-  // mapObj.addSource(SUBWAY_LINES_SOURCE_ID, SUBWAY_LINES_SOURCE);
-  // mapObj.addSource(NJ_TRANSIT_SOURCE_ID, NJ_TRANSIT_SOURCE);
-
-  // mapObj.addLayer(SUBWAY_LINE_LAYER);
-  // mapObj.addLayer(NJ_TRANSIT_STATIONS_LAYER);
   mapObj.addLayer(HEX_LAYER);
+  mapObj.addLayer(HEX_LAYER_GLOW);
   mapObj.addLayer(HEX_LAYER_LINE);
   mapObj.addLayer(ORIGIN_LAYER_LINE);
   mapObj.addLayer(INFO_MODE_SELECTED_LAYER);
@@ -207,6 +206,7 @@ export const useTripCountData = () => {
     queryFn: () =>
       getTripCountData(departureCells, selectedMonth, analysisType),
     enabled: !!selectedMonth,
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
   });
   return query;
 };
@@ -237,7 +237,10 @@ export const useUpdateMapStyleOnDataChange = (
   mapLoaded: boolean,
 ) => {
   const query = useTripCountData();
+  const [initialLoad, setInitialLoad] = useState(false);
+  const { isOpen } = useIntroModalStore();
   const { scale: scale } = useMapConfigStore();
+  const { layersAdded } = useLayerVisibilityStore();
   if (!mapLoaded) return;
   const departureCountMap = query.data?.data.trip_counts;
   const hexLayer = map.current?.getLayer(HEX_LAYER.id);
@@ -245,6 +248,10 @@ export const useUpdateMapStyleOnDataChange = (
   // Don't hide hex layer while loading - keep previous data visible
   if (hexLayer && !departureCountMap && !query.isLoading) {
     map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", "#ffffff00");
+    return;
+  }
+  // If the intro modal is open, don't update the layer.
+  if (isOpen) {
     return;
   }
   // If loading, don't update the layer (keep previous state)
@@ -284,7 +291,14 @@ export const useUpdateMapStyleOnDataChange = (
         "#fde725", // 100% - yellow
       ],
     ]);
+
+    // Only trigger animation if layers are fully added
+    if (layersAdded && !initialLoad && !isOpen) {
+      animateCellsByTripCount(map, departureCountMap);
+      setInitialLoad(true);
+    }
   }
+  return initialLoad;
 };
 
 const getCellEventHandlers = (
@@ -308,6 +322,7 @@ const getCellEventHandlers = (
       layer: HEX_LAYER.id,
       handler: (e) => {
         const cellId = e.features?.[0].id;
+        console.log(cellId);
         if (typeof cellId !== "string") return;
         const coordinates = (e as MapMouseEvent).lngLat;
         const h3Id = cellId as string;

@@ -10,8 +10,21 @@ export default {
   ],
   theme: {
     extend: {
+      keyframes: {
+        slideDown: {
+          '0%': {
+            opacity: '0',
+            transform: 'translateY(-20px)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
+      },
       dropShadow: {
         "cb-mini": "0px 0px 5px rgba(0, 0, 0, .05)",
+        "cb-hex": "0px 0px 1px rgba(0, 0, 0, .35)",
       },
 
       colors: {
