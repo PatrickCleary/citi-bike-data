@@ -32,6 +32,18 @@ interface LayerVisibilityStore {
 // Default configuration - can be modified to set initial visibility states
 const defaultLayerGroups: LayerGroup[] = [
   {
+    id: "docks",
+    name: "Docks (Aug '25)",
+    visible: false,
+    layerIds: [DOCK_LOCATIONS_CURRENT_LAYER.id],
+  },
+  {
+    id: "bike",
+    name: "CitiBike",
+    visible: true,
+    layerIds: [HEX_LAYER.id, HEX_LAYER_LINE.id],
+  },
+  {
     id: "transit",
     name: "Transit",
     visible: false,
@@ -45,18 +57,6 @@ const defaultLayerGroups: LayerGroup[] = [
       NJ_RAIL_LINE_LAYER.id,
       NJ_RAIL_STATION_LAYER.id,
     ],
-  },
-  {
-    id: "bike",
-    name: "CitiBike",
-    visible: true,
-    layerIds: [HEX_LAYER.id, HEX_LAYER_LINE.id],
-  },
-  {
-    id: "docks",
-    name: "Docks (Aug '25)",
-    visible: false,
-    layerIds: [DOCK_LOCATIONS_CURRENT_LAYER.id],
   },
   {
     id: "bike_lanes",

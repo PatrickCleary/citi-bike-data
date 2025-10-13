@@ -74,22 +74,22 @@ export const CalendarInput: React.FC = () => {
   };
 
   return (
-    <Popover>
-      <PopoverButton
-        title="Select Month"
-        className={
-          "active:scale-95 border-cb-lightGray flex h-12 w-24 flex-col items-center justify-center rounded-md border-[0.5px] bg-white/30 px-2 tabular-nums tracking-wide text-gray-900 drop-shadow-md backdrop-blur-md transition hover:bg-white/60"
-        }
-      >
-        <CalendarMonthIcon fontSize="small" />
-        {getMonthDisplayText(selectedMonth)}
-      </PopoverButton>
-      <PopoverPanel
+      <Popover>
+            <PopoverButton
+              title="Select Month"
+              className={
+                "active:scale-95 border-cb-lightGray flex h-12 w-24 flex-col items-center justify-center rounded-md border-[0.5px] bg-white/30 px-2 tabular-nums tracking-wide text-gray-900 drop-shadow-md backdrop-blur-md transition hover:bg-white/60"
+              }
+            >
+              <CalendarMonthIcon fontSize="small" />
+              {getMonthDisplayText(selectedMonth)}
+            </PopoverButton>
+              <PopoverPanel
         transition
         anchor="bottom"
         className="z-10 drop-shadow-md transition duration-200 ease-in-out [--anchor-gap:theme(spacing.1)] data-[closed]:translate-y-1 data-[closed]:opacity-0"
-      >
-        <div className="bg-cb-white border-cb-lightGray rounded-lg border-[0.5px] p-3 text-gray-900 backdrop-blur-sm">
+              >
+        <div className="bg-cb-white border-cb-lightGray rounded-lg border-[0.5px] p-3 text-gray-900">
           <div className="flex w-full gap-2">
             <Listbox value={selectedDateObj.month()} onChange={updateMonth}>
               <ListboxButton className="bg-cb-lightGray/10 data-[focus]:bg-cb-white data-[hover]:bg-cb-white border-cb-lightGray w-32 rounded-md border-[0.5px] px-3 py-2 text-left text-center font-light tracking-wide text-gray-700 focus:outline-none data-[focus]:text-gray-900">
@@ -158,7 +158,7 @@ export const CalendarInput: React.FC = () => {
             </div>
           )}
         </div>
-      </PopoverPanel>
-    </Popover>
+              </PopoverPanel>
+      </Popover>
   );
 };
