@@ -30,9 +30,6 @@ const WalkthroughCarousel: React.FC = () => {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-base font-normal text-gray-900">
-        How to Use the App
-      </h3>
       <div className="relative mx-auto max-w-lg">
         {/* Carousel Container */}
         <div className="relative overflow-hidden rounded-lg">
@@ -57,14 +54,14 @@ const WalkthroughCarousel: React.FC = () => {
         {/* Navigation Buttons */}
         <button
           onClick={prevSlide}
-          className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg transition hover:bg-white"
+          className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-md transition hover:bg-white active:scale-95"
           aria-label="Previous slide"
         >
           <ChevronLeftRoundedIcon className="h-6 w-6 text-gray-700" />
         </button>
         <button
           onClick={nextSlide}
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-lg transition hover:bg-white"
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-md transition hover:bg-white active:scale-95"
           aria-label="Next slide"
         >
           <ChevronRightRoundedIcon className="h-6 w-6 text-gray-700" />
@@ -77,7 +74,7 @@ const WalkthroughCarousel: React.FC = () => {
               key={i}
               onClick={() => setCurrentSlide(i)}
               className={`h-2 w-2 rounded-full transition ${
-                i === currentSlide ? "bg-cb-blue w-8" : "bg-gray-300"
+                i === currentSlide ? "w-8 bg-cb-blue" : "bg-gray-300"
               }`}
               aria-label={`Go to slide ${i + 1}`}
             />
@@ -101,7 +98,7 @@ export const IntroModal: React.FC = () => {
       <DialogBackdrop className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
       <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
         <DialogPanel
-          className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white font-light drop-shadow-2xl"
+          className="relative max-h-[90svh] w-full max-w-4xl max-w-lg overflow-y-auto rounded-lg bg-white font-light drop-shadow-2xl"
           // style={{
           //   backgroundImage: "url(/backdrop.jpg)",
           //   backgroundSize: "cover",
@@ -109,31 +106,30 @@ export const IntroModal: React.FC = () => {
         >
           <button
             onClick={handleClose}
-            className="hover:bg-cb-blue/10 fixed right-4 top-4 rounded-full p-2 transition"
+            className="fixed right-2 top-2 rounded-full p-2 transition hover:bg-cb-blue/10 sm:right-4 sm:top-4"
             aria-label="Close modal"
           >
             <CloseRoundedIcon className="h-6 w-6 text-gray-600" />
           </button>
 
-          <div className="space-y-5 p-6 sm:p-8">
+          <div className="space-y-5 px-6 py-8 sm:p-8 sm:px-8">
             {/* Title and Subtitle */}
-            <div className="space-y-1 text-center">
-              <h1 className="text-cb-blue flex flex-col items-center justify-center gap-2 text-2xl font-light tracking-wide sm:flex-row">
+            <div className="space-y-2 text-center">
+              <h1 className="flex flex-row items-center justify-center gap-2 text-2xl font-light tracking-wide text-cb-blue">
                 <IconLogo width={32} />
                 CitiBike Data
               </h1>
-              <h2 className="text-cb-blue/80 text-sm font-light italic">
-                From Here to There: Mapping CitiBike Journeys
+              <h2 className="text-sm font-light italic text-cb-blue/80">
+                Tracking New York City&apos;s Bike Share Trip
               </h2>
             </div>
 
             {/* Explanation */}
-            <div className="bg-cb-white/50 rounded-lg p-4">
+            <div className="rounded-lg bg-cb-white/50 p-4">
               <p className="text-sm font-light leading-relaxed text-gray-700">
-                Explore millions of CitiBike trips across New York City. This
-                interactive map lets you visualize where riders depart from and
-                where they travel to, revealing the city&apos;s cycling patterns
-                over time.
+                This interactive map lets you visualize where riders depart from
+                and where they travel to, revealing the city&apos;s cycling
+                patterns over time.
               </p>
             </div>
 
@@ -142,20 +138,39 @@ export const IntroModal: React.FC = () => {
 
             {/* FAQ Dropdown */}
             {/* <FAQDropdown /> */}
+            <button
+              onClick={handleClose}
+              className="group flex w-full flex-row items-center justify-center gap-2 rounded-lg bg-cb-blue py-4 text-cb-white transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:brightness-90 active:scale-95"
+            >
+              {"Let's go!"}
+            </button>
 
             {/* Contact and Copyright */}
-            <div className="space-y-3 border-t border-gray-200 pt-4">
-              {/* <div className="flex justify-center">
+            <div className="flex w-full flex-col items-center justify-center space-x-1 border-t border-gray-200 pt-4">
+              <span>
                 <a
-                  href="mailto:contact@citibikedata.com"
-                  className="bg-cb-blue hover:bg-cb-blue/90 inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm font-normal text-white transition"
+                  className="text-xs text-cb-blue hover:underline"
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSf239Ud_Xc2EduQoVdn4VaI8OYj0hl3KcxGDaYWe8WkbPb6gQ/viewform?usp=dialog"
                 >
-                  <EmailRoundedIcon className="h-4 w-4" />
-                  Contact Us
+                  Feedback
                 </a>
-              </div> */}
-              <p className="text-center text-xs text-gray-500">
-                &copy; {new Date().getFullYear()} CitiBike Data. All rights
+                <span className="text-xs text-cb-blue"> | </span>
+                <a
+                  className="text-xs text-cb-blue hover:underline"
+                  href="https://patrickcleary.com"
+                >
+                  Contact
+                </a>{" "}
+                <span className="text-xs text-cb-blue"> | </span>
+                <a
+                  className="text-xs text-cb-blue hover:underline"
+                  href="https://github.com/PatrickCleary/citi-bike-data"
+                >
+                  GitHub
+                </a>
+              </span>
+              <p className="text-xs text-gray-500">
+                &copy; {new Date().getFullYear()} Patrick Cleary. All rights
                 reserved.
               </p>
             </div>

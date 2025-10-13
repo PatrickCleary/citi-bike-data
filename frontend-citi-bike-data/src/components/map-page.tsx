@@ -124,12 +124,12 @@ export const Logo: React.FC = () => {
   return (
     <button
       onClick={() => setIsOpen(true)}
-      className="md:bg-cb-white/50 hover:bg-cb-white/70 fixed left-4 top-4 z-10 flex flex-row items-center overflow-hidden rounded-md drop-shadow-md backdrop-blur-sm transition active:scale-95"
+      className="fixed left-4 top-4 z-10 flex flex-row items-center overflow-hidden rounded-md drop-shadow-md backdrop-blur-sm transition hover:bg-cb-white/70 active:scale-95 md:bg-cb-white/50"
       aria-label="Open introduction modal"
     >
       <IconLogo className="md:hidden" width={32} />
       <IconLogo className="hidden drop-shadow-md md:flex" width={32} />
-      <h1 className="text-cb-blue hidden px-2 font-sans text-lg font-light tracking-wide md:flex">
+      <h1 className="hidden px-2 font-sans text-lg font-light tracking-wide text-cb-blue md:flex">
         CitiBike Data
       </h1>
     </button>
