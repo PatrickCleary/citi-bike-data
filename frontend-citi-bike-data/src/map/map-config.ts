@@ -8,6 +8,7 @@ import maplibregl, {
   Event,
   MapMouseEvent,
   LngLatLike,
+  FilterSpecification,
 } from "maplibre-gl";
 import { MutableRefObject, useEffect, useState } from "react";
 import { useInteractionModeStore } from "@/store/interaction-mode-store";
@@ -551,4 +552,48 @@ const animateOpacity = (
   };
 
   requestAnimationFrame(animate);
+};
+
+// Hook to update bike lane filter based on selectedMonth
+export const useUpdateBikeLaneFilter = (
+  map: MutableRefObject<Map | null>,
+  mapLoaded: boolean,
+) => {
+  const { selectedMonth } = useMapConfigStore();
+
+  useEffect(() => {
+    if (!mapLoaded || !selectedMonth || !map.current) return;
+
+    const layer = map.current.getLayer(NYC_BIKE_LANE_LAYER.id);
+    if (!layer) return;
+
+    // Parse the selected month to get the end of the month
+    const selectedDate = dayjs(selectedMonth);
+    const endOfMonth = selectedDate.endOf("month");
+    const startOfMonth = selectedDate.startOf("month");
+
+    // Convert to ISO date strings for comparison
+    const endOfMonthStr = endOfMonth.toISOString();
+    const startOfMonthStr = startOfMonth.toISOString();
+    console.log(`Applying bike lane filter for month: ${selectedMonth}`);
+    // Create filter expression
+    // Show lane if:
+    // 1. instdate is null OR instdate is <= end of selected month
+    // 2. AND ret_date is null OR ret_date is >= start of selected month
+    const filter = [
+      "all",
+      [
+        "any",
+        ["!", ["has", "instdate"]], // instdate is null
+        ["<=", ["get", "instdate"], endOfMonthStr], // instdate <= end of month (string comparison works for ISO dates)
+      ],
+      [
+        "any",
+        ["!", ["has", "ret_date"]], // ret_date is null
+        [">=", ["get", "ret_date"], startOfMonthStr], // ret_date >= start of month (string comparison works for ISO dates)
+      ],
+    ] as FilterSpecification;
+    console.log(filter);
+    map.current.setFilter(NYC_BIKE_LANE_LAYER.id, filter);
+  }, [selectedMonth, map, mapLoaded]);
 };

@@ -60,7 +60,7 @@ const defaultLayerGroups: LayerGroup[] = [
   },
   {
     id: "bike_lanes",
-    name: "Bike Lanes (Oct '25)",
+    name: "NYC Bike Lanes",
     visible: false,
     layerIds: ["nyc_bike_lanes_layer"],
   },

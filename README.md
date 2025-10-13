@@ -82,4 +82,4 @@ research/layer_generation/layer_generation.ipynb
 
 ### NYC bike lanes
 
-- https://data.cityofnewyork.us/dataset/New-York-City-Bike-Routes/mzxg-pwib/data_preview
+- https://data.cityofnewyork.us/dataset/New-York-City-Bike-Routes/mzxg-pwib/about_data
