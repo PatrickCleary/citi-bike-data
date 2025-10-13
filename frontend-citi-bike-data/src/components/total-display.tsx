@@ -84,19 +84,21 @@ export const TotalDisplay: React.FC = () => {
   const totalTrips = query.data?.data.sum_all_values || 0;
 
   return (
-    <div className="flex w-full cursor-default flex-col items-center rounded-md border-[0.5px] border-cb-white/40 bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md md:w-48 md:flex-col">
+    <div className="w-52 flex w-full cursor-default flex-col items-center rounded-md border-[0.5px] border-cb-white/40 bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md md:flex-col">
       <p className="flex w-full justify-center gap-[2px] rounded-sm font-light uppercase tracking-wider text-gray-600">
         {getDisplayText(analysisType, departureCells)}
         {departureCells.length > 0 && (
           <span className={classNames("flex items-center text-gray-900")}>
-            <span>area</span>
+            <span>selection</span>
             <HexagonOutlinedIcon fontSize="small" className="ml-1" />
           </span>
         )}
       </p>
       <div className="flex w-full flex-row justify-center gap-1 text-left">
         {query.isLoading ? (
-          <span className="animate-pulse text-xl blur-sm">12,345</span>
+          <span className="animate-pulse text-xl tabular-nums tracking-wider text-gray-900 blur-sm">
+            12,345
+          </span>
         ) : (
           <p>
             <AnimatedNumber value={totalTrips} />

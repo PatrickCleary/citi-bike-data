@@ -5,8 +5,6 @@ import { MutableRefObject } from "react";
 import { Menu, MenuButton, MenuItems } from "@headlessui/react";
 import classNames from "classnames";
 import LayersIcon from "@mui/icons-material/Layers";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import { MapButtonStyle } from "@/map/map-button";
 import { useLayerVisibilityStore } from "@/store/layer-visibility-store";
 
@@ -58,7 +56,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
       <MenuItems
         anchor="bottom start"
         transition
-        className="bg-cb-white border-cb-lightGray pointer-events-auto z-10 flex origin-bottom-left flex-col items-center rounded-lg border-[0.5px] p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
+        className="pointer-events-auto z-10 flex origin-bottom-left flex-col items-center rounded-lg border-[0.5px] border-cb-lightGray bg-cb-white p-4 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
         <div className="flex flex-col items-center space-y-2">
           {layerGroups.map((group) => (
@@ -71,7 +69,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                 >
                   <div
                     className={classNames(
-                      "outline-cb-green relative h-16 w-full cursor-pointer overflow-hidden rounded",
+                      "relative h-16 w-full cursor-pointer overflow-hidden rounded outline-cb-green",
                       group.visible ? "outline" : "outline-hidden",
                     )}
                     style={{
@@ -79,34 +77,12 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                     }}
-                  >
-                    {/* Overlay that lightens on hover */}
-                    <div
-                      className={classNames(
-                        "bg-cb-green absolute inset-0 opacity-0 transition-opacity group-hover:opacity-30",
-                      )}
-                    ></div>
-
-                    {/* Icon on top of overlay */}
-                    <div className="absolute inset-0 z-10 flex items-center justify-center">
-                      {!group.visible ? (
-                        <VisibilityOffOutlinedIcon
-                          className="invisible text-gray-700 group-hover:visible group-hover:text-gray-900"
-                          fontSize="small"
-                        />
-                      ) : (
-                        <VisibilityOutlinedIcon
-                          className="invisible text-gray-700 group-hover:visible group-hover:text-gray-900"
-                          fontSize="small"
-                        />
-                      )}
-                    </div>
-                  </div>
+                  ></div>
 
                   {/* Label below the image */}
                   <span
                     className={classNames(
-                      "group-hover:bg-cb-green/20 mt-1 rounded-full px-2 text-xs uppercase text-gray-700 transition duration-100 ease-out",
+                      "mt-1 rounded-full px-2 text-xs uppercase text-gray-700 transition duration-100 ease-out group-hover:bg-cb-green/20",
                       group.id === "bike" ? "tracking-wider" : "tracking-wide",
                       group.visible
                         ? "bg-cb-green/30 group-hover:bg-cb-green/30"
