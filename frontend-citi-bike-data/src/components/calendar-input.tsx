@@ -78,7 +78,7 @@ export const CalendarInput: React.FC = () => {
       <PopoverButton
         title="Select Month"
         className={
-          "border-cb-lightGray flex h-12 w-20 flex-col items-center justify-center rounded-md border-[0.5px] bg-white/30 px-2 tabular-nums tracking-wide text-gray-900 drop-shadow-md backdrop-blur-md transition hover:bg-white/60"
+          "active:scale-95 border-cb-lightGray flex h-12 w-20 flex-col items-center justify-center rounded-md border-[0.5px] bg-white/30 px-2 tabular-nums tracking-wide text-gray-900 drop-shadow-md backdrop-blur-md transition hover:bg-white/60"
         }
       >
         <CalendarMonthIcon fontSize="small" />

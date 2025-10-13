@@ -62,6 +62,7 @@ import {
 import { useMapConfigStore } from "@/store/store";
 import { useLayerVisibilityStore } from "@/store/layer-visibility-store";
 import { animateCellsByTripCount } from "./animation";
+import { useIntroModalStore } from "@/store/intro-modal-store";
 
 export type EventHandler = {
   eventType: "click" | "mousemove" | "mouseleave";
@@ -230,6 +231,7 @@ export const useUpdateMapStyleOnDataChange = (
 ) => {
   const query = useTripCountData();
   const [initialLoad, setInitialLoad] = useState(false);
+  const { isOpen } = useIntroModalStore();
   const { scale: scale } = useMapConfigStore();
   const { layersAdded } = useLayerVisibilityStore();
   if (!mapLoaded) return;
@@ -239,6 +241,10 @@ export const useUpdateMapStyleOnDataChange = (
   // Don't hide hex layer while loading - keep previous data visible
   if (hexLayer && !departureCountMap && !query.isLoading) {
     map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", "#ffffff00");
+    return;
+  }
+  // If the intro modal is open, don't update the layer. 
+  if (isOpen) {
     return;
   }
   // If loading, don't update the layer (keep previous state)
@@ -280,11 +286,12 @@ export const useUpdateMapStyleOnDataChange = (
     ]);
 
     // Only trigger animation if layers are fully added
-    if (layersAdded && !initialLoad) {
+    if (layersAdded && !initialLoad && !isOpen) {
       animateCellsByTripCount(map, departureCountMap);
       setInitialLoad(true);
     }
   }
+  return initialLoad;
 };
 
 const getCellEventHandlers = (
