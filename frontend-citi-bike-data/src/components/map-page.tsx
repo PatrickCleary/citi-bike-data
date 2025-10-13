@@ -93,7 +93,7 @@ export const MapPage: React.FC = () => {
     <div className="flex h-[100svh] w-[100svw] flex-row font-sans">
       <div className="h-full w-full" ref={mapContainer}>
         <Logo />
-        <div className="pointer-events-none fixed top-4 z-10 flex w-full flex-col items-center gap-4 md:bottom-4 md:left-auto md:right-4 md:top-auto md:w-fit md:items-end">
+        <div className="pointer-events-none fixed top-4 z-10 flex w-full flex-col items-center gap-4 md:left-1/2 md:top-4 md:-translate-x-1/2 md:flex-row md:justify-center">
           <div className="pointer-events-auto w-fit">
             <TotalDisplay />
           </div>
