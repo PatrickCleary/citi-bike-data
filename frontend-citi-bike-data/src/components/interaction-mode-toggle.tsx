@@ -4,10 +4,11 @@ import { Switch } from "@headlessui/react";
 // Remove the unused import if not needed
 import PinRoundedIcon from "@mui/icons-material/PinRounded";
 import SelectHexIcon from "@/icons/select-hex";
-import { MapButton } from "@/map/map-button";
+import { MapButtonStyle } from "@/map/map-button";
 
 import { useMapConfigStore } from "@/store/store";
-import TrashHexIcon from "@/icons/trash-hex";
+import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import classNames from "classnames";
 
 export const InteractionModeToggle: React.FC = () => {
   const { mode, toggleMode } = useInteractionModeStore();
@@ -18,7 +19,7 @@ export const InteractionModeToggle: React.FC = () => {
         checked={mode === "popup"}
         onChange={toggleMode}
         className={
-          "border-cb-lightGray flex h-12 w-24 flex-row overflow-hidden rounded-md border-[0.5px] bg-white/30 text-gray-900 drop-shadow-md backdrop-blur-md transition"
+          "flex h-12 w-24 flex-row overflow-hidden rounded-md border-[0.5px] border-cb-lightGray bg-white/30 text-gray-900 drop-shadow-md backdrop-blur-md transition"
         }
       >
         <div
@@ -32,18 +33,51 @@ export const InteractionModeToggle: React.FC = () => {
           <PinRoundedIcon fontSize="small" />
         </div>
       </Switch>
-      <DeleteButton />
+      <DeleteButtonMobile />
     </div>
   );
 };
 
-export const DeleteButton = () => {
+const DeleteButtonMobile: React.FC = () => {
   const { departureCells, setDepartureCells } = useMapConfigStore();
   const noCellsSelected = departureCells.length === 0;
-  if (noCellsSelected) return null;
+
   return (
-    <MapButton onClick={() => setDepartureCells([])} title="Delete Selection">
-      <TrashHexIcon />
-    </MapButton>
+    <button
+      onClick={() => setDepartureCells([])}
+      title="Delete Selection"
+      className={classNames(
+        "flex transform transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95",
+        MapButtonStyle,
+        {
+          transform: !noCellsSelected,
+          "hidden scale-95 transform opacity-0": noCellsSelected,
+        },
+      )}
+    >
+      <DeleteRoundedIcon fontSize="small" />
+    </button>
+  );
+};
+
+export const DeleteButton: React.FC = () => {
+  const { departureCells, setDepartureCells } = useMapConfigStore();
+  const noCellsSelected = departureCells.length === 0;
+
+  return (
+    <button
+      onClick={() => setDepartureCells([])}
+      title="Delete Selection"
+      className={classNames(
+        "fixed bottom-4 left-1/2 z-10 flex h-fit -translate-x-1/2 transform flex-row items-center gap-1 rounded-full bg-black px-3 py-2 font-sans text-sm font-light transition-transform duration-300 ease-in-out hover:scale-105",
+        {
+          "translate-y-0 transform opacity-100": !noCellsSelected,
+          "translate-y-4 transform opacity-0": noCellsSelected,
+        },
+      )}
+    >
+      <DeleteRoundedIcon fontSize="small" />
+      Clear Selection
+    </button>
   );
 };
