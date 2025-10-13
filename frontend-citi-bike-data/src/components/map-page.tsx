@@ -5,7 +5,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Map, MapSourceDataEvent } from "maplibre-gl";
 import { isMobileDevice } from "@/utils/mobile-detection";
-import { MAP_CONFIG_DEFAULT } from "./constants";
+import { DESKTOP_BOUNDS, MAP_CONFIG_DEFAULT, MOBILE_BOUNDS } from "./constants";
 import {
   useAddPMTilesProtocol,
   useApplyLayers,
@@ -31,6 +31,7 @@ import { LocationSearchModal } from "./location-search-modal";
 import { LocationSearchControl } from "./location-search-control";
 import { IntroModal } from "./intro-modal";
 import { useIntroModalStore } from "@/store/intro-modal-store";
+import { MapButton } from "@/map/map-button";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -65,6 +66,7 @@ export const MapPage: React.FC = () => {
 
     map.current = new Map({
       ...MAP_CONFIG_DEFAULT,
+      bounds: isMobileDevice() ? MOBILE_BOUNDS : DESKTOP_BOUNDS,
       container: mapContainer.current,
     });
     map.current?.on("load", async () => {
@@ -86,6 +88,25 @@ export const MapPage: React.FC = () => {
       map.current?.off("sourcedataloading", handleLoading);
     };
   }, [mapLoaded, handleIdle, handleLoading]);
+
+  const handlePrintMapInfo = useCallback(() => {
+    if (!map.current) return;
+
+    const center = map.current.getCenter();
+    const bounds = map.current.getBounds();
+
+    console.log("Map Center:", {
+      lng: center.lng,
+      lat: center.lat,
+    });
+    console.log("Map Bounds:", {
+      north: bounds.getNorth(),
+      south: bounds.getSouth(),
+      east: bounds.getEast(),
+      west: bounds.getWest(),
+    });
+  }, []);
+
   const isMobile = isMobileDevice();
   return (
     <div className="flex h-[100svh] w-[100svw] flex-row font-sans">
@@ -108,6 +129,25 @@ export const MapPage: React.FC = () => {
           <div className="pointer-events-auto flex flex-row gap-2">
             <DateControl />
             {!isMobile && <DeleteButton />}
+            <MapButton
+              onClick={handlePrintMapInfo}
+              title="Print map info to console"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="h-6 w-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+                />
+              </svg>
+            </MapButton>
           </div>
         </div>
       </div>
