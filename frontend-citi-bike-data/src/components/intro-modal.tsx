@@ -120,7 +120,7 @@ export const IntroModal: React.FC = () => {
                 CitiBike Data
               </h1>
               <h2 className="text-sm font-light italic text-cb-blue/80">
-                Tracking New York City&apos;s Bike Share Trip
+                Explore Bike Share Cycling Patterns
               </h2>
             </div>
 
