@@ -4,7 +4,7 @@ import { Switch } from "@headlessui/react";
 // Remove the unused import if not needed
 import PinRoundedIcon from "@mui/icons-material/PinRounded";
 import SelectHexIcon from "@/icons/select-hex";
-import { MapButton, MapButtonStyle } from "@/map/map-button";
+import { MapButtonStyle } from "@/map/map-button";
 
 import { useMapConfigStore } from "@/store/store";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
