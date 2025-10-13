@@ -7,7 +7,6 @@ import Providers from "./providers";
 
 const outfit = Outfit({
   subsets: ["latin"],
-  variable: "--font-outfit",
 });
 
 export const metadata: Metadata = {
@@ -37,12 +36,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={outfit.variable}>
+    <html lang="en">
       <head>
-        <link rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin=""
+        />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=bike_dock"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=bike_dock&display=swap"
         />
       </head>
       <body className={outfit.className}>

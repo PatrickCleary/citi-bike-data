@@ -8,6 +8,7 @@ import maplibregl, {
   Event,
   MapMouseEvent,
   LngLatLike,
+  FilterSpecification,
 } from "maplibre-gl";
 import { MutableRefObject, useEffect, useState } from "react";
 import { useInteractionModeStore } from "@/store/interaction-mode-store";
@@ -32,6 +33,8 @@ import {
   NYC_LINES_SOURCE_ID,
   NYC_STATIONS_SOURCE,
   NYC_STATIONS_SOURCE_ID,
+  NYC_BIKE_LANES_SOURCE,
+  NYC_BIKE_LANES_SOURCE_ID,
   ORIGIN_SOURCE,
   ORIGIN_SOURCE_ID,
   PATH_LINES_SOURCE,
@@ -53,6 +56,7 @@ import {
   NJ_LIGHT_RAIL_STATION_LAYER,
   NJ_RAIL_LINE_LAYER,
   NJ_RAIL_STATION_LAYER,
+  NYC_BIKE_LANE_LAYER,
   NYC_LINE_LAYER,
   NYC_STATION_LAYER,
   ORIGIN_LAYER_LINE,
@@ -80,6 +84,7 @@ export const useApplyLayers = (
   const { setHoveredFeature } = usePopupStateStore();
   useEffect(() => {
     if (!mapLoaded) return;
+    addBikeLaneLayer(map);
     addTransitLayers(map);
     addHexLayer(map, addOrRemoveDepartureCell, setHoveredFeature);
     addDockLayer(map);
@@ -112,11 +117,19 @@ const addTransitLayers = (map: MutableRefObject<Map | null>) => {
   mapObj.addLayer(NJ_RAIL_LINE_LAYER);
   mapObj.addLayer(NJ_RAIL_STATION_LAYER);
 };
+
 const addDockLayer = (map: MutableRefObject<Map | null>) => {
   if (!map.current) return;
   const mapObj = map.current;
   mapObj.addSource(BIKE_DOCKS_CURRENT_SOURCE_ID, BIKE_DOCKS_CURRENT_SOURCE);
   mapObj.addLayer(DOCK_LOCATIONS_CURRENT_LAYER);
+};
+
+const addBikeLaneLayer = (map: MutableRefObject<Map | null>) => {
+  if (!map.current) return;
+  const mapObj = map.current;
+  mapObj.addSource(NYC_BIKE_LANES_SOURCE_ID, NYC_BIKE_LANES_SOURCE);
+  mapObj.addLayer(NYC_BIKE_LANE_LAYER);
 };
 
 const addHexLayer = (
@@ -539,4 +552,48 @@ const animateOpacity = (
   };
 
   requestAnimationFrame(animate);
+};
+
+// Hook to update bike lane filter based on selectedMonth
+export const useUpdateBikeLaneFilter = (
+  map: MutableRefObject<Map | null>,
+  mapLoaded: boolean,
+) => {
+  const { selectedMonth } = useMapConfigStore();
+
+  useEffect(() => {
+    if (!mapLoaded || !selectedMonth || !map.current) return;
+
+    const layer = map.current.getLayer(NYC_BIKE_LANE_LAYER.id);
+    if (!layer) return;
+
+    // Parse the selected month to get the end of the month
+    const selectedDate = dayjs(selectedMonth);
+    const endOfMonth = selectedDate.endOf("month");
+    const startOfMonth = selectedDate.startOf("month");
+
+    // Convert to ISO date strings for comparison
+    const endOfMonthStr = endOfMonth.toISOString();
+    const startOfMonthStr = startOfMonth.toISOString();
+    console.log(`Applying bike lane filter for month: ${selectedMonth}`);
+    // Create filter expression
+    // Show lane if:
+    // 1. instdate is null OR instdate is <= end of selected month
+    // 2. AND ret_date is null OR ret_date is >= start of selected month
+    const filter = [
+      "all",
+      [
+        "any",
+        ["!", ["has", "instdate"]], // instdate is null
+        ["<=", ["get", "instdate"], endOfMonthStr], // instdate <= end of month (string comparison works for ISO dates)
+      ],
+      [
+        "any",
+        ["!", ["has", "ret_date"]], // ret_date is null
+        [">=", ["get", "ret_date"], startOfMonthStr], // ret_date >= start of month (string comparison works for ISO dates)
+      ],
+    ] as FilterSpecification;
+    console.log(filter);
+    map.current.setFilter(NYC_BIKE_LANE_LAYER.id, filter);
+  }, [selectedMonth, map, mapLoaded]);
 };

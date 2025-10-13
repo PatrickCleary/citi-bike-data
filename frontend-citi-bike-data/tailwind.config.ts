@@ -26,22 +26,7 @@ export default {
         "cb-mini": "0px 0px 5px rgba(0, 0, 0, .05)",
         "cb-hex": "0px 0px 1px rgba(0, 0, 0, .35)",
       },
-      fontFamily: {
-        sans: [
-          "Outfit",
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "Segoe UI",
-          "Roboto",
-          "Oxygen",
-          "Ubuntu",
-          "Cantarell",
-          "Fira Sans",
-          "Droid Sans",
-          "Helvetica Neue",
-          "sans-serif",
-        ],
-      },
+
       colors: {
         cb: {
           white: "#F2F3F0",

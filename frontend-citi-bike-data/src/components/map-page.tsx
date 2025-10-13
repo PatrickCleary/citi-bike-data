@@ -13,6 +13,7 @@ import {
   useUpdateOriginShape,
   useUpdateInfoModeSelectedCell,
   usePrefetchTripCountData,
+  useUpdateBikeLaneFilter,
 } from "@/map/map-config";
 import { useLocationMarker } from "@/map/use-location-marker";
 
@@ -45,6 +46,7 @@ export const MapPage: React.FC = () => {
   useAddPMTilesProtocol();
   usePrefetchTripCountData();
   useLocationMarker(map, mapLoaded);
+  useUpdateBikeLaneFilter(map, mapLoaded);
   const handleIdle = useCallback(() => {
     if (loading) {
       setLoading(false);

@@ -78,3 +78,8 @@ research/layer_generation/layer_generation.ipynb
  - source: https://hub.arcgis.com/documents/DCP::long-island-railroad-stations-mta/about?path=
 
  - arcgis feature layer URL:  -->
+
+
+### NYC bike lanes
+
+- https://data.cityofnewyork.us/dataset/New-York-City-Bike-Routes/mzxg-pwib/about_data

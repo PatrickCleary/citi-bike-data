@@ -193,6 +193,31 @@ export const NYC_STATION_LAYER: LayerSpecification = {
     "icon-allow-overlap": false, // Optional: allow icons to overlap
   },
 };
+const NYC_BIKE_LANE_LAYER_ID = "nyc_bike_lanes_layer";
+export const NYC_BIKE_LANE_SOURCE_LAYER_ID = "nyc_bike_lanes";
+export const NYC_BIKE_LANE_LAYER: LayerSpecification = {
+  id: NYC_BIKE_LANE_LAYER_ID,
+  source: NYC_BIKE_LANE_SOURCE_LAYER_ID,
+  "source-layer": NYC_BIKE_LANE_SOURCE_LAYER_ID,
+  type: "line",
+  paint: {
+    "line-color": "#31688e",
+    "line-width": [
+      "match",
+      ["get", "facilitycl"],
+      "I",
+      1.5,
+      "II",
+      .75,
+      "III",
+      0.25,
+      "L",
+      .5,
+      .25, //fallback
+    ],
+  }, // You can change the color as needed
+  filter: ["all"], // Will be updated dynamically based on selectedMonth
+};
 
 const NJ_LIGHT_RAIL_LINE_LAYER_ID = "nj_light_rail_lines_layer";
 export const NJ_LIGHT_RAIL_SOURCE_LAYER_ID = "nj_light_rail_lines";
