@@ -69,7 +69,7 @@ export const DeleteButton: React.FC = () => {
       onClick={() => setDepartureCells([])}
       title="Delete Selection"
       className={classNames(
-        "fixed bottom-4 left-1/2 z-10 flex h-fit -translate-x-1/2 transform flex-row items-center gap-1 rounded-full bg-black px-3 py-2 font-sans text-sm font-light transition-transform duration-300 ease-in-out hover:scale-105",
+        "fixed left-1/2 bottom-4 z-10 flex h-fit -translate-x-1/2 transform flex-row items-center gap-1 rounded-full bg-black px-3 py-2 font-sans text-sm font-light transition-transform duration-300 ease-in-out hover:scale-105",
         {
           "translate-y-0 transform opacity-100": !noCellsSelected,
           "translate-y-4 transform opacity-0": noCellsSelected,

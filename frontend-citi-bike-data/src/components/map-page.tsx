@@ -71,7 +71,6 @@ export const MapPage: React.FC = () => {
     map.current?.on("load", async () => {
       await addImages(map);
 
-      // map.current?.removeControl(map.current?.attributionControl);
       map.current?.addControl(new maplibregl.AttributionControl(), "top-right");
       setMapLoaded(true);
     });

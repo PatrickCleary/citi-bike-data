@@ -59,6 +59,7 @@ export default function RootLayout({
           `}
         </Script>
         <Providers>{children}</Providers>
+        <span className="material-symbols-outlined hidden">bike_dock</span>;
       </body>
     </html>
   );
