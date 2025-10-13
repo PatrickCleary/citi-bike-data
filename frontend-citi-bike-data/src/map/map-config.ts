@@ -575,7 +575,6 @@ export const useUpdateBikeLaneFilter = (
     // Convert to ISO date strings for comparison
     const endOfMonthStr = endOfMonth.toISOString();
     const startOfMonthStr = startOfMonth.toISOString();
-    console.log(`Applying bike lane filter for month: ${selectedMonth}`);
     // Create filter expression
     // Show lane if:
     // 1. instdate is null OR instdate is <= end of selected month
