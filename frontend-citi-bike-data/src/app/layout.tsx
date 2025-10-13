@@ -5,15 +5,31 @@ import Script from "next/script";
 import "./globals.css";
 import Providers from "./providers";
 
-export const metadata: Metadata = {
-  title: "CitiBike Data",
-  description: "A web app to visualize CitiBike data",
-};
-
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
 });
+
+export const metadata: Metadata = {
+  title: "CitiBike Data",
+  description: "A web app to visualize CitiBike data",
+  openGraph: {
+    title: "CitiBike Data",
+    description: "A web app to visualize CitiBike data",
+    url: "https://citibike.com",
+    siteName: "CitiBike Data",
+    images: [
+      {
+        url: "https://citibikedata.com/preview.jpg",
+        width: 1200,
+        height: 630,
+        alt: "CitiBike Data preview card",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+};
 
 export default function RootLayout({
   children,
