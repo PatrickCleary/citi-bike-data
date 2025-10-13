@@ -135,11 +135,6 @@ const addHexLayer = (
   mapObj.addSource(HEX_SOURCE_ID, HEX_SOURCE);
   mapObj.addSource(ORIGIN_SOURCE_ID, ORIGIN_SOURCE);
   mapObj.addSource(INFO_MODE_SELECTED_SOURCE_ID, INFO_MODE_SELECTED_SOURCE);
-  // mapObj.addSource(SUBWAY_LINES_SOURCE_ID, SUBWAY_LINES_SOURCE);
-  // mapObj.addSource(NJ_TRANSIT_SOURCE_ID, NJ_TRANSIT_SOURCE);
-
-  // mapObj.addLayer(SUBWAY_LINE_LAYER);
-  // mapObj.addLayer(NJ_TRANSIT_STATIONS_LAYER);
   mapObj.addLayer(HEX_LAYER);
   mapObj.addLayer(HEX_LAYER_GLOW);
   mapObj.addLayer(HEX_LAYER_LINE);
@@ -243,7 +238,7 @@ export const useUpdateMapStyleOnDataChange = (
     map.current?.setPaintProperty(HEX_LAYER.id, "fill-color", "#ffffff00");
     return;
   }
-  // If the intro modal is open, don't update the layer. 
+  // If the intro modal is open, don't update the layer.
   if (isOpen) {
     return;
   }
