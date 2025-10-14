@@ -39,7 +39,7 @@ const defaultLayerGroups: LayerGroup[] = [
   },
   {
     id: "bike",
-    name: "CitiBike",
+    name: "Citi Bike",
     visible: true,
     layerIds: [HEX_LAYER.id, HEX_LAYER_LINE.id],
   },

@@ -10,19 +10,19 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "CitiBike Data",
-  description: "A web app to visualize CitiBike data",
+  title: "Citi Bike Data",
+  description: "A web app to visualize Citi Bike data",
   openGraph: {
-    title: "CitiBike Data",
-    description: "A web app to visualize CitiBike data",
+    title: "Citi Bike Data",
+    description: "A web app to visualize Citi Bike data",
     url: "https://citibike.com",
-    siteName: "CitiBike Data",
+    siteName: "Citi Bike Data",
     images: [
       {
         url: "https://citibikedata.com/preview.jpg",
         width: 1200,
         height: 630,
-        alt: "CitiBike Data preview card",
+        alt: "Citi Bike Data preview card",
       },
     ],
     locale: "en_US",
