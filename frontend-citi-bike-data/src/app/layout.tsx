@@ -4,6 +4,7 @@ import Script from "next/script";
 
 import "./globals.css";
 import Providers from "./providers";
+import { Analytics } from "@vercel/analytics/next";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -50,6 +51,7 @@ export default function RootLayout({
         />
       </head>
       <body className={outfit.className}>
+        <Analytics />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-CN6RVMTMGV"
           strategy="afterInteractive"
