@@ -106,7 +106,7 @@ export const IntroModal: React.FC = () => {
         >
           <button
             onClick={handleClose}
-            className="fixed right-2 top-2 rounded-full p-2 transition hover:bg-cb-blue/10 sm:right-4 sm:top-4"
+            className="absolute right-2 top-2 rounded-full p-2 transition hover:bg-cb-blue/10 sm:right-4 sm:top-4"
             aria-label="Close modal"
           >
             <CloseRoundedIcon className="h-6 w-6 text-gray-600" />
