@@ -38,6 +38,12 @@ export const MapPage: React.FC = () => {
   const mapContainer: MutableRefObject<HTMLDivElement | null> = useRef(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(isMobileDevice());
+  }, []);
+
   useUpdateMapStyleOnDataChange(map, mapLoaded);
   useApplyLayers(map, mapLoaded);
   useFetchLatestDate();
@@ -67,7 +73,7 @@ export const MapPage: React.FC = () => {
 
     map.current = new Map({
       ...MAP_CONFIG_DEFAULT,
-      bounds: isMobileDevice() ? MOBILE_BOUNDS : DESKTOP_BOUNDS,
+      bounds: isMobile ? MOBILE_BOUNDS : DESKTOP_BOUNDS,
       container: mapContainer.current,
     });
     map.current?.on("load", async () => {
@@ -76,7 +82,7 @@ export const MapPage: React.FC = () => {
       map.current?.addControl(new maplibregl.AttributionControl(), "top-right");
       setMapLoaded(true);
     });
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
@@ -89,7 +95,6 @@ export const MapPage: React.FC = () => {
     };
   }, [mapLoaded, handleIdle, handleLoading]);
 
-  const isMobile = isMobileDevice();
   return (
     <div className="flex h-[100svh] w-[100svw] flex-row font-sans">
       <div className="h-full w-full" ref={mapContainer}>
