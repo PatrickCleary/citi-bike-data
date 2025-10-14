@@ -139,7 +139,7 @@ export const Logo: React.FC = () => {
       <IconLogo className="md:hidden" width={32} />
       <IconLogo className="hidden drop-shadow-md md:flex" width={32} />
       <h1 className="hidden px-2 font-sans text-lg font-light tracking-wide text-cb-blue md:flex">
-        CitiBike Data
+        Citi Bike Data
       </h1>
     </button>
   );
