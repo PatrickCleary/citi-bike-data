@@ -117,7 +117,7 @@ export const IntroModal: React.FC = () => {
             <div className="space-y-2 text-center">
               <h1 className="flex flex-row items-center justify-center gap-2 text-2xl font-light tracking-wide text-cb-blue">
                 <IconLogo width={32} />
-                CitiBike Data
+                Citi Bike Data
               </h1>
               <h2 className="text-sm font-light italic text-cb-blue/80">
                 Visualizing Bike Share Journeys in the City
