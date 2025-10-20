@@ -6,6 +6,7 @@ import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import dayjs from "dayjs";
 import classNames from "classnames";
 import { AnimatedNumber } from "../other/animated-digits";
+import { TripsText } from "./total-trips-metric";
 
 export const ComparisonMetric: React.FC = () => {
   const { selectedMonth } = useMapConfigStore();
@@ -38,9 +39,7 @@ export const ComparisonMetric: React.FC = () => {
           {comparison.isLoading ? (
             <span className="animate-pulse tabular-nums text-gray-900 blur-sm">
               +12,345
-              <span className="ml-2 text-sm font-light uppercase text-gray-700">
-                Trips
-              </span>
+              <TripsText />
             </span>
           ) : (
             <span>
@@ -51,9 +50,7 @@ export const ComparisonMetric: React.FC = () => {
                   isPositiveChange ? "text-cb-increase" : "text-cb-decrease"
                 }
               />
-              <span className="ml-2 text-sm font-light uppercase text-gray-700">
-                Trips
-              </span>
+              <TripsText />
             </span>
           )}
         </div>
@@ -75,7 +72,9 @@ export const ComparisonMetric: React.FC = () => {
           )}
         </span>
       </div>
-      <p className="text-xs font-light text-gray-600">vs {previousMonthDate}</p>
+      <p className="text-xs font-light uppercase text-gray-500">
+        vs {previousMonthDate}
+      </p>
     </div>
   );
 };

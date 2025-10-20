@@ -68,14 +68,14 @@ export const Sparkline: React.FC<SparklineProps> = ({
 
       datasets.push({
         data: scaledBaselineValues,
-        borderColor: "rgba(156, 163, 175, 0.3)",
-        backgroundColor: "rgba(156, 163, 175, 0.05)",
+        borderColor: "rgba(49, 104, 142, 0.3)", // Updated color
+        backgroundColor: "rgba(49, 104, 142, 0.05)", // Updated color
         borderWidth: 1,
         fill: true,
         tension: 0.4,
         pointRadius: 0,
         pointHoverRadius: 0,
-        pointHoverBackgroundColor: "rgba(156, 163, 175, 0.5)",
+        pointHoverBackgroundColor: "rgba(49, 104, 142, 0.5)", // Updated color
         pointHoverBorderColor: "white",
         pointHoverBorderWidth: 1,
       });
@@ -84,14 +84,14 @@ export const Sparkline: React.FC<SparklineProps> = ({
     // Add main dataset
     datasets.push({
       data: data.map((d) => d.total_count),
-      borderColor: "rgba(59, 130, 246, 0.8)",
-      backgroundColor: "rgba(59, 130, 246, 0.1)",
+      borderColor: "rgba(49, 104, 142, 0.8)", // Updated color
+      backgroundColor: "rgba(49, 104, 142, 0.1)", // Updated color
       borderWidth: 2,
       fill: true,
       tension: 0.4,
       pointRadius: 0,
       pointHoverRadius: 4,
-      pointHoverBackgroundColor: "rgba(59, 130, 246, 1)",
+      pointHoverBackgroundColor: "rgba(49, 104, 142, 1)", // Updated color
       pointHoverBorderColor: "white",
       pointHoverBorderWidth: 2,
     });
@@ -126,7 +126,7 @@ export const Sparkline: React.FC<SparklineProps> = ({
         ctx.moveTo(xPosition, top);
         ctx.lineTo(xPosition, bottom);
         ctx.lineWidth = 2;
-        ctx.strokeStyle = "rgba(59, 130, 246, 0.8)";
+        ctx.strokeStyle = "rgba(49, 104, 142, 0.8)"; // Updated color
         ctx.setLineDash([5, 5]);
         ctx.stroke();
         ctx.restore();
@@ -140,7 +140,6 @@ export const Sparkline: React.FC<SparklineProps> = ({
       responsive: true,
       maintainAspectRatio: false,
       animation: false,
-      // layout:''
       plugins: {
         legend: {
           display: false,

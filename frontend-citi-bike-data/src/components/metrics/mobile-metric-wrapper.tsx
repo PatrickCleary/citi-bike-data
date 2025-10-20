@@ -47,13 +47,13 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
   const allMetrics: MetricType[] = ["total", "comparison", "sparkline"];
 
   return (
-    <div className="md:hidden flex w-full cursor-default flex-col rounded-md border-[0.5px] border-cb-white/40 bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md">
+    <div className="flex w-full cursor-default flex-col rounded-md border-[0.5px] border-cb-white/40 bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md lg:hidden">
       {/* Header with menu button */}
       <div className="flex w-full items-center justify-between">
         <div className="invisible p-1">
           <MoreHorizIcon />
         </div>
-        <p className="flex flex-1 justify-center gap-[2px] text-nowrap rounded-full bg-cb-white/30 font-light uppercase tracking-wider text-gray-600">
+        <p className="flex w-fit justify-center gap-[2px] px-4 text-nowrap rounded-full bg-black/5 font-light uppercase tracking-wider text-gray-600">
           {getDisplayText(analysisType, departureCells)}
           {departureCells.length > 0 && (
             <span className={classNames("flex items-center text-gray-900")}>
@@ -72,7 +72,7 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
           <MenuItems
             anchor="bottom"
             transition
-            className="fixed z-10 !inset-x-4 flex origin-top flex-col rounded-lg border-[0.5px] border-cb-lightGray bg-cb-white p-6 px-4 shadow-lg duration-100 ease-out focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0"
+            className="fixed !inset-x-4 z-10 flex origin-top flex-col rounded-lg border-[0.5px] border-cb-lightGray bg-cb-white p-6 px-4 shadow-lg duration-100 ease-out focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0"
           >
             <p className="mb-4 px-2 py-1 text-lg font-light uppercase tracking-wide text-gray-500">
               Metrics
@@ -88,7 +88,7 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
                       onClick={() => setSelectedMobileMetric(metricType)}
                       className={classNames(
                         "relative w-full rounded-lg transition-all",
-                        isSelected && "ring-2 ring-cb-green ring-offset-2",
+                        isSelected && "ring-2 ring-cb-blue ring-offset-2",
                       )}
                     >
                       {/* Full metric card */}
@@ -102,7 +102,7 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
                       </div>
                       {/* Check icon for selected state */}
                       {isSelected && (
-                        <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-cb-green shadow-md">
+                        <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-cb-blue shadow-md">
                           <CheckIcon fontSize="small" className="text-white" />
                         </div>
                       )}

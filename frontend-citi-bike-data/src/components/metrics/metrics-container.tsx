@@ -35,13 +35,13 @@ export const MetricsContainer: React.FC = () => {
 
   const MetricComponentMobile = metricComponents[selectedMobileMetric];
   return (
-    <div className="pointer-events-auto flex w-full max-w-sm md:max-w-2xl">
+    <div className="pointer-events-auto flex w-full max-w-sm lg:max-w-2xl">
       {/* Render the visible metrics */}
 
       <MobileMetricWrapper key={selectedMobileMetric}>
         <MetricComponentMobile />
       </MobileMetricWrapper>
-      <div className="flex hidden w-full cursor-default flex-col items-center gap-2 overflow-hidden rounded-md border-[0.5px] border-cb-white/40 bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md md:flex">
+      <div className="flex hidden w-full cursor-default flex-col items-center gap-2 overflow-hidden rounded-md border-[0.5px] border-cb-white/40 bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md lg:flex">
         {/* Header */}
         <p className="flex w-fit gap-[2px] text-nowrap rounded-full bg-cb-white/30 px-8 font-light uppercase tracking-wider text-gray-600">
           {getDisplayText(analysisType, departureCells)}
