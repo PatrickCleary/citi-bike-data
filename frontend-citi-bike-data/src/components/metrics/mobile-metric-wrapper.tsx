@@ -74,7 +74,7 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
             transition
             className="fixed !inset-x-4 z-10 flex origin-top flex-col rounded-lg border-[0.5px] border-cb-lightGray bg-cb-white p-6 px-4 shadow-lg duration-100 ease-out focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0"
           >
-            <p className="mb-4 px-2 py-1 text-lg font-light uppercase tracking-wide text-gray-500">
+            <p className="mb-4 px-2 py-1 text-sm font-light uppercase tracking-wide text-gray-500">
               Metrics
             </p>
             <div className="flex flex-col gap-4">

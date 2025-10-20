@@ -16,6 +16,7 @@ import HexagonIcon from "@mui/icons-material/Hexagon";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import { useInteractionModeStore } from "@/store/interaction-mode-store";
+import dayjs from "dayjs";
 interface PopupProps {
   map: MutableRefObject<Map | null>;
 }
@@ -31,7 +32,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   const previousTripCounts = previousQuery.data?.data.trip_counts || {};
   const { hoveredFeature, setHoveredFeature } = usePopupStateStore();
   const { mode } = useInteractionModeStore();
-  const { displayType, scale } = useMapConfigStore();
+  const { displayType, scale, selectedMonth } = useMapConfigStore();
   const comparison = useComparison();
   const loading = query.isLoading;
   const hoveredTripCount =
@@ -113,6 +114,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
             hexColor={hexColor}
             cellId={hoveredFeature?.id as string}
             comparison={comparison}
+            selectedMonth={selectedMonth}
           />,
           contentRef.current,
         )}
@@ -128,7 +130,8 @@ export const PopupContent: React.FC<{
   hexColor: string;
   cellId: string;
   comparison: ReturnType<typeof useComparison>;
-}> = ({ loading, hoveredTripCount, hexColor, cellId, comparison }) => {
+  selectedMonth: string | undefined;
+}> = ({ loading, hoveredTripCount, hexColor, cellId, comparison, selectedMonth }) => {
   const { analysisType, departureCells, displayType } = useMapConfigStore();
   const noCellsSelected = departureCells.length === 0;
 
@@ -138,6 +141,11 @@ export const PopupContent: React.FC<{
   const isPositiveChange = cellComparison
     ? cellComparison.absoluteChange > 0
     : false;
+
+  // Calculate previous year's month for the "no data" message
+  const previousYearMonth = selectedMonth
+    ? dayjs(selectedMonth).subtract(1, "year")
+    : null;
 
   if (noCellsSelected)
     return (
@@ -168,24 +176,38 @@ export const PopupContent: React.FC<{
             className="drop-shadow-cb-hex"
           />
         </p>
-        {displayType === "comparison" && showComparison && (
-          <div
-            className={`mt-0.5 flex items-center gap-1 text-xs ${isPositiveChange ? "text-cb-increase" : "text-cb-decrease"}`}
-          >
-            {isPositiveChange ? (
-              <TrendingUpRoundedIcon fontSize="small" />
+        {displayType === "comparison" && (
+          <>
+            {comparison.isLoading ? (
+              <div className="mt-0.5 flex items-center gap-1 text-xs blur-sm">
+                <TrendingUpRoundedIcon fontSize="small" />
+                <span className="font-medium tabular-nums">+000</span>
+                <span>(+0.0%)</span>
+              </div>
+            ) : showComparison ? (
+              <div
+                className={`mt-0.5 flex items-center gap-1 text-xs ${isPositiveChange ? "text-cb-increase" : "text-cb-decrease"}`}
+              >
+                {isPositiveChange ? (
+                  <TrendingUpRoundedIcon fontSize="small" />
+                ) : (
+                  <TrendingDownRoundedIcon fontSize="small" />
+                )}
+                <span className="font-medium tabular-nums">
+                  {isPositiveChange ? "+" : ""}
+                  {formatter.format(cellComparison.absoluteChange ?? 0)}
+                </span>
+                <span>
+                  ({isPositiveChange ? "+" : ""}
+                  {cellComparison.percentageChange.toFixed(1)}%)
+                </span>
+              </div>
             ) : (
-              <TrendingDownRoundedIcon fontSize="small" />
+              <div className="mt-0.5 text-xs text-gray-400">
+                no data in {previousYearMonth?.format("MMMM, YYYY")}
+              </div>
             )}
-            <span className="font-medium tabular-nums">
-              {isPositiveChange ? "+" : ""}
-              {formatter.format(cellComparison.absoluteChange)}
-            </span>
-            <span>
-              ({isPositiveChange ? "+" : ""}
-              {cellComparison.percentageChange.toFixed(1)}%)
-            </span>
-          </div>
+          </>
         )}
       </PopupDiv>
     );
@@ -208,24 +230,38 @@ export const PopupContent: React.FC<{
         </div>
       </div>
       <ArrDepText analysisType={analysisType} hexColor={hexColor} />
-      {showComparison && (
-        <div
-          className={`mt-0.5 flex items-center gap-1 text-xs ${isPositiveChange ? "text-cb-increase" : "text-cb-decrease"}`}
-        >
-          {isPositiveChange ? (
-            <TrendingUpRoundedIcon fontSize="small" />
+      {displayType === "comparison" && (
+        <>
+          {comparison.isLoading ? (
+            <div className="mt-0.5 flex items-center gap-1 text-xs blur-sm">
+              <TrendingUpRoundedIcon fontSize="small" />
+              <span className="font-medium tabular-nums">+000</span>
+              <span>(+0.0%)</span>
+            </div>
+          ) : showComparison ? (
+            <div
+              className={`mt-0.5 flex items-center gap-1 text-xs ${isPositiveChange ? "text-cb-increase" : "text-cb-decrease"}`}
+            >
+              {isPositiveChange ? (
+                <TrendingUpRoundedIcon fontSize="small" />
+              ) : (
+                <TrendingDownRoundedIcon fontSize="small" />
+              )}
+              <span className="font-medium tabular-nums">
+                {isPositiveChange ? "+" : ""}
+                {formatter.format(cellComparison.absoluteChange)}
+              </span>
+              <span>
+                ({isPositiveChange ? "+" : ""}
+                {cellComparison.percentageChange.toFixed(1)}%)
+              </span>
+            </div>
           ) : (
-            <TrendingDownRoundedIcon fontSize="small" />
+            <div className="mt-0.5 text-xs text-gray-400">
+              no data in {previousYearMonth?.format("MMMM, YYYY")}
+            </div>
           )}
-          <span className="font-medium tabular-nums">
-            {isPositiveChange ? "+" : ""}
-            {formatter.format(cellComparison.absoluteChange)}
-          </span>
-          <span>
-            ({isPositiveChange ? "+" : ""}
-            {cellComparison.percentageChange.toFixed(1)}%)
-          </span>
-        </div>
+        </>
       )}
     </PopupDiv>
   );
