@@ -30,6 +30,7 @@ export const getTripCountData = async (
   });
   return data.json();
 };
+
 export const getMaxDate = async (): Promise<string> => {
   const data = await fetch(
     API_URL +
@@ -46,4 +47,46 @@ export const getMaxDate = async (): Promise<string> => {
 
   const result = await data.json();
   return result[0].date_month;
+};
+
+export const getMonthlySum = async (
+  h3Cells: string[],
+  year:string,
+  analysisType: AnalysisType,
+): Promise<TripCountResult | undefined> => {
+  if (!year || h3Cells.length <= 0) return undefined;
+  const data = await fetch(API_URL + "/functions/v1/sum-monthly", {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+    },
+    method: "POST",
+    body: JSON.stringify({
+      cell_ids: h3Cells,
+      year: year,
+      cell_type: analysisType,
+    }),
+  });
+  return data.json();
+};
+
+export type MonthlyTotal = {
+  date_month: string;
+  total_count: number;
+};
+
+export const getMonthlyTotals = async (): Promise<MonthlyTotal[]> => {
+  const data = await fetch(
+    API_URL + "/rest/v1/monthly_totals?select=*&order=date_month.asc",
+    {
+      headers: {
+        "Content-Type": "application/json",
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+      },
+      method: "GET",
+    },
+  );
+
+  return data.json();
 };

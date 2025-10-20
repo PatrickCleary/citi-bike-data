@@ -11,6 +11,8 @@ interface Store {
   analysisType: "departures" | "arrivals";
   scaleType: "dynamic" | "custom";
   scale: [number, number];
+  displayType: "absolute" | "comparison";
+  setDisplayType: (type: "absolute" | "comparison") => void;
   setScaleType: (type: "dynamic" | "custom") => void;
   setScale: (max: [number, number]) => void;
   swapAnalysisType: () => void;
@@ -27,6 +29,8 @@ export const useMapConfigStore = create<Store>((set) => ({
   analysisType: "arrivals",
   scaleType: "dynamic",
   scale: [1, 100],
+  displayType: "absolute",
+  setDisplayType: (type) => set({ displayType: type }),
   setScaleType: (type) => set({ scaleType: type }),
   setScale: (max) => set({ scale: max }),
   swapAnalysisType: () =>

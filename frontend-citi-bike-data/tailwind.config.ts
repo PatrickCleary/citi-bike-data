@@ -10,6 +10,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        outfit: ['Outfit', 'sans-serif'],
+      },
       keyframes: {
         slideDown: {
           '0%': {
@@ -39,6 +42,9 @@ export default {
           green: "#35b779",
           lightGreen: "#6ece58",
           yellow: "#fde725",
+          // Comparison/trend colors
+          increase: "#01665e", // Dark blue-green for increases
+          decrease: "#8c510a", // Brown for decreases
         },
         background: "var(--background)",
         foreground: "var(--foreground)",

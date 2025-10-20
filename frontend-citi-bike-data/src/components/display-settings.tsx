@@ -18,9 +18,18 @@ export const buttonHoverStyle =
   "data-[selected]:bg-cb-green/30 focus:outline-none data-[focus]:bg-cb-green/20  data-[selected]:data-[focus]:bg-cb-green/30 data-[hover]:bg-cb-green/20  data-[selected]:data-[hover]:bg-cb-green/30  transition ease-out duration-100";
 
 const tabStyle = classNames(
-  "uppercase tracking-wide text-xs flex flex-row gap-2 justify-center items-center  transition rounded-full focus:outline-none w-32 px-2 py-1 text-gray-900",
+  "uppercase tracking-wide text-xs flex flex-row gap-2 justify-center items-center  transition rounded-full focus:outline-none w-32 px-2 py-1 text-gray-900 active:scale-95",
   buttonHoverStyle,
 );
+
+const absoluteGradient = `linear-gradient(to right,
+  #440154, #482878, #3e4989, #31688e,
+  #26828e, #35b779, #6ece58, #fde725)`;
+
+const comparisonGradient = `linear-gradient(to right,
+  #543005, #8c510a, #bf812d, #dfc27d,
+  #d8d8d8, #80cdc1, #35978f, #01665e, #003c30)`;
+
 export const DisplaySettings: React.FC = () => {
   const {
     swapAnalysisType,
@@ -29,9 +38,12 @@ export const DisplaySettings: React.FC = () => {
     setScaleType,
     scale,
     setScale,
+    displayType,
+    setDisplayType,
   } = useMapConfigStore();
   useUpdateScaleMax();
   const selectedIndexAnalysis = analysisType === "arrivals" ? 0 : 1;
+  const selectedDisplayTypeIndex = displayType === "absolute" ? 0 : 1;
   const selectedIndexScale = scaleType === "dynamic" ? 0 : 1;
 
   const inputRef1 = useRef<HTMLInputElement | null>(null);
@@ -56,7 +68,7 @@ export const DisplaySettings: React.FC = () => {
       <MenuItems
         anchor="top start"
         transition
-        className="border-cb-lightGray bg-cb-white pointer-events-auto z-10 flex origin-bottom-left flex-col rounded-lg border-[0.5px] p-6 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
+        className="pointer-events-auto z-10 flex origin-bottom-left flex-col gap-2 rounded-lg border-[0.5px] border-cb-lightGray bg-cb-white p-6 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
         <TabGroup
           selectedIndex={selectedIndexAnalysis}
@@ -78,9 +90,44 @@ export const DisplaySettings: React.FC = () => {
             </Tab>
           </TabList>
         </TabGroup>
-        <hr className="bg-cb-lightGray my-2" />
 
-        <p className="mb-2 cursor-default text-xs uppercase tracking-wide text-gray-400">
+        <p className="cursor-default text-xs uppercase tracking-wide text-gray-400">
+          Mode
+        </p>
+        <TabGroup
+          selectedIndex={selectedDisplayTypeIndex}
+          onChange={() =>
+            setDisplayType(
+              displayType === "absolute" ? "comparison" : "absolute",
+            )
+          }
+        >
+          <TabList className={"flex flex-row gap-2 text-sm text-gray-900"}>
+            <Tab
+              key={"absolute"}
+              className="group relative flex w-32 flex-row items-center justify-center gap-2 overflow-hidden rounded-full px-2 py-1 text-xs uppercase tracking-wide text-gray-700 transition focus:outline-none active:scale-95"
+            >
+              <div
+                className="absolute inset-0 opacity-0 transition-opacity group-data-[hover]:opacity-20 group-data-[selected]:group-data-[hover]:opacity-30 group-data-[selected]:opacity-30"
+                style={{ background: absoluteGradient }}
+              />
+              <span className="relative z-10">absolute</span>
+            </Tab>
+            <Tab
+              key={"comparison"}
+              className="group relative flex w-32 flex-row items-center justify-center gap-2 overflow-hidden rounded-full px-2 py-1 text-xs uppercase tracking-wide text-gray-700 transition focus:outline-none active:scale-95"
+            >
+              <div
+                className="absolute inset-0 opacity-0 transition-opacity group-data-[hover]:opacity-20 group-data-[selected]:group-data-[hover]:opacity-30 group-data-[selected]:opacity-30"
+                style={{ background: comparisonGradient }}
+              />
+              <span className="relative z-10 tracking-wide">comparison</span>
+            </Tab>
+          </TabList>
+        </TabGroup>
+        <hr className="bg-cb-lightGray" />
+
+        <p className="cursor-default text-xs uppercase tracking-wide text-gray-400">
           Scale
         </p>
         <div className="flex w-full flex-col">
@@ -120,7 +167,7 @@ export const DisplaySettings: React.FC = () => {
                     "",
                   );
                 }}
-                className="bg-cb-white/50 border-bg-white w-16 rounded-full border-[0.5px] text-center text-sm font-medium tabular-nums focus:outline-none"
+                className="border-bg-white w-16 rounded-full border-[0.5px] bg-cb-white/50 text-center text-sm font-medium tabular-nums focus:outline-none"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 ref={inputRef1}
@@ -149,7 +196,7 @@ export const DisplaySettings: React.FC = () => {
                     "",
                   );
                 }}
-                className="bg-cb-white/50 border-bg-white w-16 rounded-full border-[0.5px] text-center text-sm font-medium focus:outline-none"
+                className="border-bg-white w-16 rounded-full border-[0.5px] bg-cb-white/50 text-center text-sm font-medium focus:outline-none"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 ref={inputRef2}

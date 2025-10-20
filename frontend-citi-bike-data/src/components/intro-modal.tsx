@@ -115,13 +115,13 @@ export const IntroModal: React.FC = () => {
           <div className="space-y-5 px-6 py-8 sm:p-8 sm:px-8">
             {/* Title and Subtitle */}
             <div className="space-y-2 text-center">
-              <h1 className="flex flex-row items-center justify-center gap-2 text-2xl font-light tracking-wide text-cb-blue">
+              <h2 className="flex flex-row items-center justify-center gap-2 text-2xl font-light tracking-wide text-cb-blue">
                 <IconLogo width={32} />
                 Citi Bike Data
-              </h1>
-              <h2 className="text-sm font-light italic text-cb-blue/80">
-                Visualizing Bike Share Journeys in the City
               </h2>
+              <h3 className="text-sm font-light italic text-cb-blue/80">
+                Visualizing Bike Share Journeys in the City
+              </h3>
             </div>
 
             {/* Explanation */}

@@ -17,7 +17,7 @@ import {
 } from "@/map/map-config";
 import { useLocationMarker } from "@/map/use-location-marker";
 
-import { TotalDisplay } from "./total-display";
+import { MetricsContainer } from "./metrics/metrics-container";
 import Popup from "@/map/popup";
 import { addImages } from "@/map/utils";
 import { LayerControl } from "./layer-control";
@@ -99,10 +99,8 @@ export const MapPage: React.FC = () => {
     <div className="flex h-[100svh] w-[100svw] flex-row font-sans">
       <div className="h-full w-full" ref={mapContainer}>
         <Logo />
-        <div className="pointer-events-none fixed top-4 z-10 flex w-full flex-col items-center gap-4 md:left-1/2 md:top-4 md:-translate-x-1/2 md:flex-row md:justify-center">
-          <div className="pointer-events-auto w-fit">
-            <TotalDisplay />
-          </div>
+        <div className="pointer-events-none fixed top-4 z-10 flex w-full flex-col items-center gap-4 md:left-1/2 md:top-4 md:-translate-x-1/2 md:flex-row md:justify-center px-16">
+          <MetricsContainer />
         </div>
         <div className="pointer-events-none fixed bottom-4 left-4 z-10 flex flex-col gap-2">
           <Legend />

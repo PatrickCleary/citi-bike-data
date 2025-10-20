@@ -152,7 +152,7 @@ export const CalendarInput: React.FC = () => {
           </div>
           {error && (
             <div className="mt-1 h-5 text-center">
-              <p className="text-sm font-light text-red-600">
+              <p className="text-sm font-light text-red-500">
                 No data available for this month
               </p>
             </div>

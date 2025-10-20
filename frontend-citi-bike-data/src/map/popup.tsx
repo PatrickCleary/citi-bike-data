@@ -3,12 +3,18 @@ import { MutableRefObject, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import maplibregl, { Map, Popup } from "maplibre-gl";
 import { usePopupStateStore } from "@/store/popup-store";
-import { useTripCountData } from "./map-config";
+import {
+  useTripCountData,
+  useComparison,
+  usePreviousYearData,
+} from "./map-config";
 import { formatter } from "@/utils/utils";
 import { useMapConfigStore } from "@/store/store";
 import HexagonOutlinedIcon from "@mui/icons-material/HexagonOutlined";
 import PedalBikeRoundedIcon from "@mui/icons-material/PedalBikeRounded";
 import HexagonIcon from "@mui/icons-material/Hexagon";
+import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
+import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import { useInteractionModeStore } from "@/store/interaction-mode-store";
 interface PopupProps {
   map: MutableRefObject<Map | null>;
@@ -20,13 +26,27 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   // a ref for an element to hold the popup's content
   const contentRef = useRef<HTMLDivElement | null>(null);
   const query = useTripCountData();
+  const previousQuery = usePreviousYearData();
   const tripCounts = query.data?.data.trip_counts || {};
+  const previousTripCounts = previousQuery.data?.data.trip_counts || {};
   const { hoveredFeature, setHoveredFeature } = usePopupStateStore();
-  const { scale } = useMapConfigStore();
   const { mode } = useInteractionModeStore();
+  const { displayType, scale } = useMapConfigStore();
+  const comparison = useComparison();
   const loading = query.isLoading;
-  const hoveredTripCount = tripCounts[hoveredFeature?.id as string] || 0;
-  const hexColor = getHexagonColor(hoveredTripCount, scale);
+  const hoveredTripCount =
+    tripCounts[hoveredFeature?.id as string] || undefined;
+  const hoveredPreviousTripCount =
+    previousTripCounts[hoveredFeature?.id as string] || undefined;
+  const cellComparison = hoveredFeature?.id
+    ? comparison.getCellComparison(hoveredFeature.id as string)
+    : null;
+
+  // Get hex color based on display type
+  const hexColor =
+    displayType === "absolute"
+      ? getHexagonColorByAbsoluteValue(hoveredTripCount, scale)
+      : getHexagonColorBySignificance(cellComparison?.significance);
 
   // Initialize contentRef with a div element on mount
   useEffect(() => {
@@ -69,7 +89,10 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
       return;
     }
 
-    if (hoveredTripCount === 0) {
+    if (
+      hoveredTripCount === undefined &&
+      hoveredPreviousTripCount === undefined
+    ) {
       popupRef.current.remove();
       return;
     }
@@ -88,6 +111,8 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
             hoveredTripCount={hoveredTripCount}
             loading={loading}
             hexColor={hexColor}
+            cellId={hoveredFeature?.id as string}
+            comparison={comparison}
           />,
           contentRef.current,
         )}
@@ -99,11 +124,21 @@ export default PopupComponent;
 
 export const PopupContent: React.FC<{
   loading: boolean;
-  hoveredTripCount: number;
+  hoveredTripCount: number | undefined;
   hexColor: string;
-}> = ({ loading, hoveredTripCount, hexColor }) => {
-  const { analysisType, departureCells } = useMapConfigStore();
+  cellId: string;
+  comparison: ReturnType<typeof useComparison>;
+}> = ({ loading, hoveredTripCount, hexColor, cellId, comparison }) => {
+  const { analysisType, departureCells, displayType } = useMapConfigStore();
   const noCellsSelected = departureCells.length === 0;
+
+  const cellComparison = cellId ? comparison.getCellComparison(cellId) : null;
+  const showComparison =
+    cellComparison && !comparison.isLoading && cellComparison.previousCount > 0;
+  const isPositiveChange = cellComparison
+    ? cellComparison.absoluteChange > 0
+    : false;
+
   if (noCellsSelected)
     return (
       <PopupDiv>
@@ -115,7 +150,7 @@ export const PopupContent: React.FC<{
               <span className="animate-pulse tabular-nums blur-sm">0</span>
             ) : (
               <span className="font-bold tabular-nums tracking-wider">
-                {formatter.format(hoveredTripCount)}{" "}
+                {formatter.format(hoveredTripCount ?? 0)}{" "}
               </span>
             )}
             <span className="text-xs font-medium uppercase tracking-wide">
@@ -133,6 +168,25 @@ export const PopupContent: React.FC<{
             className="drop-shadow-cb-hex"
           />
         </p>
+        {displayType === "comparison" && showComparison && (
+          <div
+            className={`mt-0.5 flex items-center gap-1 text-xs ${isPositiveChange ? "text-cb-increase" : "text-cb-decrease"}`}
+          >
+            {isPositiveChange ? (
+              <TrendingUpRoundedIcon fontSize="small" />
+            ) : (
+              <TrendingDownRoundedIcon fontSize="small" />
+            )}
+            <span className="font-medium tabular-nums">
+              {isPositiveChange ? "+" : ""}
+              {formatter.format(cellComparison.absoluteChange)}
+            </span>
+            <span>
+              ({isPositiveChange ? "+" : ""}
+              {cellComparison.percentageChange.toFixed(1)}%)
+            </span>
+          </div>
+        )}
       </PopupDiv>
     );
 
@@ -145,7 +199,7 @@ export const PopupContent: React.FC<{
             {loading ? (
               <span className="animate-pulse blur-sm">000</span>
             ) : (
-              <span>{formatter.format(hoveredTripCount)}</span>
+              <span>{formatter.format(hoveredTripCount ?? 0)}</span>
             )}
           </span>
           <span className="text-xs font-medium uppercase tracking-wide">
@@ -154,13 +208,32 @@ export const PopupContent: React.FC<{
         </div>
       </div>
       <ArrDepText analysisType={analysisType} hexColor={hexColor} />
+      {showComparison && (
+        <div
+          className={`mt-0.5 flex items-center gap-1 text-xs ${isPositiveChange ? "text-cb-increase" : "text-cb-decrease"}`}
+        >
+          {isPositiveChange ? (
+            <TrendingUpRoundedIcon fontSize="small" />
+          ) : (
+            <TrendingDownRoundedIcon fontSize="small" />
+          )}
+          <span className="font-medium tabular-nums">
+            {isPositiveChange ? "+" : ""}
+            {formatter.format(cellComparison.absoluteChange)}
+          </span>
+          <span>
+            ({isPositiveChange ? "+" : ""}
+            {cellComparison.percentageChange.toFixed(1)}%)
+          </span>
+        </div>
+      )}
     </PopupDiv>
   );
 };
 
 const PopupDiv: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="border-cb-white/50 rounded-2 pointer-events-none flex flex-col items-center rounded-md border-[.5px] bg-white/30 px-2 py-1 text-center font-sans text-lg tabular-nums text-black text-neutral-800 drop-shadow-md backdrop-blur-md">
+    <div className="rounded-2 pointer-events-none flex flex-col items-center rounded-md border-[.5px] border-cb-white/50 bg-white/30 px-2 py-1 text-center font-sans text-lg tabular-nums text-black text-neutral-800 drop-shadow-md backdrop-blur-md">
       {children}
     </div>
   );
@@ -223,44 +296,37 @@ const ArrDepIcon: React.FC<{ analysisType: "arrivals" | "departures" }> = ({
   }
   return <PedalBikeRoundedIcon />;
 };
-// Helper function to calculate hexagon color based on trip count and scale
-const getHexagonColor = (
-  tripCount: number | undefined,
+// Helper function to calculate hexagon color based on absolute value using viridis colormap
+const getHexagonColorByAbsoluteValue = (
+  value: number | undefined,
   scale: [number, number],
 ): string => {
-  const [minScale, maxScale] = scale;
-  if (tripCount === undefined) {
-    return "#F2F3F0"; // default color for undefined trip counts
+  if (value === undefined || value < scale[0]) {
+    return "#F2F3F0"; // default color for undefined or below scale minimum
   }
 
-  // Return transparent for values outside the scale
-  if (tripCount < minScale || minScale >= maxScale) {
-    return "#ffffff00";
-  }
+  // Use logarithmic scale like the map does
+  const logMin = Math.log(scale[0] + 1);
+  const logMax = Math.log(scale[1] + 1);
+  const logValue = Math.log(value + 1);
 
-  // Apply logarithmic transformation
-  const logMin = Math.log(minScale + 1);
-  const logMax = Math.log(maxScale + 1);
-  const logValue = Math.log(tripCount + 1);
-  const logRange = logMax - logMin;
+  // Clamp to scale range
+  const clampedLogValue = Math.max(logMin, Math.min(logMax, logValue));
 
-  // Color stops with viridis palette (7 stops for smooth gradients)
+  // Normalize to 0-1 range
+  const normalized = (clampedLogValue - logMin) / (logMax - logMin);
+
+  // Color stops based on viridis colormap (matching the map)
   const colorStops: Array<{ position: number; color: string }> = [
-    { position: 0, color: "#440154" }, // 0% - dark purple
+    { position: 0.0, color: "#440154" }, // 0% - dark purple
     { position: 0.15, color: "#482878" }, // 15% - purple
     { position: 0.3, color: "#3e4989" }, // 30% - blue-purple
     { position: 0.45, color: "#31688e" }, // 45% - blue
     { position: 0.6, color: "#26828e" }, // 60% - teal
     { position: 0.75, color: "#35b779" }, // 75% - green
     { position: 0.9, color: "#6ece58" }, // 90% - light green
-    { position: 1, color: "#fde725" }, // 100% - yellow
+    { position: 1.0, color: "#fde725" }, // 100% - yellow
   ];
-
-  // Calculate normalized position in log space (0 to 1)
-  const normalizedPosition = (logValue - logMin) / logRange;
-
-  // Clamp to [0, 1]
-  const clampedPosition = Math.max(0, Math.min(1, normalizedPosition));
 
   // Find the two color stops to interpolate between
   let lowerStop = colorStops[0];
@@ -268,8 +334,8 @@ const getHexagonColor = (
 
   for (let i = 0; i < colorStops.length - 1; i++) {
     if (
-      clampedPosition >= colorStops[i].position &&
-      clampedPosition <= colorStops[i + 1].position
+      normalized >= colorStops[i].position &&
+      normalized <= colorStops[i + 1].position
     ) {
       lowerStop = colorStops[i];
       upperStop = colorStops[i + 1];
@@ -279,7 +345,54 @@ const getHexagonColor = (
 
   // Calculate interpolation factor between the two stops
   const t =
-    (clampedPosition - lowerStop.position) /
+    (normalized - lowerStop.position) /
+    (upperStop.position - lowerStop.position);
+
+  return interpolateColor(lowerStop.color, upperStop.color, t);
+};
+
+// Helper function to calculate hexagon color based on significance using BrBG colormap
+const getHexagonColorBySignificance = (
+  significance: number | undefined,
+): string => {
+  if (significance === undefined) {
+    return "#F2F3F0"; // default color for undefined
+  }
+
+  // Color stops based on significance value using BrBG (Brown-Blue-Green) colormap
+  const colorStops: Array<{ position: number; color: string }> = [
+    { position: -20, color: "#543005" }, // Dark brown - large decrease
+    { position: -10, color: "#8c510a" }, // Brown
+    { position: -5, color: "#bf812d" }, // Light brown
+    { position: -2, color: "#dfc27d" }, // Tan
+    { position: 0, color: "#d8d8d8" }, // Very light gray (almost white) - no change
+    { position: 2, color: "#80cdc1" }, // Light blue-green
+    { position: 5, color: "#35978f" }, // Blue-green
+    { position: 10, color: "#01665e" }, // Dark blue-green
+    { position: 20, color: "#003c30" }, // Very dark blue-green - large increase
+  ];
+
+  // Clamp significance to range [-20, 20]
+  const clampedSignificance = Math.max(-20, Math.min(20, significance));
+
+  // Find the two color stops to interpolate between
+  let lowerStop = colorStops[0];
+  let upperStop = colorStops[colorStops.length - 1];
+
+  for (let i = 0; i < colorStops.length - 1; i++) {
+    if (
+      clampedSignificance >= colorStops[i].position &&
+      clampedSignificance <= colorStops[i + 1].position
+    ) {
+      lowerStop = colorStops[i];
+      upperStop = colorStops[i + 1];
+      break;
+    }
+  }
+
+  // Calculate interpolation factor between the two stops
+  const t =
+    (clampedSignificance - lowerStop.position) /
     (upperStop.position - lowerStop.position);
 
   return interpolateColor(lowerStop.color, upperStop.color, t);

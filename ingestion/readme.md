@@ -22,3 +22,7 @@
 
 - Storing the data – should I just use S3? Will already basically be indexed on date and station ID. Can just store accordingly and then fetch.
 - Would need a separate bucket/folder for storing origins/destinations. This is how blue bike data works now anyway.
+
+
+### Notes
+- There is a materialized view used for monthly sums. This data is shared across all users so we don't want to be re-calculating it all the time. The view is called `monthly_totals`. It needs to be refreshed when data is updated in "citi-bike-monthly". It is refreshed via `REFRESH MATERIALIZED VIEW public.monthly_totals;`
