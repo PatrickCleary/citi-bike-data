@@ -921,6 +921,7 @@
       "layout": {
         "icon-image": "road_{ref_length}",
         "icon-rotation-alignment": "viewport",
+        "visibility": "none",
         "icon-size": 1,
         "symbol-avoid-edges": true,
         "symbol-placement": {"base": 1, "stops": [[10, "point"], [11, "line"]]},
@@ -944,6 +945,7 @@
       ],
       "layout": {
         "text-size": 10,
+        "visibility": "none",
         "icon-image": "{network}_{ref_length}",
         "icon-rotation-alignment": "viewport",
         "text-font": ["Outfit Regular"],
@@ -967,6 +969,7 @@
         ["==", "network", "us-interstate"]
       ],
       "layout": {
+        "visibility": "none",
         "text-size": 10,
         "icon-image": "{network}_{ref_length}",
         "icon-rotation-alignment": "viewport",
