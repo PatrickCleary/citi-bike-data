@@ -28,7 +28,11 @@ import { DisplaySettings } from "./display-settings";
 import { DeleteButton, InteractionModeToggle } from "./interaction-mode-toggle";
 import { SelectionModeToggle } from "./selection-mode-toggle";
 import { Legend } from "./legend";
-import { useFetchLatestDate } from "@/store/store";
+import {
+  useFetchLatestDate,
+  useSync,
+  useSyncAnalysisType,
+} from "@/store/store";
 import IconLogo from "@/icons/icon";
 import { LocationSearchModal } from "./location-search-modal";
 import { LocationSearchControl } from "./location-search-control";
@@ -52,6 +56,7 @@ export const MapPage: React.FC = () => {
   useFetchLatestDate();
   useUpdateOriginShape(map, mapLoaded);
   useUpdateDestinationShape(map, mapLoaded);
+  useSync();
   useUpdateInfoModeSelectedCell(map, mapLoaded);
   useAddPMTilesProtocol();
   usePrefetchTripCountData();
@@ -104,7 +109,7 @@ export const MapPage: React.FC = () => {
       <div className="h-full w-full" ref={mapContainer}>
         <Logo />
         <ZoomLevelOverlay map={map} mapLoaded={mapLoaded} />
-        <div className="pointer-events-none fixed top-4 z-10 flex w-full flex-col items-center gap-4 md:left-1/2 md:top-4 md:-translate-x-1/2 md:flex-row md:justify-center px-16">
+        <div className="pointer-events-none fixed top-4 z-10 flex w-full flex-col items-center gap-4 px-16 md:left-1/2 md:top-4 md:-translate-x-1/2 md:flex-row md:justify-center">
           <MetricsContainer />
         </div>
         <div className="pointer-events-none fixed bottom-4 left-4 z-10 flex flex-col gap-2">

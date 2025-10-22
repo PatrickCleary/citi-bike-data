@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { create } from "zustand";
 
 interface Store {
+  cellsToFetch: string[];
   originCells: string[];
   destinationCells: string[];
   departureCountMap: Record<string, number> | null;
@@ -15,12 +16,14 @@ interface Store {
   displayType: "absolute" | "comparison";
   normalizeComparison: boolean;
   selectionMode: "origin" | "destination";
+  setCellsToFetch: (cells: string[]) => void;
   clearSelection: () => void;
   setDisplayType: (type: "absolute" | "comparison") => void;
   setScaleType: (type: "dynamic" | "custom") => void;
   setScale: (max: [number, number]) => void;
   setNormalizeComparison: (normalize: boolean) => void;
   setSelectionMode: (mode: "origin" | "destination") => void;
+  setAnalysisType: (type: "departures" | "arrivals") => void;
   swapAnalysisType: () => void;
   setSelectedMonth: (month: string | undefined) => void;
   setDepartureCountMap: (map: Record<string, number>) => void;
@@ -31,6 +34,7 @@ interface Store {
 }
 
 export const useMapConfigStore = create<Store>((set, get) => ({
+  cellsToFetch: [],
   originCells: [],
   destinationCells: [],
   departureCountMap: null,
@@ -41,6 +45,7 @@ export const useMapConfigStore = create<Store>((set, get) => ({
   displayType: "absolute",
   normalizeComparison: true,
   selectionMode: "origin",
+  setCellsToFetch: (cells) => set({ cellsToFetch: cells }),
   clearSelection: () => {
     const selectionMode = get().selectionMode;
     if (selectionMode === "origin") {
@@ -55,6 +60,7 @@ export const useMapConfigStore = create<Store>((set, get) => ({
   setNormalizeComparison: (normalize) =>
     set({ normalizeComparison: normalize }),
   setSelectionMode: (mode) => set({ selectionMode: mode }),
+  setAnalysisType: (type) => set({ analysisType: type }),
   swapAnalysisType: () =>
     set((state) => ({
       analysisType:
@@ -78,7 +84,6 @@ export const useMapConfigStore = create<Store>((set, get) => ({
     }),
   addOrRemoveDestinationCell: (cell) =>
     set((state) => {
-      console.log(state.destinationCells);
       const isCellPresent = state.destinationCells.includes(cell);
       if (isCellPresent) {
         return {
@@ -113,4 +118,45 @@ export const useFetchLatestDate = () => {
     if (query.isError) setSelectedMonth(undefined);
     if (query.data) setSelectedMonth(query.data);
   }, [query.data, setSelectedMonth]);
+};
+
+// Separate hook to manage analysisType logic
+export const useSyncAnalysisType = () => {
+  const { setAnalysisType, originCells, destinationCells } =
+    useMapConfigStore();
+  useEffect(() => {
+    if (originCells.length === 0 && destinationCells.length > 0)
+      setAnalysisType("departures");
+    else setAnalysisType("arrivals"); // default or when origins exist
+  }, [originCells, destinationCells, setAnalysisType]);
+};
+
+export const useSyncTripsToFetchData = () => {
+  const {
+    originCells,
+    destinationCells,
+    selectedMonth,
+    analysisType,
+    setCellsToFetch,
+  } = useMapConfigStore();
+
+  useEffect(() => {
+    let cells: string[] = [];
+    if (originCells.length > 0) cells = originCells;
+    else if (destinationCells.length > 0) {
+      cells = destinationCells;
+    }
+    setCellsToFetch(cells);
+  }, [
+    setCellsToFetch,
+    originCells,
+    destinationCells,
+    analysisType,
+    selectedMonth,
+  ]);
+};
+
+export const useSync = () => {
+  useSyncAnalysisType();
+  useSyncTripsToFetchData();
 };

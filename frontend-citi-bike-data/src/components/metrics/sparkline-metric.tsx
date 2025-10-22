@@ -7,7 +7,7 @@ import { useMapConfigStore } from "@/store/store";
 import { Sparkline } from "../sparkline";
 
 export const SparklineMetric: React.FC = () => {
-  const { originCells, selectedMonth, analysisType } = useMapConfigStore();
+  const { selectedMonth } = useMapConfigStore();
   const sumQuery = useTripMonthlySumData();
   const baselineQuery = useBaselineMonthlySumData();
 
@@ -17,21 +17,11 @@ export const SparklineMetric: React.FC = () => {
         {baselineQuery.data ? (
           <Sparkline
             data={
-              originCells.length > 0 && sumQuery.data?.data
-                ? sumQuery.data.data
-                : baselineQuery.data
+              !!sumQuery.data?.data ? sumQuery.data.data : baselineQuery.data
             }
-            baselineData={
-              originCells.length > 0 ? baselineQuery.data : undefined
-            }
+            baselineData={baselineQuery.data}
             selectedDate={selectedMonth}
-            title={
-              originCells.length > 0
-                ? analysisType === "departures"
-                  ? "Departing trips"
-                  : "Arriving trips"
-                : "Trips"
-            }
+            title={"Trips vs. baseline"}
             unit=" trips"
           />
         ) : (

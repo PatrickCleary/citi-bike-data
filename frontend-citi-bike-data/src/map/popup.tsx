@@ -131,9 +131,18 @@ export const PopupContent: React.FC<{
   cellId: string;
   comparison: ReturnType<typeof useComparison>;
   selectedMonth: string | undefined;
-}> = ({ loading, hoveredTripCount, hexColor, cellId, comparison, selectedMonth }) => {
-  const { analysisType, originCells, displayType } = useMapConfigStore();
-  const noCellsSelected = originCells.length === 0;
+}> = ({
+  loading,
+  hoveredTripCount,
+  hexColor,
+  cellId,
+  comparison,
+  selectedMonth,
+}) => {
+  const { analysisType, originCells, displayType, destinationCells } =
+    useMapConfigStore();
+  const noCellsSelected =
+    originCells.length === 0 && destinationCells.length === 0;
 
   const cellComparison = cellId ? comparison.getCellComparison(cellId) : null;
   const showComparison =

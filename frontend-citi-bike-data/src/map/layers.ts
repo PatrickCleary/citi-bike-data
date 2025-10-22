@@ -98,6 +98,7 @@ export const ORIGIN_LABEL_LAYER: LayerSpecification = {
   layout: {
     "icon-offset": [0, 25],
     "icon-image": "origin_label",
+    "icon-allow-overlap": true,
   },
 };
 
@@ -108,8 +109,21 @@ export const DESTINATION_LAYER_LINE: LayerSpecification = {
   source: DESTINATION_SOURCE_ID,
   type: "line",
   paint: {
-    "line-width": 4,
-    "line-color": "#DCDCDC",
+    "line-width": 6,
+    "line-color": "#000000",
+  },
+};
+
+export const DESTINATION_LAYER_LINE_INSET_ID =
+  "destination_hex_tiles_line_inset_layer";
+
+export const DESTINATION_LAYER_LINE_INSET: LayerSpecification = {
+  id: DESTINATION_LAYER_LINE_INSET_ID,
+  source: DESTINATION_SOURCE_ID,
+  type: "line",
+  paint: {
+    "line-width": 2,
+    "line-color": "#ffffff",
   },
 };
 
@@ -122,6 +136,7 @@ export const DESTINATION_LABEL_LAYER: LayerSpecification = {
   layout: {
     "icon-offset": [0, 25],
     "icon-image": "destination_label",
+    "icon-allow-overlap": true,
   },
 };
 

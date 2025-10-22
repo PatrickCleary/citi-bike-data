@@ -58,7 +58,7 @@ import {
   DESTINATION_LABEL_SOURCE_ID,
   DESTINATION_LABEL_SOURCE,
 } from "./sources";
-import { cellsToMultiPolygon } from "h3-js";
+import { cellsToMultiPolygon, CoordPair } from "h3-js";
 
 import {
   DEFAULT_HEX_OPACITY,
@@ -78,6 +78,7 @@ import {
   ORIGIN_LAYER_LINE,
   ORIGIN_LABEL_LAYER,
   DESTINATION_LAYER_LINE,
+  DESTINATION_LAYER_LINE_INSET,
   PATH_LINE_LAYER,
   PATH_STATION_LAYER,
   DESTINATION_LABEL_LAYER,
@@ -218,6 +219,7 @@ const addHexLayer = (
     HEX_LAYER_LINE,
     ORIGIN_LAYER_LINE,
     DESTINATION_LAYER_LINE,
+    DESTINATION_LAYER_LINE_INSET,
     ORIGIN_LABEL_LAYER,
     DESTINATION_LABEL_LAYER,
     INFO_MODE_SELECTED_LAYER,
@@ -283,23 +285,25 @@ const getMonthsToPrefetch = (selectedMonth: string | undefined): string[] => {
 export const TRIP_COUNT_QUERY_KEY = "tripCounts";
 
 export const useTripCountData = () => {
-  const { originCells, selectedMonth, analysisType } = useMapConfigStore();
+  const { cellsToFetch, selectedMonth, analysisType } = useMapConfigStore();
+
   const query = useQuery({
-    queryKey: [TRIP_COUNT_QUERY_KEY, originCells, selectedMonth, analysisType],
-    queryFn: () => getTripCountData(originCells, selectedMonth, analysisType),
+    queryKey: [TRIP_COUNT_QUERY_KEY, cellsToFetch, selectedMonth, analysisType],
+    queryFn: () => getTripCountData(cellsToFetch, selectedMonth, analysisType),
     enabled: !!selectedMonth,
     staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
   });
   return query;
 };
+
 export const useTripCountDataFilteredbyDestination = (
   query: UseQueryResult<TripCountResult | undefined, Error>,
 ) => {
-  const { destinationCells } = useMapConfigStore();
+  const { destinationCells, originCells } = useMapConfigStore();
 
-  if (destinationCells.length === 0) return query;
-  if (!query.data || destinationCells.length === 0) return query;
-  const filteredData = Object.entries(query.data.data.trip_counts)
+  if (destinationCells.length === 0 || originCells.length === 0) return query;
+  if (!query.data) return query;
+  const filteredData = Object.entries(query.data.data.trip_counts ?? {})
     .filter((item) => destinationCells.includes(item[0]))
     .reduce(
       (obj, [key, value]) => {
@@ -588,15 +592,15 @@ export const useBaselineMonthlySumData = () => {
 
 // Hook to fetch previous month data for comparison
 export const usePreviousYearData = () => {
-  const { originCells, selectedMonth, analysisType } = useMapConfigStore();
+  const { cellsToFetch, selectedMonth, analysisType } = useMapConfigStore();
 
   const previousYear = selectedMonth
     ? dayjs(selectedMonth).subtract(1, "year").format("YYYY-MM-DD")
     : undefined;
 
   const query = useQuery({
-    queryKey: [TRIP_COUNT_QUERY_KEY, originCells, previousYear, analysisType],
-    queryFn: () => getTripCountData(originCells, previousYear, analysisType),
+    queryKey: [TRIP_COUNT_QUERY_KEY, cellsToFetch, previousYear, analysisType],
+    queryFn: () => getTripCountData(cellsToFetch, previousYear, analysisType),
     enabled: !!previousYear,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -765,9 +769,7 @@ export const useComparison = () => {
 // Hook to prefetch adjacent months and years
 export const usePrefetchTripCountData = () => {
   const queryClient = useQueryClient();
-  const { originCells, selectedMonth, analysisType } = useMapConfigStore();
-
-  const hasOrigin = originCells.length > 0;
+  const { cellsToFetch, selectedMonth, analysisType } = useMapConfigStore();
 
   useEffect(() => {
     if (!selectedMonth) return;
@@ -777,12 +779,12 @@ export const usePrefetchTripCountData = () => {
     // Prefetch each month
     monthsToPrefetch.forEach((month) => {
       queryClient.prefetchQuery({
-        queryKey: [TRIP_COUNT_QUERY_KEY, originCells, month, analysisType],
-        queryFn: () => getTripCountData(originCells, month, analysisType),
+        queryKey: [TRIP_COUNT_QUERY_KEY, cellsToFetch, month, analysisType],
+        queryFn: () => getTripCountData(cellsToFetch, month, analysisType),
         staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
       });
     });
-  }, [queryClient, originCells, selectedMonth, analysisType, hasOrigin]);
+  }, [queryClient, cellsToFetch, selectedMonth, analysisType]);
 };
 
 const updateMapStyleAbsolute = (
@@ -1141,7 +1143,8 @@ export const useUpdateOriginShape = (
 
   useEffect(() => {
     if (!mapLoaded) return;
-    const originGeoJson = convertCellsToGeoJSON(originCells);
+    const polygon = cellsToMultiPolygon(originCells, true);
+    const originGeoJson = convertCellsToGeoJSON(polygon);
 
     const originSource = map.current?.getSource(
       ORIGIN_SOURCE_ID,
@@ -1149,7 +1152,11 @@ export const useUpdateOriginShape = (
     originSource?.setData(originGeoJson);
 
     // Update the label position
-    const labelGeoJson = convertCellsToLabelGeoJSON(originCells, "ORIGIN");
+    const labelGeoJson = convertCellsToLabelGeoJSON(
+      originCells,
+      polygon,
+      "ORIGIN",
+    );
     const labelSource = map.current?.getSource(
       ORIGIN_LABEL_SOURCE_ID,
     ) as maplibregl.GeoJSONSource;
@@ -1165,7 +1172,8 @@ export const useUpdateDestinationShape = (
 
   useEffect(() => {
     if (!mapLoaded) return;
-    const destinationGeoJson = convertCellsToGeoJSON(destinationCells);
+    const polygons = cellsToMultiPolygon(destinationCells, true);
+    const destinationGeoJson = convertCellsToGeoJSON(polygons);
 
     const destinationSource = map.current?.getSource(
       DESTINATION_SOURCE_ID,
@@ -1175,6 +1183,7 @@ export const useUpdateDestinationShape = (
     // Update the label position
     const labelGeoJson = convertCellsToLabelGeoJSON(
       destinationCells,
+      polygons,
       "DESTINATION",
     );
     const labelSource = map.current?.getSource(
@@ -1204,9 +1213,8 @@ export const useUpdateInfoModeSelectedCell = (
 };
 
 const convertCellsToGeoJSON = (
-  cells: string[],
+  polygons: CoordPair[][][],
 ): GeoJSON.FeatureCollection<GeoJSON.Geometry> => {
-  const polygons = cellsToMultiPolygon(cells, true);
   const features = polygons.map((polygon) => ({
     type: "Feature" as const,
     geometry: {
@@ -1246,6 +1254,7 @@ const findBottomMostPoint = (polygon: number[][][]): [number, number] => {
 // Creates one label per disconnected polygon region
 const convertCellsToLabelGeoJSON = (
   cells: string[],
+  polygons: CoordPair[][][],
   title: string,
 ): GeoJSON.FeatureCollection<GeoJSON.Geometry> => {
   if (cells.length === 0) {
@@ -1254,9 +1263,6 @@ const convertCellsToLabelGeoJSON = (
       features: [],
     };
   }
-
-  // Get all polygons from the cells (each represents a potentially disconnected region)
-  const polygons = cellsToMultiPolygon(cells, true);
 
   // Calculate top-right point for each polygon and create a label point
   const features = polygons.map((polygon) => {
@@ -1270,6 +1276,7 @@ const convertCellsToLabelGeoJSON = (
       },
       properties: {
         title: title,
+        cells: cells,
       },
     };
   });
