@@ -47,12 +47,16 @@ import {
   NYC_BIKE_LANES_SOURCE_ID,
   ORIGIN_SOURCE,
   ORIGIN_SOURCE_ID,
+  ORIGIN_LABEL_SOURCE,
+  ORIGIN_LABEL_SOURCE_ID,
   DESTINATION_SOURCE,
   DESTINATION_SOURCE_ID,
   PATH_LINES_SOURCE,
   PATH_LINES_SOURCE_ID,
   PATH_STATIONS_SOURCE,
   PATH_STATIONS_SOURCE_ID,
+  DESTINATION_LABEL_SOURCE_ID,
+  DESTINATION_LABEL_SOURCE,
 } from "./sources";
 import { cellsToMultiPolygon } from "h3-js";
 
@@ -72,9 +76,11 @@ import {
   NYC_LINE_LAYER,
   NYC_STATION_LAYER,
   ORIGIN_LAYER_LINE,
+  ORIGIN_LABEL_LAYER,
   DESTINATION_LAYER_LINE,
   PATH_LINE_LAYER,
   PATH_STATION_LAYER,
+  DESTINATION_LABEL_LAYER,
 } from "./layers";
 import { useMapConfigStore } from "@/store/store";
 import { useLayerVisibilityStore } from "@/store/layer-visibility-store";
@@ -198,6 +204,8 @@ const addHexLayer = (
     { id: ORIGIN_SOURCE_ID, source: ORIGIN_SOURCE },
     { id: DESTINATION_SOURCE_ID, source: DESTINATION_SOURCE },
     { id: INFO_MODE_SELECTED_SOURCE_ID, source: INFO_MODE_SELECTED_SOURCE },
+    { id: DESTINATION_LABEL_SOURCE_ID, source: DESTINATION_LABEL_SOURCE },
+    { id: ORIGIN_LABEL_SOURCE_ID, source: ORIGIN_LABEL_SOURCE },
   ];
   sources.forEach(({ id, source }) => {
     if (!mapObj.getSource(id)) {
@@ -210,6 +218,8 @@ const addHexLayer = (
     HEX_LAYER_LINE,
     ORIGIN_LAYER_LINE,
     DESTINATION_LAYER_LINE,
+    ORIGIN_LABEL_LAYER,
+    DESTINATION_LABEL_LAYER,
     INFO_MODE_SELECTED_LAYER,
   ];
   layers.forEach((layer) => {
@@ -456,7 +466,8 @@ export const useBaselineMonthlySumData = () => {
   const dayjsDate = selectedMonth ? dayjs(selectedMonth) : null;
 
   // Determine if we should use origin cells as baseline (when destination cells are selected)
-  const useOriginAsBaseline = destinationCells.length > 0 && originCells.length > 0;
+  const useOriginAsBaseline =
+    destinationCells.length > 0 && originCells.length > 0;
 
   // Calculate which years we need for the 24-month window (when using origin as baseline)
   const yearsToFetch = useMemo(() => {
@@ -489,11 +500,7 @@ export const useBaselineMonthlySumData = () => {
 
   // Fetch origin cell data when destination cells are selected
   const originQuery = useQuery({
-    queryKey: [
-      "tripMonthlySumOriginBaseline",
-      yearsToFetch,
-      originCells,
-    ],
+    queryKey: ["tripMonthlySumOriginBaseline", yearsToFetch, originCells],
     queryFn: async () => {
       if (!useOriginAsBaseline || yearsToFetch.length === 0) {
         return [];
@@ -631,7 +638,8 @@ export const usePreviousYearSystemTotal = () => {
 
 // Hook to get month-over-month comparison data
 export const useComparison = () => {
-  const { originCells, destinationCells, normalizeComparison } = useMapConfigStore();
+  const { originCells, destinationCells, normalizeComparison } =
+    useMapConfigStore();
   const query = useTripCountData();
   const previousQuery = usePreviousYearData();
   const systemQuery = useSystemTotalTrips();
@@ -652,11 +660,11 @@ export const useComparison = () => {
   const shouldUseSystemWide = !hasOrigins && !hasDestinations;
 
   const currentTotal = shouldUseSystemWide
-    ? (systemQuery.data?.data.sum_all_values || 0)
-    : (queryFiltered.data?.data.sum_all_values || 0);
+    ? systemQuery.data?.data.sum_all_values || 0
+    : queryFiltered.data?.data.sum_all_values || 0;
   const previousTotal = shouldUseSystemWide
-    ? (previousSystemQuery.data?.data.sum_all_values || 0)
-    : (previousQueryFiltered.data?.data.sum_all_values || 0);
+    ? previousSystemQuery.data?.data.sum_all_values || 0
+    : previousQueryFiltered.data?.data.sum_all_values || 0;
 
   const currentTripCounts = queryFiltered.data?.data.trip_counts || {};
   const previousTripCounts = previousQueryFiltered.data?.data.trip_counts || {};
@@ -733,11 +741,12 @@ export const useComparison = () => {
   };
 
   const isLoading = shouldUseSystemWide
-    ? (systemQuery.isLoading || previousSystemQuery.isLoading)
-    : (queryFiltered.isLoading || previousQueryFiltered.isLoading);
+    ? systemQuery.isLoading || previousSystemQuery.isLoading
+    : queryFiltered.isLoading || previousQueryFiltered.isLoading;
 
   // Always loading system data for baseline
-  const baselineLoading = systemQuery.isLoading || previousSystemQuery.isLoading;
+  const baselineLoading =
+    systemQuery.isLoading || previousSystemQuery.isLoading;
 
   return {
     isLoading: isLoading || baselineLoading,
@@ -1138,6 +1147,13 @@ export const useUpdateOriginShape = (
       ORIGIN_SOURCE_ID,
     ) as maplibregl.GeoJSONSource;
     originSource?.setData(originGeoJson);
+
+    // Update the label position
+    const labelGeoJson = convertCellsToLabelGeoJSON(originCells, "ORIGIN");
+    const labelSource = map.current?.getSource(
+      ORIGIN_LABEL_SOURCE_ID,
+    ) as maplibregl.GeoJSONSource;
+    labelSource?.setData(labelGeoJson);
   }, [originCells, map, mapLoaded]);
 };
 
@@ -1155,6 +1171,16 @@ export const useUpdateDestinationShape = (
       DESTINATION_SOURCE_ID,
     ) as maplibregl.GeoJSONSource;
     destinationSource?.setData(destinationGeoJson);
+
+    // Update the label position
+    const labelGeoJson = convertCellsToLabelGeoJSON(
+      destinationCells,
+      "DESTINATION",
+    );
+    const labelSource = map.current?.getSource(
+      DESTINATION_LABEL_SOURCE_ID,
+    ) as maplibregl.GeoJSONSource;
+    labelSource?.setData(labelGeoJson);
   }, [destinationCells, map, mapLoaded]);
 };
 
@@ -1189,6 +1215,65 @@ const convertCellsToGeoJSON = (
     },
     properties: {},
   }));
+  return {
+    type: "FeatureCollection",
+    features: features,
+  };
+};
+// Helper function to calculate the bottom-most (southernmost) point of a polygon
+const findBottomMostPoint = (polygon: number[][][]): [number, number] => {
+  // polygon is an array of rings, we only need the outer ring (first element)
+  const ring = polygon[0];
+
+  let bottomMostPoint: [number, number] = [
+    Number.POSITIVE_INFINITY,
+    Number.POSITIVE_INFINITY,
+  ];
+
+  for (const [x, y] of ring) {
+    if (
+      y < bottomMostPoint[1] ||
+      (y === bottomMostPoint[1] && x < bottomMostPoint[0])
+    ) {
+      bottomMostPoint = [x, y];
+    }
+  }
+
+  return bottomMostPoint;
+};
+
+// Helper function to calculate the top-right point of origin cells for label placement
+// Creates one label per disconnected polygon region
+const convertCellsToLabelGeoJSON = (
+  cells: string[],
+  title: string,
+): GeoJSON.FeatureCollection<GeoJSON.Geometry> => {
+  if (cells.length === 0) {
+    return {
+      type: "FeatureCollection",
+      features: [],
+    };
+  }
+
+  // Get all polygons from the cells (each represents a potentially disconnected region)
+  const polygons = cellsToMultiPolygon(cells, true);
+
+  // Calculate top-right point for each polygon and create a label point
+  const features = polygons.map((polygon) => {
+    const bottomPoint = findBottomMostPoint(polygon);
+
+    return {
+      type: "Feature" as const,
+      geometry: {
+        type: "Point" as const,
+        coordinates: bottomPoint,
+      },
+      properties: {
+        title: title,
+      },
+    };
+  });
+
   return {
     type: "FeatureCollection",
     features: features,

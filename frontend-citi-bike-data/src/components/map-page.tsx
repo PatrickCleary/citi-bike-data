@@ -34,6 +34,7 @@ import { LocationSearchModal } from "./location-search-modal";
 import { LocationSearchControl } from "./location-search-control";
 import { IntroModal } from "./intro-modal";
 import { useIntroModalStore } from "@/store/intro-modal-store";
+import { ZoomLevelOverlay } from "./zoom-level-overlay";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -102,6 +103,7 @@ export const MapPage: React.FC = () => {
     <div className="flex h-[100svh] w-[100svw] flex-row font-sans">
       <div className="h-full w-full" ref={mapContainer}>
         <Logo />
+        <ZoomLevelOverlay map={map} mapLoaded={mapLoaded} />
         <div className="pointer-events-none fixed top-4 z-10 flex w-full flex-col items-center gap-4 md:left-1/2 md:top-4 md:-translate-x-1/2 md:flex-row md:justify-center px-16">
           <MetricsContainer />
         </div>

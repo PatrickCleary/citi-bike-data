@@ -26,6 +26,24 @@ export const DESTINATION_SOURCE: SourceSpecification = {
   },
 };
 
+export const ORIGIN_LABEL_SOURCE_ID = "origin_label";
+export const ORIGIN_LABEL_SOURCE: SourceSpecification = {
+  type: "geojson",
+  data: {
+    type: "FeatureCollection",
+    features: [],
+  },
+};
+
+export const DESTINATION_LABEL_SOURCE_ID = "destination_label";
+export const DESTINATION_LABEL_SOURCE: SourceSpecification = {
+  type: "geojson",
+  data: {
+    type: "FeatureCollection",
+    features: [],
+  },
+};
+
 export const INFO_MODE_SELECTED_SOURCE_ID = "info_mode_selected_hex";
 export const INFO_MODE_SELECTED_SOURCE: SourceSpecification = {
   type: "geojson",

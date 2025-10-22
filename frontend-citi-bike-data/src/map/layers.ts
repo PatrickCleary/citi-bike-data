@@ -8,7 +8,9 @@ import {
   NYC_LINES_SOURCE_ID,
   NYC_STATIONS_SOURCE_ID,
   ORIGIN_SOURCE_ID,
+  ORIGIN_LABEL_SOURCE_ID,
   DESTINATION_SOURCE_ID,
+  DESTINATION_LABEL_SOURCE_ID,
   PATH_LINES_SOURCE_ID,
   PATH_STATIONS_SOURCE_ID,
   SUBWAY_LINES_SOURCE_ID,
@@ -88,15 +90,38 @@ export const ORIGIN_LAYER_LINE: LayerSpecification = {
   },
 };
 
+export const ORIGIN_LABEL_LAYER_ID = "origin_label_layer";
+export const ORIGIN_LABEL_LAYER: LayerSpecification = {
+  id: ORIGIN_LABEL_LAYER_ID,
+  source: ORIGIN_LABEL_SOURCE_ID,
+  type: "symbol",
+  layout: {
+    "icon-offset": [0, 25],
+    "icon-image": "origin_label",
+  },
+};
+
 export const DESTINATION_LAYER_LINE_ID = "destination_hex_tiles_line_layer";
 
 export const DESTINATION_LAYER_LINE: LayerSpecification = {
   id: DESTINATION_LAYER_LINE_ID,
   source: DESTINATION_SOURCE_ID,
-  type: "fill",
+  type: "line",
   paint: {
-    // "line-width": 4,
-    "fill-color": "#ffffff",
+    "line-width": 4,
+    "line-color": "#DCDCDC",
+  },
+};
+
+export const DESTINATION_LABEL_LAYER_ID = "destination_label_layer";
+
+export const DESTINATION_LABEL_LAYER: LayerSpecification = {
+  id: DESTINATION_LABEL_LAYER_ID,
+  source: DESTINATION_LABEL_SOURCE_ID,
+  type: "symbol",
+  layout: {
+    "icon-offset": [0, 25],
+    "icon-image": "destination_label",
   },
 };
 
@@ -221,12 +246,12 @@ export const NYC_BIKE_LANE_LAYER: LayerSpecification = {
       "I",
       1.5,
       "II",
-      .75,
+      0.75,
       "III",
       0.25,
       "L",
-      .5,
-      .25, //fallback
+      0.5,
+      0.25, //fallback
     ],
   }, // You can change the color as needed
   filter: ["all"], // Will be updated dynamically based on selectedMonth
