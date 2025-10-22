@@ -49,12 +49,22 @@ export const getMaxDate = async (): Promise<string> => {
   return result[0].date_month;
 };
 
+export type MonthlyAggResult = {
+  data: {
+    date_month: string;
+    total_count: number;
+  }[];
+};
+
 export const getMonthlySum = async (
-  h3Cells: string[],
-  year:string,
-  analysisType: AnalysisType,
-): Promise<TripCountResult | undefined> => {
-  if (!year || h3Cells.length <= 0) return undefined;
+  originCellIds: string[],
+  destinationCellIds: string[],
+  year: string,
+): Promise<MonthlyAggResult | undefined> => {
+  if (!year || (originCellIds.length === 0 && destinationCellIds.length === 0)) {
+    return undefined;
+  }
+
   const data = await fetch(API_URL + "/functions/v1/sum-monthly", {
     headers: {
       "Content-Type": "application/json",
@@ -62,9 +72,9 @@ export const getMonthlySum = async (
     },
     method: "POST",
     body: JSON.stringify({
-      cell_ids: h3Cells,
-      year: year,
-      cell_type: analysisType,
+      origin_cell_ids: originCellIds,
+      destination_cell_ids: destinationCellIds,
+      year,
     }),
   });
   return data.json();

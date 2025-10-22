@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type MetricType = "total" | "comparison" | "sparkline";
+export type MetricType = "total" | "comparison" | "sparkline" | "percentage";
 
 interface MetricsStore {
   visibleMetrics: MetricType[];
@@ -12,7 +12,7 @@ interface MetricsStore {
 }
 
 export const useMetricsStore = create<MetricsStore>((set) => ({
-  visibleMetrics: ["total", "comparison", "sparkline"], // Default to showing only total trips
+  visibleMetrics: ["total", "comparison", "sparkline", "percentage"],
   selectedMobileMetric: "total",
 
   addMetric: (metric) =>

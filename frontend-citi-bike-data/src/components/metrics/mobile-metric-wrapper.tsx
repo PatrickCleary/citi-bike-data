@@ -25,12 +25,12 @@ const metricComponents: Record<MetricType, React.FC> = {
 
 const getDisplayText = (
   analysisType: AnalysisType,
-  departureCells: string[],
+  originCells: string[],
 ) => {
-  if (!departureCells || departureCells.length === 0) {
+  if (!originCells || originCells.length === 0) {
     return "System-wide";
   }
-  if (departureCells.length >= 1) {
+  if (originCells.length >= 1) {
     return `${analysisType === "departures" ? "to" : "from"}`;
   }
 };
@@ -42,7 +42,7 @@ interface MobileMetricWrapperProps {
 export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
   children,
 }) => {
-  const { analysisType, departureCells } = useMapConfigStore();
+  const { analysisType, originCells } = useMapConfigStore();
   const { selectedMobileMetric, setSelectedMobileMetric } = useMetricsStore();
   const allMetrics: MetricType[] = ["total", "comparison", "sparkline"];
 
@@ -54,8 +54,8 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
           <MoreHorizIcon />
         </div>
         <p className="flex w-fit justify-center gap-[2px] px-4 text-nowrap rounded-full bg-black/5 font-light uppercase tracking-wider text-gray-600">
-          {getDisplayText(analysisType, departureCells)}
-          {departureCells.length > 0 && (
+          {getDisplayText(analysisType, originCells)}
+          {originCells.length > 0 && (
             <span className={classNames("flex items-center text-gray-900")}>
               <span>selection</span>
               <HexagonOutlinedIcon

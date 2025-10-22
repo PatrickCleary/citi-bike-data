@@ -11,6 +11,7 @@ import {
   useApplyLayers,
   useUpdateMapStyleOnDataChange,
   useUpdateOriginShape,
+  useUpdateDestinationShape,
   useUpdateInfoModeSelectedCell,
   usePrefetchTripCountData,
   useUpdateBikeLaneFilter,
@@ -25,6 +26,7 @@ import { LayerControl } from "./layer-control";
 import { DateControl } from "./date-control";
 import { DisplaySettings } from "./display-settings";
 import { DeleteButton, InteractionModeToggle } from "./interaction-mode-toggle";
+import { SelectionModeToggle } from "./selection-mode-toggle";
 import { Legend } from "./legend";
 import { useFetchLatestDate } from "@/store/store";
 import IconLogo from "@/icons/icon";
@@ -48,6 +50,7 @@ export const MapPage: React.FC = () => {
   useApplyLayers(map, mapLoaded);
   useFetchLatestDate();
   useUpdateOriginShape(map, mapLoaded);
+  useUpdateDestinationShape(map, mapLoaded);
   useUpdateInfoModeSelectedCell(map, mapLoaded);
   useAddPMTilesProtocol();
   usePrefetchTripCountData();
@@ -106,6 +109,7 @@ export const MapPage: React.FC = () => {
           <Legend />
           <LayerControl map={map} mapLoaded={mapLoaded} />
           <DisplaySettings />
+          <SelectionModeToggle />
           <LocationSearchControl />
 
           <div className="w-fit md:hidden">

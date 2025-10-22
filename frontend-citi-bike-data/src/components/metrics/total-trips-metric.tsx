@@ -1,5 +1,8 @@
 import React from "react";
-import { useTripCountData } from "@/map/map-config";
+import {
+  useTripCountData,
+  useTripCountDataFilteredbyDestination,
+} from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
 import dayjs from "dayjs";
 import { AnimatedNumber } from "../other/animated-digits";
@@ -9,7 +12,8 @@ export const TotalTripsMetric: React.FC = () => {
   const dateObj = dayjs(selectedMonth);
   const startDate = dateObj.format("MMMM YYYY");
   const query = useTripCountData();
-  const totalTrips = query.data?.data.sum_all_values || 0;
+  const queryFiltered = useTripCountDataFilteredbyDestination(query);
+  const totalTrips = queryFiltered?.data?.data.sum_all_values || 0;
 
   return (
     <div className="flex cursor-default flex-col items-center">
@@ -34,5 +38,9 @@ export const TotalTripsMetric: React.FC = () => {
 };
 
 export const TripsText: React.FC = () => {
-  return <span className="ml-2 font-light text-xs uppercase text-gray-700">Trips</span>;
+  return (
+    <span className="ml-2 text-xs font-light uppercase text-gray-700">
+      Trips
+    </span>
+  );
 };

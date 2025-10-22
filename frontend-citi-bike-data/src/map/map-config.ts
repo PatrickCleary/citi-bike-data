@@ -1,10 +1,15 @@
 import { Protocol } from "pmtiles";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
 import {
   getMonthlySum,
   getTripCountData,
   getMaxDate,
   getMonthlyTotals,
+  TripCountResult,
 } from "@/utils/api";
 import { HoveredFeature, usePopupStateStore } from "@/store/popup-store";
 import maplibregl, {
@@ -42,6 +47,8 @@ import {
   NYC_BIKE_LANES_SOURCE_ID,
   ORIGIN_SOURCE,
   ORIGIN_SOURCE_ID,
+  DESTINATION_SOURCE,
+  DESTINATION_SOURCE_ID,
   PATH_LINES_SOURCE,
   PATH_LINES_SOURCE_ID,
   PATH_STATIONS_SOURCE,
@@ -65,6 +72,7 @@ import {
   NYC_LINE_LAYER,
   NYC_STATION_LAYER,
   ORIGIN_LAYER_LINE,
+  DESTINATION_LAYER_LINE,
   PATH_LINE_LAYER,
   PATH_STATION_LAYER,
 } from "./layers";
@@ -85,16 +93,28 @@ export const useApplyLayers = (
   mapLoaded: boolean,
 ) => {
   const { setLayersAdded } = useLayerVisibilityStore();
-  const { addOrRemoveDepartureCell } = useMapConfigStore();
+  const { addOrRemoveOriginCell, addOrRemoveDestinationCell } =
+    useMapConfigStore();
   const { setHoveredFeature } = usePopupStateStore();
   useEffect(() => {
     if (!mapLoaded) return;
     addBikeLaneLayer(map);
     addTransitLayers(map);
-    addHexLayer(map, addOrRemoveDepartureCell, setHoveredFeature);
+    addHexLayer(
+      map,
+      addOrRemoveOriginCell,
+      addOrRemoveDestinationCell,
+      setHoveredFeature,
+    );
     addDockLayer(map);
     setLayersAdded(true);
-  }, [mapLoaded, map, addOrRemoveDepartureCell, setHoveredFeature]);
+  }, [
+    mapLoaded,
+    map,
+    addOrRemoveOriginCell,
+    addOrRemoveDestinationCell,
+    setHoveredFeature,
+  ]);
 };
 const addTransitLayers = (map: MutableRefObject<Map | null>) => {
   if (!map.current) return;
@@ -161,19 +181,22 @@ const addBikeLaneLayer = (map: MutableRefObject<Map | null>) => {
 
 const addHexLayer = (
   map: MutableRefObject<Map | null>,
-  addOrRemoveDepartureCell: (cell: string) => void,
+  addOrRemoveOriginCell: (cell: string) => void,
+  addOrRemoveDestinationCell: (cell: string) => void,
   setHoveredFeature: (feature: HoveredFeature | null) => void,
 ) => {
   if (!map.current) return;
   const mapObj = map.current;
   const eventHandlers = getCellEventHandlers(
     map,
-    addOrRemoveDepartureCell,
+    addOrRemoveOriginCell,
+    addOrRemoveDestinationCell,
     setHoveredFeature,
   );
   const sources = [
     { id: HEX_SOURCE_ID, source: HEX_SOURCE },
     { id: ORIGIN_SOURCE_ID, source: ORIGIN_SOURCE },
+    { id: DESTINATION_SOURCE_ID, source: DESTINATION_SOURCE },
     { id: INFO_MODE_SELECTED_SOURCE_ID, source: INFO_MODE_SELECTED_SOURCE },
   ];
   sources.forEach(({ id, source }) => {
@@ -186,6 +209,7 @@ const addHexLayer = (
     HEX_LAYER_GLOW,
     HEX_LAYER_LINE,
     ORIGIN_LAYER_LINE,
+    DESTINATION_LAYER_LINE,
     INFO_MODE_SELECTED_LAYER,
   ];
   layers.forEach((layer) => {
@@ -249,39 +273,73 @@ const getMonthsToPrefetch = (selectedMonth: string | undefined): string[] => {
 export const TRIP_COUNT_QUERY_KEY = "tripCounts";
 
 export const useTripCountData = () => {
-  const { departureCells, selectedMonth, analysisType } = useMapConfigStore();
-
+  const { originCells, selectedMonth, analysisType } = useMapConfigStore();
   const query = useQuery({
-    queryKey: [
-      TRIP_COUNT_QUERY_KEY,
-      departureCells,
-      selectedMonth,
-      analysisType,
-    ],
-    queryFn: () =>
-      getTripCountData(departureCells, selectedMonth, analysisType),
+    queryKey: [TRIP_COUNT_QUERY_KEY, originCells, selectedMonth, analysisType],
+    queryFn: () => getTripCountData(originCells, selectedMonth, analysisType),
     enabled: !!selectedMonth,
     staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
   });
   return query;
 };
+export const useTripCountDataFilteredbyDestination = (
+  query: UseQueryResult<TripCountResult | undefined, Error>,
+) => {
+  const { destinationCells } = useMapConfigStore();
+
+  if (destinationCells.length === 0) return query;
+  if (!query.data || destinationCells.length === 0) return query;
+  const filteredData = Object.entries(query.data.data.trip_counts)
+    .filter((item) => destinationCells.includes(item[0]))
+    .reduce(
+      (obj, [key, value]) => {
+        obj["trip_counts"][key] = value;
+        obj["sum_all_values"] += value;
+        if (value > obj["highest_value"]) {
+          obj["highest_value"] = value;
+        }
+        return obj;
+      },
+      {
+        trip_counts: {},
+        sum_all_values: 0,
+        highest_value: 0,
+      } as {
+        trip_counts: Record<string, number>;
+        sum_all_values: number;
+        highest_value: number;
+      },
+    );
+  return { ...query, data: { data: filteredData } };
+};
 
 // Hook to fetch monthly sum data for selected cells with 2-year window
 // Fetches data year-by-year and caches each year separately
 export const useTripMonthlySumData = () => {
-  const { departureCells, selectedMonth, analysisType } = useMapConfigStore();
+  const { originCells, destinationCells, selectedMonth } = useMapConfigStore();
   const maxDateQuery = useMaxDate();
   const dayjsDate = selectedMonth ? dayjs(selectedMonth) : null;
 
-  // Calculate which years we need for the 2-year window
+  const hasDestination = destinationCells.length > 0;
+  const hasOrigin = originCells.length > 0;
+  const shouldFetch = hasDestination || hasOrigin;
+
+  // Calculate which years we need for the 24-month window
   const yearsToFetch = useMemo(() => {
     if (!dayjsDate || !maxDateQuery.data) return [];
 
     const maxDate = dayjs(maxDateQuery.data);
-    const windowStart = dayjsDate.subtract(1, "year");
-    const windowEnd = maxDate.isBefore(dayjsDate.add(1, "year"))
-      ? maxDate
-      : dayjsDate.add(1, "year");
+
+    // Try to center on selected date (1 year before, 1 year after)
+    let windowStart = dayjsDate.subtract(1, "year");
+    let windowEnd = dayjsDate.add(1, "year");
+
+    // If the selected date + 1 year exceeds max date, shift window back
+    // to ensure we always show 24 months ending at max date
+    if (windowEnd.isAfter(maxDate)) {
+      windowEnd = maxDate;
+      windowStart = maxDate.subtract(2, "years");
+    }
 
     const years: string[] = [];
     let currentYear = parseInt(windowStart.format("YYYY"));
@@ -294,19 +352,25 @@ export const useTripMonthlySumData = () => {
 
     return years;
   }, [dayjsDate, maxDateQuery.data]);
+  const analysisType = hasOrigin ? "departures" : "arrivals";
 
   // Fetch data for each year using separate queries (for caching)
-  const fetchKey = departureCells.slice().sort().join(",");
   const yearQueries = useQuery({
-    queryKey: ["tripMonthlySumByYears", fetchKey, analysisType, yearsToFetch],
+    queryKey: [
+      "tripMonthlySumByYears",
+      analysisType,
+      yearsToFetch,
+      originCells,
+      destinationCells,
+    ],
     queryFn: async () => {
-      if (departureCells.length === 0 || yearsToFetch.length === 0) {
+      if (!shouldFetch || yearsToFetch.length === 0) {
         return [];
       }
 
       // Fetch all years in parallel
       const yearDataPromises = yearsToFetch.map((year) =>
-        getMonthlySum(departureCells, year, analysisType),
+        getMonthlySum(originCells, destinationCells, year),
       );
 
       const results = await Promise.all(yearDataPromises);
@@ -318,6 +382,7 @@ export const useTripMonthlySumData = () => {
       results.forEach((result) => {
         if (result?.data) {
           // Handle different possible response formats
+          // Backend returns array of { date_month, total_count } for monthly sums
           const yearData = Array.isArray(result.data) ? result.data : [];
           combinedData.push(...yearData);
         }
@@ -333,20 +398,28 @@ export const useTripMonthlySumData = () => {
     enabled:
       !!selectedMonth &&
       yearsToFetch.length > 0 &&
-      departureCells.length > 0 &&
+      shouldFetch &&
       !!maxDateQuery.data,
     staleTime: 1000 * 60 * 5,
   });
 
-  // Window the data to show exactly 2 years (1 year before, up to 1 year after or max date)
+  // Window the data to show exactly 24 months
+  // If selected date is near the end, shift window back to show full 24 months
   const windowedData = useMemo(() => {
     if (!yearQueries.data || !dayjsDate || !maxDateQuery.data) return undefined;
 
     const maxDate = dayjs(maxDateQuery.data);
-    const windowStart = dayjsDate.subtract(1, "year").startOf("month");
-    const windowEnd = maxDate.isBefore(dayjsDate.add(1, "year"))
-      ? maxDate.endOf("month")
-      : dayjsDate.add(1, "year").endOf("month");
+
+    // Try to center on selected date (1 year before, 1 year after)
+    let windowStart = dayjsDate.subtract(1, "year").startOf("month");
+    let windowEnd = dayjsDate.add(1, "year").endOf("month");
+
+    // If the selected date + 1 year exceeds max date, shift window back
+    // to ensure we always show 24 months ending at max date
+    if (windowEnd.isAfter(maxDate)) {
+      windowEnd = maxDate.endOf("month");
+      windowStart = maxDate.subtract(2, "years").startOf("month");
+    }
 
     const filtered = yearQueries.data.filter((d) => {
       const date = dayjs(d.date_month);
@@ -374,31 +447,120 @@ const useMaxDate = () => {
   });
 };
 
-// Hook to fetch baseline monthly sum data (with no cell filters)
-// Shows 2-year window centered on selected date
+// Hook to fetch baseline monthly sum data
+// If destination cells are selected, uses traffic from origin cells as baseline
+// Otherwise shows 2-year window of total traffic (no cell filters)
 export const useBaselineMonthlySumData = () => {
-  const { selectedMonth } = useMapConfigStore();
+  const { selectedMonth, originCells, destinationCells } = useMapConfigStore();
   const maxDateQuery = useMaxDate();
   const dayjsDate = selectedMonth ? dayjs(selectedMonth) : null;
 
-  // Fetch all data once from start to max available date
+  // Determine if we should use origin cells as baseline (when destination cells are selected)
+  const useOriginAsBaseline = destinationCells.length > 0 && originCells.length > 0;
+
+  // Calculate which years we need for the 24-month window (when using origin as baseline)
+  const yearsToFetch = useMemo(() => {
+    if (!useOriginAsBaseline || !dayjsDate || !maxDateQuery.data) return [];
+
+    const maxDate = dayjs(maxDateQuery.data);
+
+    // Try to center on selected date (1 year before, 1 year after)
+    let windowStart = dayjsDate.subtract(1, "year");
+    let windowEnd = dayjsDate.add(1, "year");
+
+    // If the selected date + 1 year exceeds max date, shift window back
+    // to ensure we always show 24 months ending at max date
+    if (windowEnd.isAfter(maxDate)) {
+      windowEnd = maxDate;
+      windowStart = maxDate.subtract(2, "years");
+    }
+
+    const years: string[] = [];
+    let currentYear = parseInt(windowStart.format("YYYY"));
+    const endYear = parseInt(windowEnd.format("YYYY"));
+
+    while (currentYear <= endYear) {
+      years.push(currentYear.toString());
+      currentYear++;
+    }
+
+    return years;
+  }, [useOriginAsBaseline, dayjsDate, maxDateQuery.data]);
+
+  // Fetch origin cell data when destination cells are selected
+  const originQuery = useQuery({
+    queryKey: [
+      "tripMonthlySumOriginBaseline",
+      yearsToFetch,
+      originCells,
+    ],
+    queryFn: async () => {
+      if (!useOriginAsBaseline || yearsToFetch.length === 0) {
+        return [];
+      }
+
+      // Fetch all years in parallel
+      const yearDataPromises = yearsToFetch.map((year) =>
+        getMonthlySum(originCells, [], year),
+      );
+
+      const results = await Promise.all(yearDataPromises);
+
+      // Combine all year data into a single array
+      const combinedData: Array<{ date_month: string; total_count: number }> =
+        [];
+
+      results.forEach((result) => {
+        if (result?.data) {
+          const yearData = Array.isArray(result.data) ? result.data : [];
+          combinedData.push(...yearData);
+        }
+      });
+
+      // Sort by date
+      combinedData.sort(
+        (a, b) => dayjs(a.date_month).unix() - dayjs(b.date_month).unix(),
+      );
+
+      return combinedData;
+    },
+    enabled:
+      useOriginAsBaseline &&
+      !!selectedMonth &&
+      yearsToFetch.length > 0 &&
+      !!maxDateQuery.data,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Fetch all data once from start to max available date (when not using origin as baseline)
   // This way we have all data cached for any month navigation
-  const query = useQuery({
+  const totalQuery = useQuery({
     queryKey: ["tripMonthlySumBaselineAll"],
     queryFn: () => getMonthlyTotals(),
-    enabled: !!maxDateQuery.data,
+    enabled: !useOriginAsBaseline && !!maxDateQuery.data,
     staleTime: 1000 * 60 * 60, // Consider data fresh for 60 minutes
   });
 
-  // Window data to show exactly 2 years (1 year before, up to 1 year after or max date)
+  // Select the appropriate query based on whether we're using origin as baseline
+  const query = useOriginAsBaseline ? originQuery : totalQuery;
+
+  // Window data to show exactly 24 months
+  // If selected date is near the end, shift window back to show full 24 months
   const windowedData = useMemo(() => {
     if (!query.data || !selectedMonth || !maxDateQuery.data) return undefined;
 
     const maxDate = dayjs(maxDateQuery.data);
-    const windowStart = dayjsDate!.subtract(1, "year").startOf("month");
-    const windowEnd = maxDate.isBefore(dayjsDate!.add(1, "year"))
-      ? maxDate.endOf("month")
-      : dayjsDate!.add(1, "year").endOf("month");
+
+    // Try to center on selected date (1 year before, 1 year after)
+    let windowStart = dayjsDate!.subtract(1, "year").startOf("month");
+    let windowEnd = dayjsDate!.add(1, "year").endOf("month");
+
+    // If the selected date + 1 year exceeds max date, shift window back
+    // to ensure we always show 24 months ending at max date
+    if (windowEnd.isAfter(maxDate)) {
+      windowEnd = maxDate.endOf("month");
+      windowStart = maxDate.subtract(2, "years").startOf("month");
+    }
 
     const filtered = query.data.filter((d) => {
       const date = dayjs(d.date_month);
@@ -419,20 +581,15 @@ export const useBaselineMonthlySumData = () => {
 
 // Hook to fetch previous month data for comparison
 export const usePreviousYearData = () => {
-  const { departureCells, selectedMonth, analysisType } = useMapConfigStore();
+  const { originCells, selectedMonth, analysisType } = useMapConfigStore();
 
   const previousYear = selectedMonth
     ? dayjs(selectedMonth).subtract(1, "year").format("YYYY-MM-DD")
     : undefined;
 
   const query = useQuery({
-    queryKey: [
-      TRIP_COUNT_QUERY_KEY,
-      departureCells,
-      previousYear,
-      analysisType,
-    ],
-    queryFn: () => getTripCountData(departureCells, previousYear, analysisType),
+    queryKey: [TRIP_COUNT_QUERY_KEY, originCells, previousYear, analysisType],
+    queryFn: () => getTripCountData(originCells, previousYear, analysisType),
     enabled: !!previousYear,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -440,52 +597,158 @@ export const usePreviousYearData = () => {
   return query;
 };
 
+// Hook to fetch system-wide total trips for current month (for baseline comparison)
+export const useSystemTotalTrips = () => {
+  const { selectedMonth } = useMapConfigStore();
+
+  const query = useQuery({
+    queryKey: [TRIP_COUNT_QUERY_KEY, [], selectedMonth, "arrivals"],
+    queryFn: () => getTripCountData([], selectedMonth, "arrivals"),
+    enabled: !!selectedMonth,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  return query;
+};
+
+// Hook to fetch system-wide total trips for previous year (for baseline comparison)
+export const usePreviousYearSystemTotal = () => {
+  const { selectedMonth } = useMapConfigStore();
+
+  const previousYear = selectedMonth
+    ? dayjs(selectedMonth).subtract(1, "year").format("YYYY-MM-DD")
+    : undefined;
+
+  const query = useQuery({
+    queryKey: [TRIP_COUNT_QUERY_KEY, [], previousYear, "arrivals"],
+    queryFn: () => getTripCountData([], previousYear, "arrivals"),
+    enabled: !!previousYear,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  return query;
+};
+
 // Hook to get month-over-month comparison data
 export const useComparison = () => {
-  const currentQuery = useTripCountData();
+  const { originCells, destinationCells, normalizeComparison } = useMapConfigStore();
+  const query = useTripCountData();
   const previousQuery = usePreviousYearData();
+  const systemQuery = useSystemTotalTrips();
+  const previousSystemQuery = usePreviousYearSystemTotal();
 
-  const currentTotal = currentQuery.data?.data.sum_all_values || 0;
-  const previousTotal = previousQuery.data?.data.sum_all_values || 0;
-  const currentTripCounts = currentQuery.data?.data.trip_counts || {};
-  const previousTripCounts = previousQuery.data?.data.trip_counts || {};
+  const hasDestinations = destinationCells.length > 0;
+  const hasOrigins = originCells.length > 0;
 
-  // Calculate absolute and percentage change for total
+  // Filter by destination if destinations are selected
+  const queryFiltered = useTripCountDataFilteredbyDestination(query);
+  const previousQueryFiltered =
+    useTripCountDataFilteredbyDestination(previousQuery);
+
+  // Determine which data to use for the main comparison
+  // If no origins and no destinations: use system-wide
+  // If origins but no destinations: use origin data
+  // If destinations: use destination-filtered data
+  const shouldUseSystemWide = !hasOrigins && !hasDestinations;
+
+  const currentTotal = shouldUseSystemWide
+    ? (systemQuery.data?.data.sum_all_values || 0)
+    : (queryFiltered.data?.data.sum_all_values || 0);
+  const previousTotal = shouldUseSystemWide
+    ? (previousSystemQuery.data?.data.sum_all_values || 0)
+    : (previousQueryFiltered.data?.data.sum_all_values || 0);
+
+  const currentTripCounts = queryFiltered.data?.data.trip_counts || {};
+  const previousTripCounts = previousQueryFiltered.data?.data.trip_counts || {};
+
+  // Calculate absolute and percentage change for main comparison
   const absoluteChange = currentTotal - previousTotal;
   const percentageChange =
     previousTotal > 0
       ? ((currentTotal - previousTotal) / previousTotal) * 100
       : 0;
 
+  // Calculate baseline comparison
+  // - When destinations are selected: use origin traffic as baseline
+  // - Otherwise: use system-wide traffic as baseline
+  let baselineAbsoluteChange = 0;
+  let baselinePercentageChange = 0;
+  let baselineLabel = "system";
+
+  if (hasDestinations && hasOrigins) {
+    // Use origin traffic as baseline (unfiltered by destination)
+    const baselineCurrent = query.data?.data.sum_all_values || 0;
+    const baselinePrevious = previousQuery.data?.data.sum_all_values || 0;
+    baselineAbsoluteChange = baselineCurrent - baselinePrevious;
+    baselinePercentageChange =
+      baselinePrevious > 0
+        ? ((baselineCurrent - baselinePrevious) / baselinePrevious) * 100
+        : 0;
+    baselineLabel = "origin";
+  } else {
+    // Use system-wide traffic as baseline
+    const systemCurrent = systemQuery.data?.data.sum_all_values || 0;
+    const systemPrevious = previousSystemQuery.data?.data.sum_all_values || 0;
+    baselineAbsoluteChange = systemCurrent - systemPrevious;
+    baselinePercentageChange =
+      systemPrevious > 0
+        ? ((systemCurrent - systemPrevious) / systemPrevious) * 100
+        : 0;
+    baselineLabel = "system";
+  }
+
+  // Calculate expected growth rate from baseline (if normalizing)
+  const expectedGrowthRate =
+    normalizeComparison && previousTotal > 0
+      ? baselinePercentageChange / 100
+      : 0;
+
   // Function to get comparison for a specific cell
   const getCellComparison = (cellId: string) => {
     const currentCount = currentTripCounts[cellId] || 0;
     const previousCount = previousTripCounts[cellId] || 0;
+    const expectedCount = normalizeComparison
+      ? previousCount * (1 + expectedGrowthRate)
+      : previousCount;
     const cellAbsoluteChange = currentCount - previousCount;
     const cellPercentageChange =
       previousCount > 0
         ? ((currentCount - previousCount) / previousCount) * 100
         : 0;
+    // Significance calculation (normalized if flag is on)
     const smoothingConstant = 10;
     const significance =
-      (currentCount - previousCount) /
+      (currentCount - expectedCount) /
       Math.sqrt(previousCount + smoothingConstant);
 
     return {
       currentCount,
       previousCount,
+      expectedCount,
       absoluteChange: cellAbsoluteChange,
       percentageChange: cellPercentageChange,
       significance,
+      expectedGrowthRate: expectedGrowthRate * 100, // Return as percentage
     };
   };
 
+  const isLoading = shouldUseSystemWide
+    ? (systemQuery.isLoading || previousSystemQuery.isLoading)
+    : (queryFiltered.isLoading || previousQueryFiltered.isLoading);
+
+  // Always loading system data for baseline
+  const baselineLoading = systemQuery.isLoading || previousSystemQuery.isLoading;
+
   return {
-    isLoading: currentQuery.isLoading || previousQuery.isLoading,
+    isLoading: isLoading || baselineLoading,
     currentTotal,
     previousTotal,
     absoluteChange,
     percentageChange,
+    baselineAbsoluteChange,
+    baselinePercentageChange,
+    baselineLabel,
+    showBaseline: !shouldUseSystemWide, // Show baseline when not already showing system-wide
     getCellComparison,
   };
 };
@@ -493,7 +756,9 @@ export const useComparison = () => {
 // Hook to prefetch adjacent months and years
 export const usePrefetchTripCountData = () => {
   const queryClient = useQueryClient();
-  const { departureCells, selectedMonth, analysisType } = useMapConfigStore();
+  const { originCells, selectedMonth, analysisType } = useMapConfigStore();
+
+  const hasOrigin = originCells.length > 0;
 
   useEffect(() => {
     if (!selectedMonth) return;
@@ -503,12 +768,12 @@ export const usePrefetchTripCountData = () => {
     // Prefetch each month
     monthsToPrefetch.forEach((month) => {
       queryClient.prefetchQuery({
-        queryKey: [TRIP_COUNT_QUERY_KEY, departureCells, month, analysisType],
-        queryFn: () => getTripCountData(departureCells, month, analysisType),
+        queryKey: [TRIP_COUNT_QUERY_KEY, originCells, month, analysisType],
+        queryFn: () => getTripCountData(originCells, month, analysisType),
         staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
       });
     });
-  }, [queryClient, departureCells, selectedMonth, analysisType]);
+  }, [queryClient, originCells, selectedMonth, analysisType, hasOrigin]);
 };
 
 const updateMapStyleAbsolute = (
@@ -554,8 +819,18 @@ const updateMapStyleComparison = (
   map: Map,
   departureCountMap: Record<string, number>,
   previousDepartureCountMap: Record<string, number>,
+  currentTotal: number,
+  previousTotal: number,
+  normalize: boolean,
 ) => {
-  // Calculate significance for each cell using: significance = (new - old) / sqrt(old + smoothing_constant)
+  // Calculate overall growth rate from origin cells
+  // If total trips went from 500 to 1000, expectedGrowthRate = 1.0 (100% growth)
+  const expectedGrowthRate =
+    normalize && previousTotal > 0
+      ? (currentTotal - previousTotal) / previousTotal
+      : 0;
+
+  // Calculate significance for each cell
   const smoothingConstant = 100; // Prevents division by very small numbers
   const significanceMap: { [cellId: string]: number } = {};
 
@@ -563,9 +838,16 @@ const updateMapStyleComparison = (
     const currentCount = departureCountMap[cellId] || 0;
     const previousCount = previousDepartureCountMap[cellId] || 0;
 
-    // Calculate significance
+    // Expected count based on overall origin traffic growth (if normalizing)
+    const expectedCount = normalize
+      ? previousCount * (1 + expectedGrowthRate)
+      : previousCount;
+
+    // Calculate significance based on deviation from expected
+    // If normalizing: Positive = grew more than expected, Negative = grew less than expected
+    // If not normalizing: Positive = increased, Negative = decreased
     const significance =
-      (currentCount - previousCount) /
+      (currentCount - expectedCount) /
       Math.sqrt(previousCount + smoothingConstant);
     significanceMap[cellId] = significance;
   });
@@ -574,8 +856,11 @@ const updateMapStyleComparison = (
   Object.keys(previousDepartureCountMap).forEach((cellId) => {
     if (!(cellId in departureCountMap)) {
       const previousCount = previousDepartureCountMap[cellId] || 0;
+      const expectedCount = normalize
+        ? previousCount * (1 + expectedGrowthRate)
+        : previousCount;
       const significance =
-        (0 - previousCount) / Math.sqrt(previousCount + smoothingConstant);
+        (0 - expectedCount) / Math.sqrt(previousCount + smoothingConstant);
       significanceMap[cellId] = significance;
     }
   });
@@ -620,12 +905,14 @@ export const useUpdateMapStyleOnDataChange = (
   const previousQuery = usePreviousYearData();
   const [initialLoad, setInitialLoad] = useState(false);
   const { isOpen } = useIntroModalStore();
-  const { scale, displayType } = useMapConfigStore();
+  const { scale, displayType, normalizeComparison } = useMapConfigStore();
   const { layersAdded } = useLayerVisibilityStore();
   const mapObj = map.current;
   if (!mapLoaded) return;
   const departureCountMap = query.data?.data.trip_counts;
   const previousDepartureCountMap = previousQuery.data?.data.trip_counts;
+  const currentTotal = query.data?.data.sum_all_values || 0;
+  const previousTotal = previousQuery.data?.data.sum_all_values || 0;
   const hexLayer = map.current?.getLayer(HEX_LAYER.id);
   if (scale[0] >= scale[1]) return;
   // Don't hide hex layer while loading - keep previous data visible
@@ -656,6 +943,9 @@ export const useUpdateMapStyleOnDataChange = (
       mapObj,
       departureCountMap,
       previousDepartureCountMap,
+      currentTotal,
+      previousTotal,
+      normalizeComparison,
     );
   }
 
@@ -669,7 +959,8 @@ export const useUpdateMapStyleOnDataChange = (
 
 const getCellEventHandlers = (
   map: MutableRefObject<Map | null>,
-  addOrRemoveDepartureCell: (cell: string) => void,
+  addOrRemoveOriginCell: (cell: string) => void,
+  addOrRemoveDestinationCell: (cell: string) => void,
   setHoveredFeature: (feature: HoveredFeature | null) => void,
 ): {
   eventType: "click" | "mousemove" | "mouseleave";
@@ -692,9 +983,14 @@ const getCellEventHandlers = (
         const coordinates = (e as MapMouseEvent).lngLat;
         const h3Id = cellId as string;
 
-        // On desktop: always select cell on click (no mode concept)
+        // On desktop: use selection mode to determine which cell array to modify
         if (!isMobile) {
-          addOrRemoveDepartureCell(cellId);
+          const selectionMode = useMapConfigStore.getState().selectionMode;
+          if (selectionMode === "origin") {
+            addOrRemoveOriginCell(cellId);
+          } else {
+            addOrRemoveDestinationCell(cellId);
+          }
           return;
         }
 
@@ -714,8 +1010,9 @@ const getCellEventHandlers = (
             setInfoModeSelectedCell(h3Id);
           }
         } else {
-          // Select cell on click in selection mode
-          addOrRemoveDepartureCell(cellId);
+          // On mobile selection mode, always use origin cells for now
+          // (Mobile UI for destination selection can be added later)
+          addOrRemoveOriginCell(cellId);
           // Clear info mode selection when in selection mode
           setInfoModeSelectedCell(null);
         }
@@ -831,17 +1128,34 @@ export const useUpdateOriginShape = (
   map: MutableRefObject<Map | null>,
   mapLoaded: boolean,
 ) => {
-  const { departureCells } = useMapConfigStore();
+  const { originCells } = useMapConfigStore();
 
   useEffect(() => {
     if (!mapLoaded) return;
-    const originGeoJson = convertCellsToGeoJSON(departureCells);
+    const originGeoJson = convertCellsToGeoJSON(originCells);
 
     const originSource = map.current?.getSource(
       ORIGIN_SOURCE_ID,
     ) as maplibregl.GeoJSONSource;
     originSource?.setData(originGeoJson);
-  }, [departureCells, map, mapLoaded]);
+  }, [originCells, map, mapLoaded]);
+};
+
+export const useUpdateDestinationShape = (
+  map: MutableRefObject<Map | null>,
+  mapLoaded: boolean,
+) => {
+  const { destinationCells } = useMapConfigStore();
+
+  useEffect(() => {
+    if (!mapLoaded) return;
+    const destinationGeoJson = convertCellsToGeoJSON(destinationCells);
+
+    const destinationSource = map.current?.getSource(
+      DESTINATION_SOURCE_ID,
+    ) as maplibregl.GeoJSONSource;
+    destinationSource?.setData(destinationGeoJson);
+  }, [destinationCells, map, mapLoaded]);
 };
 
 export const useUpdateInfoModeSelectedCell = (

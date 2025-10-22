@@ -39,12 +39,12 @@ export const InteractionModeToggle: React.FC = () => {
 };
 
 const DeleteButtonMobile: React.FC = () => {
-  const { departureCells, setDepartureCells } = useMapConfigStore();
-  const noCellsSelected = departureCells.length === 0;
+  const { originCells, setOriginCells } = useMapConfigStore();
+  const noCellsSelected = originCells.length === 0;
 
   return (
     <button
-      onClick={() => setDepartureCells([])}
+      onClick={() => setOriginCells([])}
       title="Delete Selection"
       className={classNames(
         "flex transform transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95",
@@ -61,23 +61,28 @@ const DeleteButtonMobile: React.FC = () => {
 };
 
 export const DeleteButton: React.FC = () => {
-  const { departureCells, setDepartureCells } = useMapConfigStore();
-  const noCellsSelected = departureCells.length === 0;
+  const { originCells, destinationCells, clearSelection, selectionMode } =
+    useMapConfigStore();
+  const noCellsSelected = originCells.length === 0;
 
   return (
     <button
-      onClick={() => setDepartureCells([])}
+      onClick={() => clearSelection()}
       title="Delete Selection"
       className={classNames(
-        "fixed left-1/2 bottom-4 font-sans tracking-wider  uppercase text-xs z-10 flex h-fit -translate-x-1/2 transform flex-row items-center gap-1 rounded-full bg-black px-3 py-2 font-sans font-light transition-transform duration-300 ease-in-out hover:scale-105",
+        "fixed bottom-4 left-1/2 z-10 flex h-fit -translate-x-1/2 transform flex-row items-center gap-1 rounded-full bg-black px-3 py-2 font-sans text-xs font-light uppercase tracking-wider transition-transform duration-300 ease-in-out hover:scale-105",
         {
-          "translate-y-0 transform opacity-100": !noCellsSelected,
-          "translate-y-4 transform opacity-0": noCellsSelected,
+          "translate-y-0 transform opacity-100":
+            (destinationCells.length > 0 && selectionMode === "destination") ||
+            (originCells.length > 0 && selectionMode === "origin"),
+          "translate-y-4 transform opacity-0":
+            (originCells.length === 0 && selectionMode === "origin") ||
+            (destinationCells.length === 0 && selectionMode === "destination"),
         },
       )}
     >
       <DeleteRoundedIcon fontSize="small" />
-      Clear Selection
+      Clear {selectionMode}
     </button>
   );
 };

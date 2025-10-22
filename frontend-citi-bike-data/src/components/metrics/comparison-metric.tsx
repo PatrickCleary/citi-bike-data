@@ -15,6 +15,7 @@ export const ComparisonMetric: React.FC = () => {
   const previousMonthDate = dateObj.subtract(1, "year").format("MMMM YYYY");
   const comparison = useComparison();
   const isPositiveChange = comparison.absoluteChange > 0;
+  const isBaselinePositive = comparison.baselineAbsoluteChange > 0;
 
   return (
     <div className="flex cursor-default flex-col items-center">
@@ -71,6 +72,12 @@ export const ComparisonMetric: React.FC = () => {
             </>
           )}
         </span>
+        {comparison.showBaseline && !comparison.isLoading && (
+          <span className="text-xs font-light text-gray-500">
+            {comparison.baselineLabel}: {isBaselinePositive ? "+" : ""}
+            {comparison.baselinePercentageChange.toFixed(1)}%
+          </span>
+        )}
       </div>
       <p className="text-xs font-light uppercase text-gray-500">
         vs {previousMonthDate}

@@ -5,6 +5,7 @@ import {
   Menu,
   MenuButton,
   MenuItems,
+  Switch,
   Tab,
   TabGroup,
   TabList,
@@ -40,6 +41,8 @@ export const DisplaySettings: React.FC = () => {
     setScale,
     displayType,
     setDisplayType,
+    normalizeComparison,
+    setNormalizeComparison,
   } = useMapConfigStore();
   useUpdateScaleMax();
   const selectedIndexAnalysis = analysisType === "arrivals" ? 0 : 1;
@@ -125,105 +128,135 @@ export const DisplaySettings: React.FC = () => {
             </Tab>
           </TabList>
         </TabGroup>
-        <hr className="bg-cb-lightGray" />
 
-        <p className="cursor-default text-xs uppercase tracking-wide text-gray-400">
-          Scale
-        </p>
-        <div className="flex w-full flex-col">
-          <TabGroup
-            selectedIndex={selectedIndexScale}
-            onChange={(index) =>
-              setScaleType(index === 0 ? "dynamic" : "custom")
-            }
-          >
-            <TabList className={"flex flex-row gap-2 text-sm text-gray-900"}>
-              <Tab key={"dynamic"} className={tabStyle}>
-                Dynamic
-              </Tab>
-              <Tab key={"custom"} className={tabStyle}>
-                Custom
-              </Tab>
-            </TabList>
-          </TabGroup>
-          {scaleType === "custom" && (
-            <div
-              className="mt-2 flex h-8 w-full flex-row items-center justify-between rounded-full bg-gradient-to-r px-2 font-semibold tabular-nums text-gray-900"
-              style={{
-                background: `linear-gradient(to right, 
-                  #440154, #482878, #3e4989, #31688e, 
-                  #26828e, #35b779, #6ece58, #fde725)`,
-              }}
-            >
-              <Input
-                value={scale[0]}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  setScale([value, scale[1]]);
-                }}
-                onInput={(e) => {
-                  e.currentTarget.value = e.currentTarget.value.replace(
-                    /[^0-9]/g,
-                    "",
-                  );
-                }}
-                className="border-bg-white w-16 rounded-full border-[0.5px] bg-cb-white/50 text-center text-sm font-medium tabular-nums focus:outline-none"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                ref={inputRef1}
-                onClick={() => selectText(inputRef1)}
-                onKeyDown={(e) => {
-                  if (e.key === "ArrowUp") {
-                    e.preventDefault();
-                    const increment = e.shiftKey ? 10 : 1;
-                    setScale([scale[0] + increment, scale[1]]);
-                  } else if (e.key === "ArrowDown") {
-                    e.preventDefault();
-                    const decrement = e.shiftKey ? 10 : 1;
-                    setScale([scale[0] - decrement, scale[1]]);
-                  }
-                }}
-              />
-              <Input
-                value={scale[1]}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  setScale([scale[0], value]);
-                }}
-                onInput={(e) => {
-                  e.currentTarget.value = e.currentTarget.value.replace(
-                    /[^0-9]/g,
-                    "",
-                  );
-                }}
-                className="border-bg-white w-16 rounded-full border-[0.5px] bg-cb-white/50 text-center text-sm font-medium focus:outline-none"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                ref={inputRef2}
-                onClick={() => selectText(inputRef2)}
-                onKeyDown={(e) => {
-                  if (e.key === "ArrowUp") {
-                    e.preventDefault();
-                    const increment = e.shiftKey ? 10 : 1;
-                    setScale([scale[0], scale[1] + increment]);
-                  } else if (e.key === "ArrowDown") {
-                    e.preventDefault();
-                    const decrement = e.shiftKey ? 10 : 1;
-                    setScale([scale[0], scale[1] - decrement]);
-                  }
-                }}
-              />
+        {displayType === "comparison" && (
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row items-center justify-between gap-4">
+              <div className="flex flex-col">
+                <p className="cursor-default text-xs font-medium uppercase tracking-wide text-gray-700">
+                  Normalize by origin traffic
+                </p>
+                <p className="cursor-default text-xs text-gray-400">
+                  Account for overall ridership changes
+                </p>
+              </div>
+              <Switch
+                checked={normalizeComparison}
+                onChange={setNormalizeComparison}
+                className="group relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-300 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-cb-green focus-visible:ring-offset-2 data-[checked]:bg-cb-green"
+              >
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out group-data-[checked]:translate-x-5"
+                />
+              </Switch>
             </div>
-          )}
-          <p
-            className={classNames(
-              showError ? "flex" : "hidden",
-              "flex w-full cursor-default text-wrap text-center text-sm text-red-500",
-            )}
-          >
-            Scale max must be greater than scale min
-          </p>
-        </div>
+          </div>
+        )}
+
+        {displayType === "absolute" && (
+          <>
+            <hr className="bg-cb-lightGray" />
+
+            <p className="cursor-default text-xs uppercase tracking-wide text-gray-400">
+              Scale
+            </p>
+            <div className="flex w-full flex-col">
+              <TabGroup
+                selectedIndex={selectedIndexScale}
+                onChange={(index) =>
+                  setScaleType(index === 0 ? "dynamic" : "custom")
+                }
+              >
+                <TabList className={"flex flex-row gap-2 text-sm text-gray-900"}>
+                  <Tab key={"dynamic"} className={tabStyle}>
+                    Dynamic
+                  </Tab>
+                  <Tab key={"custom"} className={tabStyle}>
+                    Custom
+                  </Tab>
+                </TabList>
+              </TabGroup>
+              {scaleType === "custom" && (
+                <div
+                  className="mt-2 flex h-8 w-full flex-row items-center justify-between rounded-full bg-gradient-to-r px-2 font-semibold tabular-nums text-gray-900"
+                  style={{
+                    background: `linear-gradient(to right,
+                  #440154, #482878, #3e4989, #31688e,
+                  #26828e, #35b779, #6ece58, #fde725)`,
+                  }}
+                >
+                  <Input
+                    value={scale[0]}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      setScale([value, scale[1]]);
+                    }}
+                    onInput={(e) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        "",
+                      );
+                    }}
+                    className="border-bg-white w-16 rounded-full border-[0.5px] bg-cb-white/50 text-center text-sm font-medium tabular-nums focus:outline-none"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    ref={inputRef1}
+                    onClick={() => selectText(inputRef1)}
+                    onKeyDown={(e) => {
+                      if (e.key === "ArrowUp") {
+                        e.preventDefault();
+                        const increment = e.shiftKey ? 10 : 1;
+                        setScale([scale[0] + increment, scale[1]]);
+                      } else if (e.key === "ArrowDown") {
+                        e.preventDefault();
+                        const decrement = e.shiftKey ? 10 : 1;
+                        setScale([scale[0] - decrement, scale[1]]);
+                      }
+                    }}
+                  />
+                  <Input
+                    value={scale[1]}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      setScale([scale[0], value]);
+                    }}
+                    onInput={(e) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(
+                        /[^0-9]/g,
+                        "",
+                      );
+                    }}
+                    className="border-bg-white w-16 rounded-full border-[0.5px] bg-cb-white/50 text-center text-sm font-medium focus:outline-none"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    ref={inputRef2}
+                    onClick={() => selectText(inputRef2)}
+                    onKeyDown={(e) => {
+                      if (e.key === "ArrowUp") {
+                        e.preventDefault();
+                        const increment = e.shiftKey ? 10 : 1;
+                        setScale([scale[0], scale[1] + increment]);
+                      } else if (e.key === "ArrowDown") {
+                        e.preventDefault();
+                        const decrement = e.shiftKey ? 10 : 1;
+                        setScale([scale[0], scale[1] - decrement]);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+              <p
+                className={classNames(
+                  showError ? "flex" : "hidden",
+                  "flex w-full cursor-default text-wrap text-center text-sm text-red-500",
+                )}
+              >
+                Scale max must be greater than scale min
+              </p>
+            </div>
+          </>
+        )}
       </MenuItems>
     </Menu>
   );

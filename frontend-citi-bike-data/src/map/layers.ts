@@ -8,6 +8,7 @@ import {
   NYC_LINES_SOURCE_ID,
   NYC_STATIONS_SOURCE_ID,
   ORIGIN_SOURCE_ID,
+  DESTINATION_SOURCE_ID,
   PATH_LINES_SOURCE_ID,
   PATH_STATIONS_SOURCE_ID,
   SUBWAY_LINES_SOURCE_ID,
@@ -84,6 +85,18 @@ export const ORIGIN_LAYER_LINE: LayerSpecification = {
   paint: {
     "line-width": 4,
     "line-color": "#000000",
+  },
+};
+
+export const DESTINATION_LAYER_LINE_ID = "destination_hex_tiles_line_layer";
+
+export const DESTINATION_LAYER_LINE: LayerSpecification = {
+  id: DESTINATION_LAYER_LINE_ID,
+  source: DESTINATION_SOURCE_ID,
+  type: "fill",
+  paint: {
+    // "line-width": 4,
+    "fill-color": "#ffffff",
   },
 };
 

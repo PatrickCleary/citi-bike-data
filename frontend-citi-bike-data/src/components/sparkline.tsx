@@ -35,6 +35,7 @@ interface SparklineProps {
   selectedDate?: string;
 
   title?: string;
+  unit?: string;
 }
 
 export const Sparkline: React.FC<SparklineProps> = ({
@@ -42,29 +43,37 @@ export const Sparkline: React.FC<SparklineProps> = ({
   baselineData,
   selectedDate,
   title,
+  unit,
 }) => {
   const chartRef = useRef<ChartJS<"line">>(null);
+  const selectedDateRef = useRef(selectedDate);
+  const dataRef = useRef(data);
+
+  // Update refs when props change
+  selectedDateRef.current = selectedDate;
+  dataRef.current = data;
 
   const chartData = useMemo(() => {
     const datasets = [];
 
-    // Add baseline dataset first (so it renders behind), scaled to match the range of the main data
+    // Add baseline dataset first (so it renders behind), scaled by mean values
     if (baselineData && baselineData.length > 0) {
       const mainValues = data.map((d) => d.total_count);
       const baselineValues = baselineData.map((d) => d.total_count);
 
-      // Calculate min/max for both datasets
-      const mainMin = Math.min(...mainValues);
-      const mainMax = Math.max(...mainValues);
-      const baselineMin = Math.min(...baselineValues);
-      const baselineMax = Math.max(...baselineValues);
+      // Calculate mean for both datasets
+      const mainMean =
+        mainValues.reduce((sum, val) => sum + val, 0) / mainValues.length;
+      const baselineMean =
+        baselineValues.reduce((sum, val) => sum + val, 0) /
+        baselineValues.length;
 
-      // Scale baseline to match the range of main data
-      const scaledBaselineValues = baselineValues.map((value) => {
-        const normalizedValue =
-          (value - baselineMin) / (baselineMax - baselineMin);
-        return mainMin + normalizedValue * (mainMax - mainMin);
-      });
+      // Scale baseline so that its mean matches the main data's mean
+      // This preserves the zero baseline and makes it clear if traffic is above/below expected
+      const scaleFactor = baselineMean > 0 ? mainMean / baselineMean : 1;
+      const scaledBaselineValues = baselineValues.map(
+        (value) => value * scaleFactor,
+      );
 
       datasets.push({
         data: scaledBaselineValues,
@@ -103,18 +112,22 @@ export const Sparkline: React.FC<SparklineProps> = ({
   }, [data, baselineData]);
 
   // Custom plugin to draw vertical line at selected date
+  // Using refs to access current values since plugin is only registered once
   const verticalLinePlugin = useMemo(
     () => ({
       id: "verticalLine",
       afterDatasetsDraw(chart: ChartJS<"line">) {
-        if (!selectedDate) return;
+        const currentSelectedDate = selectedDateRef.current;
+        const currentData = dataRef.current;
+
+        if (!currentSelectedDate) return;
 
         const { ctx, chartArea, scales } = chart;
         if (!chartArea || !scales.x) return;
 
         const { top, bottom } = chartArea;
-        const selectedIndex = data.findIndex(
-          (d) => d.date_month === selectedDate,
+        const selectedIndex = currentData.findIndex(
+          (d) => d.date_month === currentSelectedDate,
         );
 
         if (selectedIndex === -1) return;
@@ -132,7 +145,7 @@ export const Sparkline: React.FC<SparklineProps> = ({
         ctx.restore();
       },
     }),
-    [selectedDate, data],
+    [], // Empty deps - plugin is created once, uses refs for current values
   );
 
   const options: ChartOptions<"line"> = useMemo(
@@ -150,6 +163,7 @@ export const Sparkline: React.FC<SparklineProps> = ({
           backgroundColor: "rgba(0, 0, 0, 0.8)",
           padding: 8,
           position: "nearest",
+
           titleFont: {
             size: 11,
             family: "Outfit, sans-serif",
@@ -175,7 +189,7 @@ export const Sparkline: React.FC<SparklineProps> = ({
               ) {
                 return "";
               }
-              return `${context.parsed.y?.toLocaleString() ?? 0} trips`;
+              return `${context.parsed.y?.toLocaleString() ?? 0}${unit}`;
             },
           },
           filter: (tooltipItem) => {
@@ -211,11 +225,11 @@ export const Sparkline: React.FC<SparklineProps> = ({
   return (
     <div className="relative flex w-full flex-col">
       {title && (
-        <h3 className="font-outfit md:hidden mb-2 text-sm font-light text-gray-500">
+        <h3 className="mb-2 font-outfit text-sm font-light text-gray-500 md:hidden">
           {title}
         </h3>
       )}
-      <div className="h-12 w-full">
+      <div className="h-64 w-full">
         <Line
           ref={chartRef}
           data={chartData}
