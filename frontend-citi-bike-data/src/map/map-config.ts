@@ -20,7 +20,7 @@ import maplibregl, {
   LngLatLike,
   FilterSpecification,
 } from "maplibre-gl";
-import { MutableRefObject, useEffect, useState, useMemo } from "react";
+import { MutableRefObject, useEffect, useState, useMemo, useRef } from "react";
 import { useInteractionModeStore } from "@/store/interaction-mode-store";
 import { isMobileDevice } from "@/utils/mobile-detection";
 import dayjs from "dayjs";
@@ -590,18 +590,18 @@ export const useBaselineMonthlySumData = () => {
   };
 };
 
-// Hook to fetch previous month data for comparison
-export const usePreviousYearData = () => {
-  const { cellsToFetch, selectedMonth, analysisType } = useMapConfigStore();
+export const useComparisonData = () => {
+  const { cellsToFetch, selectedMonth, analysisType, comparisonDelta } =
+    useMapConfigStore();
 
-  const previousYear = selectedMonth
-    ? dayjs(selectedMonth).subtract(1, "year").format("YYYY-MM-DD")
+  const compDate = selectedMonth
+    ? dayjs(selectedMonth).subtract(comparisonDelta).format("YYYY-MM-DD")
     : undefined;
 
   const query = useQuery({
-    queryKey: [TRIP_COUNT_QUERY_KEY, cellsToFetch, previousYear, analysisType],
-    queryFn: () => getTripCountData(cellsToFetch, previousYear, analysisType),
-    enabled: !!previousYear,
+    queryKey: [TRIP_COUNT_QUERY_KEY, cellsToFetch, compDate, analysisType],
+    queryFn: () => getTripCountData(cellsToFetch, compDate, analysisType),
+    enabled: !!compDate,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
@@ -641,11 +641,11 @@ export const usePreviousYearSystemTotal = () => {
 };
 
 // Hook to get month-over-month comparison data
-export const useComparison = () => {
+export const useComparison = (filter = true) => {
   const { originCells, destinationCells, normalizeComparison } =
     useMapConfigStore();
   const query = useTripCountData();
-  const previousQuery = usePreviousYearData();
+  const previousQuery = useComparisonData();
   const systemQuery = useSystemTotalTrips();
   const previousSystemQuery = usePreviousYearSystemTotal();
 
@@ -661,7 +661,7 @@ export const useComparison = () => {
   // If no origins and no destinations: use system-wide
   // If origins but no destinations: use origin data
   // If destinations: use destination-filtered data
-  const shouldUseSystemWide = !hasOrigins && !hasDestinations;
+  const shouldUseSystemWide = (!hasOrigins && !hasDestinations) || !filter;
 
   const currentTotal = shouldUseSystemWide
     ? systemQuery.data?.data.sum_all_values || 0
@@ -913,7 +913,7 @@ export const useUpdateMapStyleOnDataChange = (
   mapLoaded: boolean,
 ) => {
   const query = useTripCountData();
-  const previousQuery = usePreviousYearData();
+  const previousQuery = useComparisonData();
   const [initialLoad, setInitialLoad] = useState(false);
   const { isOpen } = useIntroModalStore();
   const { scale, displayType, normalizeComparison } = useMapConfigStore();
@@ -921,7 +921,7 @@ export const useUpdateMapStyleOnDataChange = (
   const mapObj = map.current;
   if (!mapLoaded) return;
   const departureCountMap = query.data?.data.trip_counts;
-  const previousDepartureCountMap = previousQuery.data?.data.trip_counts;
+  const previousDepartureCountMap = previousQuery.data?.data?.trip_counts ?? {};
   const currentTotal = query.data?.data.sum_all_values || 0;
   const previousTotal = previousQuery.data?.data.sum_all_values || 0;
   const hexLayer = map.current?.getLayer(HEX_LAYER.id);
@@ -990,17 +990,26 @@ const getCellEventHandlers = (
       layer: HEX_LAYER.id,
       handler: (e) => {
         const cellId = e.features?.[0].id;
+        const isOrigin = e.features?.[0].state?.isOrigin as boolean;
+        const isDestination = e.features?.[0].state?.isDestination as boolean;
         if (typeof cellId !== "string") return;
         const coordinates = (e as MapMouseEvent).lngLat;
         const h3Id = cellId as string;
 
-        // On desktop: use selection mode to determine which cell array to modify
+        // On desktop: set clicked feature to show popup with buttons
         if (!isMobile) {
-          const selectionMode = useMapConfigStore.getState().selectionMode;
-          if (selectionMode === "origin") {
-            addOrRemoveOriginCell(cellId);
+          const { clickedFeature, setClickedFeature } =
+            usePopupStateStore.getState();
+          // Toggle: if clicking the same cell, clear it; otherwise set new cell
+          if (clickedFeature?.id === h3Id) {
+            setClickedFeature(null);
           } else {
-            addOrRemoveDestinationCell(cellId);
+            setClickedFeature({
+              id: h3Id,
+              coordinates: coordinates,
+              isOrigin,
+              isDestination,
+            });
           }
           return;
         }
@@ -1044,8 +1053,11 @@ const getCellEventHandlers = (
           const coordinates = e.lngLat;
           const h3Id = feature.id as string;
 
-          // Always show popup on hover (desktop only)
-          setHoveredFeature({ id: h3Id, coordinates: coordinates });
+          // Only show hover popup if there's no clicked feature
+          const { clickedFeature } = usePopupStateStore.getState();
+          if (!clickedFeature) {
+            setHoveredFeature({ id: h3Id, coordinates: coordinates });
+          }
           map.current.getCanvas().style.cursor = "pointer";
 
           if (!h3Id) return;
@@ -1058,7 +1070,7 @@ const getCellEventHandlers = (
 
           // If we're hovering a different feature
           if (hoveredFeatureId !== h3Id) {
-            // Animate previous feature back to 0.5 from wherever it currently is
+            // Animate previous feature back to base opacity from wherever it currently is
             if (hoveredFeatureId !== null) {
               const previousFeatureState = map.current?.getFeatureState({
                 source: HEX_SOURCE_ID,
@@ -1068,13 +1080,15 @@ const getCellEventHandlers = (
 
               const currentOpacity =
                 previousFeatureState?.opacity || DEFAULT_HEX_OPACITY;
-              // Only animate if it's not already at 0.5
-              if (currentOpacity !== DEFAULT_HEX_OPACITY) {
+              const baseOpacity =
+                previousFeatureState?.baseOpacity || DEFAULT_HEX_OPACITY;
+              // Only animate if it's not already at base opacity
+              if (currentOpacity !== baseOpacity) {
                 animateOpacity(
                   map,
                   hoveredFeatureId,
                   currentOpacity,
-                  DEFAULT_HEX_OPACITY,
+                  baseOpacity,
                 );
               } else {
                 // Just set hover state to false if already at correct opacity
@@ -1089,9 +1103,18 @@ const getCellEventHandlers = (
               }
             }
 
-            // Start animating new feature
+            // Start animating new feature from its current/base opacity to 0.85
             hoveredFeatureId = h3Id;
-            animateOpacity(map, h3Id, DEFAULT_HEX_OPACITY, 0.85, 100);
+            const newFeatureState = map.current?.getFeatureState({
+              source: HEX_SOURCE_ID,
+              sourceLayer: HEX_SOURCE_LAYER_ID,
+              id: h3Id,
+            });
+            const startOpacity =
+              newFeatureState?.opacity ||
+              newFeatureState?.baseOpacity ||
+              DEFAULT_HEX_OPACITY;
+            animateOpacity(map, h3Id, startOpacity, 0.85, 100);
           }
         },
       },
@@ -1107,16 +1130,22 @@ const getCellEventHandlers = (
               id: hoveredFeatureId,
             });
 
-            const currentOpacity = featureState?.opacity || 0.5;
+            const currentOpacity = featureState?.opacity || DEFAULT_HEX_OPACITY;
+            const baseOpacity =
+              featureState?.baseOpacity || DEFAULT_HEX_OPACITY;
 
-            // Animate back to 0.5
-            animateOpacity(map, hoveredFeatureId, currentOpacity, 0.5);
+            // Animate back to base opacity
+            animateOpacity(map, hoveredFeatureId, currentOpacity, baseOpacity);
 
             // Clear the hovered feature
             hoveredFeatureId = null;
           }
 
-          setHoveredFeature(null);
+          // Only clear hover if there's no clicked feature
+          const { clickedFeature } = usePopupStateStore.getState();
+          if (!clickedFeature) {
+            setHoveredFeature(null);
+          }
         },
       },
     );
@@ -1140,9 +1169,11 @@ export const useUpdateOriginShape = (
   mapLoaded: boolean,
 ) => {
   const { originCells } = useMapConfigStore();
+  const prevOriginCellsRef = useRef<string[]>([]);
 
   useEffect(() => {
-    if (!mapLoaded) return;
+    if (!mapLoaded || !map.current) return;
+
     const polygon = cellsToMultiPolygon(originCells, true);
     const originGeoJson = convertCellsToGeoJSON(polygon);
 
@@ -1161,6 +1192,41 @@ export const useUpdateOriginShape = (
       ORIGIN_LABEL_SOURCE_ID,
     ) as maplibregl.GeoJSONSource;
     labelSource?.setData(labelGeoJson);
+
+    // Update featureState for origin cells
+    const prevOriginCells = prevOriginCellsRef.current;
+    const originCellsSet = new Set(originCells);
+    const prevOriginCellsSet = new Set(prevOriginCells);
+
+    // Add isOrigin to new cells
+    originCells.forEach((cellId) => {
+      if (!prevOriginCellsSet.has(cellId)) {
+        map.current?.setFeatureState(
+          {
+            source: HEX_SOURCE_ID,
+            sourceLayer: HEX_SOURCE_LAYER_ID,
+            id: cellId,
+          },
+          { isOrigin: true },
+        );
+      }
+    });
+
+    // Remove isOrigin from cells no longer in origin
+    prevOriginCells.forEach((cellId) => {
+      if (!originCellsSet.has(cellId)) {
+        map.current?.setFeatureState(
+          {
+            source: HEX_SOURCE_ID,
+            sourceLayer: HEX_SOURCE_LAYER_ID,
+            id: cellId,
+          },
+          { isOrigin: false },
+        );
+      }
+    });
+
+    prevOriginCellsRef.current = originCells;
   }, [originCells, map, mapLoaded]);
 };
 
@@ -1169,9 +1235,11 @@ export const useUpdateDestinationShape = (
   mapLoaded: boolean,
 ) => {
   const { destinationCells } = useMapConfigStore();
+  const prevDestinationCellsRef = useRef<string[]>([]);
 
   useEffect(() => {
-    if (!mapLoaded) return;
+    if (!mapLoaded || !map.current) return;
+
     const polygons = cellsToMultiPolygon(destinationCells, true);
     const destinationGeoJson = convertCellsToGeoJSON(polygons);
 
@@ -1190,7 +1258,81 @@ export const useUpdateDestinationShape = (
       DESTINATION_LABEL_SOURCE_ID,
     ) as maplibregl.GeoJSONSource;
     labelSource?.setData(labelGeoJson);
+
+    // Update featureState for destination cells
+    const prevDestinationCells = prevDestinationCellsRef.current;
+    const destinationCellsSet = new Set(destinationCells);
+    const prevDestinationCellsSet = new Set(prevDestinationCells);
+
+    // Add isDestination to new cells
+    destinationCells.forEach((cellId) => {
+      if (!prevDestinationCellsSet.has(cellId)) {
+        map.current?.setFeatureState(
+          {
+            source: HEX_SOURCE_ID,
+            sourceLayer: HEX_SOURCE_LAYER_ID,
+            id: cellId,
+          },
+          { isDestination: true },
+        );
+      }
+    });
+
+    // Remove isDestination from cells no longer in destination
+    prevDestinationCells.forEach((cellId) => {
+      if (!destinationCellsSet.has(cellId)) {
+        map.current?.setFeatureState(
+          {
+            source: HEX_SOURCE_ID,
+            sourceLayer: HEX_SOURCE_LAYER_ID,
+            id: cellId,
+          },
+          { isDestination: false },
+        );
+      }
+    });
+
+    prevDestinationCellsRef.current = destinationCells;
   }, [destinationCells, map, mapLoaded]);
+};
+
+const DIMMED_OPACITY = 0.2;
+
+export const useDimNonSelectedCells = (
+  map: MutableRefObject<Map | null>,
+  mapLoaded: boolean,
+) => {
+  const { originCells, destinationCells } = useMapConfigStore();
+  const query = useTripCountData();
+
+  useEffect(() => {
+    if (!mapLoaded || !map.current) return;
+
+    const departureCountMap = query.data?.data.trip_counts;
+    if (!departureCountMap) return;
+
+    // Only dim cells when BOTH origin AND destination are selected
+    const shouldDim = originCells.length > 0 && destinationCells.length > 0;
+
+    // Create a Set for faster lookup
+    const selectedCells = new Set([...originCells, ...destinationCells]);
+
+    // Update opacity for all cells
+    Object.keys(departureCountMap).forEach((cellId) => {
+      const isSelected = selectedCells.has(cellId);
+      const targetOpacity =
+        shouldDim && !isSelected ? DIMMED_OPACITY : DEFAULT_HEX_OPACITY;
+
+      map.current?.setFeatureState(
+        {
+          source: HEX_SOURCE_ID,
+          sourceLayer: HEX_SOURCE_LAYER_ID,
+          id: cellId,
+        },
+        { opacity: targetOpacity, baseOpacity: targetOpacity },
+      );
+    });
+  }, [originCells, destinationCells, map, mapLoaded, query.data]);
 };
 
 export const useUpdateInfoModeSelectedCell = (

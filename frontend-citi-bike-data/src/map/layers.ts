@@ -97,6 +97,7 @@ export const ORIGIN_LABEL_LAYER: LayerSpecification = {
   type: "symbol",
   layout: {
     "icon-offset": [0, 25],
+    "icon-size":.8,
     "icon-image": "origin_label",
     "icon-allow-overlap": true,
   },
@@ -135,6 +136,7 @@ export const DESTINATION_LABEL_LAYER: LayerSpecification = {
   type: "symbol",
   layout: {
     "icon-offset": [0, 25],
+    "icon-size":.8,
     "icon-image": "destination_label",
     "icon-allow-overlap": true,
   },

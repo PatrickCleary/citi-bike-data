@@ -12,6 +12,7 @@ import {
   useUpdateMapStyleOnDataChange,
   useUpdateOriginShape,
   useUpdateDestinationShape,
+  useDimNonSelectedCells,
   useUpdateInfoModeSelectedCell,
   usePrefetchTripCountData,
   useUpdateBikeLaneFilter,
@@ -56,6 +57,7 @@ export const MapPage: React.FC = () => {
   useFetchLatestDate();
   useUpdateOriginShape(map, mapLoaded);
   useUpdateDestinationShape(map, mapLoaded);
+  useDimNonSelectedCells(map, mapLoaded);
   useSync();
   useUpdateInfoModeSelectedCell(map, mapLoaded);
   useAddPMTilesProtocol();

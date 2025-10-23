@@ -16,7 +16,7 @@ export const getTripCountData = async (
   analysisType: AnalysisType,
 ): Promise<TripCountResult | undefined> => {
   if (!targetMonth) return undefined;
-  const data = await fetch(API_URL + "/functions/v1/trip-counts", {
+  const data = await fetch(API_URL + "/functions/v1/trip-counts-v2", {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
@@ -61,11 +61,14 @@ export const getMonthlySum = async (
   destinationCellIds: string[],
   year: string,
 ): Promise<MonthlyAggResult | undefined> => {
-  if (!year || (originCellIds.length === 0 && destinationCellIds.length === 0)) {
+  if (
+    !year ||
+    (originCellIds.length === 0 && destinationCellIds.length === 0)
+  ) {
     return undefined;
   }
 
-  const data = await fetch(API_URL + "/functions/v1/sum-monthly", {
+  const data = await fetch(API_URL + "/functions/v1/sum-monthly-v2", {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,

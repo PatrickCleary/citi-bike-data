@@ -38,7 +38,7 @@ export const ZoomLevelOverlay: React.FC<ZoomLevelOverlayProps> = ({
   }
 
   return (
-    <div className="pointer-events-none fixed right-4 top-4 z-50 rounded-md bg-black/70 px-3 py-2 font-mono text-sm text-white backdrop-blur-sm">
+    <div className="pointer-events-none fixed right-4 top-4 z-50 rounded-md bg-black/70 px-3 py-2 font-mono text-sm text-white backdrop-blur-sm hidden md:flex">
       Zoom: {zoom.toFixed(2)}
     </div>
   );

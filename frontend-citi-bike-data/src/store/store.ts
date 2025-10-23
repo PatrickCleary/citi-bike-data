@@ -1,14 +1,18 @@
 import { useTripCountData } from "@/map/map-config";
 import { getMaxDate } from "@/utils/api";
 import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { useEffect } from "react";
 import { create } from "zustand";
+import duration from "dayjs/plugin/duration";
+dayjs.extend(duration);
 
 interface Store {
   cellsToFetch: string[];
   originCells: string[];
   destinationCells: string[];
   departureCountMap: Record<string, number> | null;
+  comparisonDelta: duration.Duration;
   selectedMonth: string | undefined;
   analysisType: "departures" | "arrivals";
   scaleType: "dynamic" | "custom";
@@ -37,6 +41,7 @@ export const useMapConfigStore = create<Store>((set, get) => ({
   cellsToFetch: [],
   originCells: [],
   destinationCells: [],
+  comparisonDelta: dayjs.duration(1, "year"),
   departureCountMap: null,
   selectedMonth: undefined,
   analysisType: "arrivals",

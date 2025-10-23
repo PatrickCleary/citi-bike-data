@@ -6,7 +6,7 @@ import { usePopupStateStore } from "@/store/popup-store";
 import {
   useTripCountData,
   useComparison,
-  usePreviousYearData,
+  useComparisonData,
 } from "./map-config";
 import { formatter } from "@/utils/utils";
 import { useMapConfigStore } from "@/store/store";
@@ -27,20 +27,25 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   // a ref for an element to hold the popup's content
   const contentRef = useRef<HTMLDivElement | null>(null);
   const query = useTripCountData();
-  const previousQuery = usePreviousYearData();
+  const previousQuery = useComparisonData();
   const tripCounts = query.data?.data.trip_counts || {};
   const previousTripCounts = previousQuery.data?.data.trip_counts || {};
-  const { hoveredFeature, setHoveredFeature } = usePopupStateStore();
+  const { hoveredFeature, setHoveredFeature, clickedFeature } =
+    usePopupStateStore();
   const { mode } = useInteractionModeStore();
   const { displayType, scale, selectedMonth } = useMapConfigStore();
-  const comparison = useComparison();
+  const comparison = useComparison(false);
   const loading = query.isLoading;
-  const hoveredTripCount =
-    tripCounts[hoveredFeature?.id as string] || undefined;
+
+  // Use clicked feature if it exists, otherwise use hovered feature
+  const activeFeature = clickedFeature || hoveredFeature;
+  const isClicked = !!clickedFeature;
+
+  const hoveredTripCount = tripCounts[activeFeature?.id as string] || undefined;
   const hoveredPreviousTripCount =
-    previousTripCounts[hoveredFeature?.id as string] || undefined;
-  const cellComparison = hoveredFeature?.id
-    ? comparison.getCellComparison(hoveredFeature.id as string)
+    previousTripCounts[activeFeature?.id as string] || undefined;
+  const cellComparison = activeFeature?.id
+    ? comparison.getCellComparison(activeFeature.id as string)
     : null;
 
   // Get hex color based on display type
@@ -81,16 +86,41 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
     }
   }, [mode, setHoveredFeature]);
 
+  // Add click listener to clear clicked feature when clicking outside
+  const { setClickedFeature } = usePopupStateStore();
+  useEffect(() => {
+    if (!map.current) return;
+
+    const handleMapClick = (e: maplibregl.MapMouseEvent) => {
+      const features = map.current?.queryRenderedFeatures(e.point);
+      const hasHexFeature = features?.some(
+        (f) => f.layer.id === "nyc_jc_hex_tiles_layer",
+      );
+
+      if (!hasHexFeature && clickedFeature) {
+        setClickedFeature(null);
+      }
+    };
+
+    map.current.on("click", handleMapClick);
+
+    return () => {
+      map.current?.off("click", handleMapClick);
+    };
+  }, [map, clickedFeature, setClickedFeature]);
+
   // when activeFeature changes, set the popup's location and content, and add it to the map
   useEffect(() => {
     if (!popupRef.current || !map.current) return;
 
-    if (!hoveredFeature) {
+    if (!activeFeature) {
       popupRef.current.remove();
       return;
     }
 
+    // Only require data for hover (not for clicked cells)
     if (
+      !isClicked &&
       hoveredTripCount === undefined &&
       hoveredPreviousTripCount === undefined
     ) {
@@ -99,10 +129,10 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
     }
     if (!contentRef.current) return;
     popupRef.current
-      .setLngLat(hoveredFeature.coordinates) // set its position using activeFeature's geometry
+      .setLngLat(activeFeature.coordinates) // set its position using activeFeature's geometry
       .setDOMContent(contentRef.current) // use contentRef to set the DOM content of the popup
       .addTo(map.current); // add the popup to the map
-  }, [hoveredFeature]);
+  }, [activeFeature, hoveredTripCount, hoveredPreviousTripCount, isClicked]);
   // use a react portal to render the content to show in the popup, assigning it to contentRef
   return (
     <>
@@ -112,9 +142,10 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
             hoveredTripCount={hoveredTripCount}
             loading={loading}
             hexColor={hexColor}
-            cellId={hoveredFeature?.id as string}
+            cellId={activeFeature?.id as string}
             comparison={comparison}
             selectedMonth={selectedMonth}
+            showButtons={isClicked}
           />,
           contentRef.current,
         )}
@@ -131,6 +162,7 @@ export const PopupContent: React.FC<{
   cellId: string;
   comparison: ReturnType<typeof useComparison>;
   selectedMonth: string | undefined;
+  showButtons: boolean;
 }> = ({
   loading,
   hoveredTripCount,
@@ -138,11 +170,35 @@ export const PopupContent: React.FC<{
   cellId,
   comparison,
   selectedMonth,
+  showButtons,
 }) => {
-  const { analysisType, originCells, displayType, destinationCells } =
-    useMapConfigStore();
+  const {
+    analysisType,
+    originCells,
+    displayType,
+    destinationCells,
+    comparisonDelta,
+    addOrRemoveOriginCell,
+    addOrRemoveDestinationCell,
+  } = useMapConfigStore();
+  const { setClickedFeature, clickedFeature } = usePopupStateStore();
   const noCellsSelected =
     originCells.length === 0 && destinationCells.length === 0;
+  const isSelected = clickedFeature?.isDestination || clickedFeature?.isOrigin;
+
+  const handleRemove = () => {
+    if (clickedFeature?.isDestination) addOrRemoveDestinationCell(cellId);
+    if (clickedFeature?.isOrigin) addOrRemoveOriginCell(cellId);
+    setClickedFeature(null);
+  };
+  const handleAddOrigin = () => [
+    addOrRemoveOriginCell(cellId),
+    setClickedFeature(null),
+  ];
+  const handleAddDestination = () => [
+    addOrRemoveDestinationCell(cellId),
+    setClickedFeature(null),
+  ];
 
   const cellComparison = cellId ? comparison.getCellComparison(cellId) : null;
   const showComparison =
@@ -152,8 +208,8 @@ export const PopupContent: React.FC<{
     : false;
 
   // Calculate previous year's month for the "no data" message
-  const previousYearMonth = selectedMonth
-    ? dayjs(selectedMonth).subtract(1, "year")
+  const comparisonDate = selectedMonth
+    ? dayjs(selectedMonth).subtract(comparisonDelta)
     : null;
 
   if (noCellsSelected)
@@ -213,10 +269,36 @@ export const PopupContent: React.FC<{
               </div>
             ) : (
               <div className="mt-0.5 text-xs text-gray-400">
-                no data in {previousYearMonth?.format("MMMM, YYYY")}
+                no data in {comparisonDate?.format("MMMM, YYYY")}
               </div>
             )}
           </>
+        )}
+        {!isSelected && showButtons && (
+          <div className="mt-2 flex flex-col gap-1">
+            <button
+              onClick={handleAddOrigin}
+              className="pointer-events-auto rounded-md bg-black/70 px-3 py-1 text-xs font-medium text-white transition hover:bg-black active:scale-95"
+            >
+              Add to origin
+            </button>
+            <button
+              onClick={handleAddDestination}
+              className="pointer-events-auto rounded-md bg-white/70 px-3 py-1 text-xs font-medium text-black transition hover:bg-white active:scale-95"
+            >
+              Add to destination
+            </button>
+          </div>
+        )}
+        {isSelected && (
+          <div className="mt-2 text-xs font-medium text-gray-500">
+            <button
+              onClick={handleRemove}
+              className="pointer-events-auto rounded-md bg-black/70 px-3 py-1 text-xs font-medium text-white transition hover:bg-black active:scale-95"
+            >
+              Remove from {clickedFeature?.isOrigin ? "origin" : "destination"}
+            </button>
+          </div>
         )}
       </PopupDiv>
     );
@@ -267,10 +349,36 @@ export const PopupContent: React.FC<{
             </div>
           ) : (
             <div className="mt-0.5 text-xs text-gray-400">
-              no data in {previousYearMonth?.format("MMMM, YYYY")}
+              no data in {comparisonDate?.format("MMMM, YYYY")}
             </div>
           )}
         </>
+      )}
+      {!isSelected && showButtons && (
+        <div className="mt-2 flex flex-col gap-1">
+          <button
+            onClick={handleAddOrigin}
+            className="pointer-events-auto rounded-md bg-black/70 px-3 py-1 text-xs font-medium text-white transition hover:bg-black active:scale-95"
+          >
+            Add to origin
+          </button>
+          <button
+            onClick={handleAddDestination}
+            className="pointer-events-auto rounded-md bg-white/70 px-3 py-1 text-xs font-medium text-black transition hover:bg-white active:scale-95"
+          >
+            Add to destination
+          </button>
+        </div>
+      )}
+      {isSelected && (
+        <div className="mt-2 text-xs font-medium text-gray-500">
+          <button
+            onClick={handleRemove}
+            className="pointer-events-auto rounded-md bg-black/70 px-3 py-1 text-xs font-medium text-white transition hover:bg-black active:scale-95"
+          >
+            Remove from {clickedFeature?.isOrigin ? "origin" : "destination"}
+          </button>
+        </div>
       )}
     </PopupDiv>
   );
@@ -278,7 +386,7 @@ export const PopupContent: React.FC<{
 
 const PopupDiv: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="rounded-2 pointer-events-none flex flex-col items-center rounded-md border-[.5px] border-cb-white/50 bg-white/30 px-2 py-1 text-center font-sans text-lg tabular-nums text-black text-neutral-800 drop-shadow-md backdrop-blur-md">
+    <div className="rounded-2 flex flex-col items-center rounded-md border-[.5px] border-cb-white/50 bg-white/30 px-2 py-1 text-center font-sans text-lg tabular-nums text-black text-neutral-800 drop-shadow-md backdrop-blur-md">
       {children}
     </div>
   );
