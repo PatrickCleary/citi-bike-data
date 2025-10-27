@@ -7,12 +7,13 @@ import dayjs from "dayjs";
 import classNames from "classnames";
 import { AnimatedNumber } from "../other/animated-digits";
 import { TripsText } from "./total-trips-metric";
+import { formatter } from "@/utils/utils";
 
 export const ComparisonMetric: React.FC = () => {
   const { selectedMonth, comparisonDelta } = useMapConfigStore();
   const dateObj = dayjs(selectedMonth);
 
-  const comparisonDate = dateObj.subtract(comparisonDelta).format("MMMM YYYY");
+  const comparisonDate = dateObj.add(comparisonDelta).format("MMMM YYYY");
   const comparison = useComparison();
   const isPositiveChange = comparison.absoluteChange > 0;
   const isBaselinePositive = comparison.baselineAbsoluteChange > 0;
@@ -78,6 +79,7 @@ export const ComparisonMetric: React.FC = () => {
             {comparison.baselinePercentageChange.toFixed(1)}%
           </span>
         )}
+        <span>{formatter.format(comparison.normalizedPercentageChange)}%</span>
       </div>
       <p className="text-xs font-light uppercase text-gray-500">
         vs {comparisonDate}

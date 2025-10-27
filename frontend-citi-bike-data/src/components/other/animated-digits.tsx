@@ -29,7 +29,7 @@ const AnimatedDigit: React.FC<AnimatedDigitProps> = ({
 };
 
 interface AnimatedNumberProps {
-  value: number;
+  value: string | number;
   className?: string;
 }
 
@@ -50,7 +50,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
 
   return (
     <span
-      className={classNames("text-xl tabular-nums tracking-wider", className)}
+      className={classNames("tabular-nums tracking-wider", className)}
     >
       {digits.map((digit, index) => (
         <AnimatedDigit

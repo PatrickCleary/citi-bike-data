@@ -21,7 +21,7 @@ import maplibregl, {
   FilterSpecification,
 } from "maplibre-gl";
 import { MutableRefObject, useEffect, useState, useMemo, useRef } from "react";
-import { useInteractionModeStore } from "@/store/interaction-mode-store";
+
 import { isMobileDevice } from "@/utils/mobile-detection";
 import dayjs from "dayjs";
 import {
@@ -595,7 +595,7 @@ export const useComparisonData = () => {
     useMapConfigStore();
 
   const compDate = selectedMonth
-    ? dayjs(selectedMonth).subtract(comparisonDelta).format("YYYY-MM-DD")
+    ? dayjs(selectedMonth).add(comparisonDelta).format("YYYY-MM-DD")
     : undefined;
 
   const query = useQuery({
@@ -709,6 +709,9 @@ export const useComparison = (filter = true) => {
     baselineLabel = "system";
   }
 
+  const normalizedPercentageChange =
+    percentageChange - baselinePercentageChange;
+
   // Calculate expected growth rate from baseline (if normalizing)
   const expectedGrowthRate =
     normalizeComparison && previousTotal > 0
@@ -760,6 +763,7 @@ export const useComparison = (filter = true) => {
     percentageChange,
     baselineAbsoluteChange,
     baselinePercentageChange,
+    normalizedPercentageChange,
     baselineLabel,
     showBaseline: !shouldUseSystemWide, // Show baseline when not already showing system-wide
     getCellComparison,
@@ -996,46 +1000,20 @@ const getCellEventHandlers = (
         const coordinates = (e as MapMouseEvent).lngLat;
         const h3Id = cellId as string;
 
-        // On desktop: set clicked feature to show popup with buttons
-        if (!isMobile) {
-          const { clickedFeature, setClickedFeature } =
-            usePopupStateStore.getState();
-          // Toggle: if clicking the same cell, clear it; otherwise set new cell
-          if (clickedFeature?.id === h3Id) {
-            setClickedFeature(null);
-          } else {
-            setClickedFeature({
-              id: h3Id,
-              coordinates: coordinates,
-              isOrigin,
-              isDestination,
-            });
-          }
-          return;
-        }
-
-        // On mobile: use interaction mode
-        const mode = useInteractionModeStore.getState().mode;
-        const { infoModeSelectedCell, setInfoModeSelectedCell } =
+        const { clickedFeature, setClickedFeature } =
           usePopupStateStore.getState();
-
-        if (mode === "popup") {
-          // Toggle info mode selection - if clicking the same cell, deselect it and clear popup
-          if (infoModeSelectedCell === h3Id) {
-            setInfoModeSelectedCell(null);
-            setHoveredFeature(null);
-          } else {
-            // Show popup and select new cell
-            setHoveredFeature({ id: h3Id, coordinates: coordinates });
-            setInfoModeSelectedCell(h3Id);
-          }
+        // Toggle: if clicking the same cell, clear it; otherwise set new cell
+        if (clickedFeature?.id === h3Id) {
+          setClickedFeature(null);
         } else {
-          // On mobile selection mode, always use origin cells for now
-          // (Mobile UI for destination selection can be added later)
-          addOrRemoveOriginCell(cellId);
-          // Clear info mode selection when in selection mode
-          setInfoModeSelectedCell(null);
+          setClickedFeature({
+            id: h3Id,
+            coordinates: coordinates,
+            isOrigin,
+            isDestination,
+          });
         }
+        return;
       },
     },
   ];

@@ -11,17 +11,17 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        outfit: ['Outfit', 'sans-serif'],
+        outfit: ["Outfit", "sans-serif"],
       },
       keyframes: {
         slideDown: {
-          '0%': {
-            opacity: '0',
-            transform: 'translateY(-20px)',
+          "0%": {
+            opacity: "0",
+            transform: "translateY(-20px)",
           },
-          '100%': {
-            opacity: '1',
-            transform: 'translateY(0)',
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0)",
           },
         },
       },
@@ -44,7 +44,9 @@ export default {
           yellow: "#fde725",
           // Comparison/trend colors
           increase: "#01665e", // Dark blue-green for increases
+          "increase-pastel": "#BEE8E5",
           decrease: "#8c510a", // Brown for decreases
+          "decrease-pastel": "#EBDAC5",
         },
         background: "var(--background)",
         foreground: "var(--foreground)",

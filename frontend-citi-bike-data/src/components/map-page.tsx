@@ -26,20 +26,16 @@ import { LayerControl } from "./layer-control";
 
 import { DateControl } from "./date-control";
 import { DisplaySettings } from "./display-settings";
-import { DeleteButton, InteractionModeToggle } from "./interaction-mode-toggle";
 import { SelectionModeToggle } from "./selection-mode-toggle";
 import { Legend } from "./legend";
-import {
-  useFetchLatestDate,
-  useSync,
-  useSyncAnalysisType,
-} from "@/store/store";
+import { useFetchLatestDate, useSync } from "@/store/store";
 import IconLogo from "@/icons/icon";
 import { LocationSearchModal } from "./location-search-modal";
 import { LocationSearchControl } from "./location-search-control";
 import { IntroModal } from "./intro-modal";
 import { useIntroModalStore } from "@/store/intro-modal-store";
 import { ZoomLevelOverlay } from "./zoom-level-overlay";
+import { MobileMetricsContainer } from "./metrics/mobile-metrics-container";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -111,25 +107,24 @@ export const MapPage: React.FC = () => {
       <div className="h-full w-full" ref={mapContainer}>
         <Logo />
         <ZoomLevelOverlay map={map} mapLoaded={mapLoaded} />
-        <div className="pointer-events-none fixed top-4 z-10 flex w-full flex-col items-center gap-4 px-16 md:left-1/2 md:top-4 md:-translate-x-1/2 md:flex-row md:justify-center">
+        {/* <div className="pointer-events-none fixed top-4 z-10 flex hidden w-full flex-col items-center gap-4 px-16 md:left-1/2 md:top-4 md:flex md:-translate-x-1/2 md:flex-row md:justify-center">
           <MetricsContainer />
-        </div>
-        <div className="pointer-events-none fixed bottom-4 left-4 z-10 flex flex-col gap-2">
-          <Legend />
-          <LayerControl map={map} mapLoaded={mapLoaded} />
-          <DisplaySettings />
-          <SelectionModeToggle />
-          <LocationSearchControl />
-
-          <div className="w-fit md:hidden">
-            <InteractionModeToggle />
+        </div> */}
+        <div className="pointer-events-none fixed bottom-0 z-10 flex w-full flex-col gap-2">
+          <div className="px-4">
+            <Legend />
+            <LayerControl map={map} mapLoaded={mapLoaded} />
+            <DisplaySettings />
+            <SelectionModeToggle />
+            <LocationSearchControl />
+            <div className="pointer-events-auto flex flex-row gap-2">
+              <DateControl />
+            </div>
           </div>
-          <div className="pointer-events-auto flex flex-row gap-2">
-            <DateControl />
-          </div>
+          <MobileMetricsContainer />
+          {/* <MetricsContainer /> */}
         </div>
       </div>
-      {!isMobile && <DeleteButton />}
 
       <Popup map={map} />
       <LocationSearchModal />

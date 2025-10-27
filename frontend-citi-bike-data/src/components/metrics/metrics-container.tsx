@@ -10,6 +10,8 @@ import { isMobileDevice } from "@/utils/mobile-detection";
 import classNames from "classnames";
 import { useMapConfigStore } from "@/store/store";
 import { AnalysisType } from "@/utils/api";
+import { MobileBasicMetric } from "./mobile-basic-metric";
+import { TestMetric } from "./test-metric";
 
 const metricComponents: Record<MetricType, React.FC> = {
   total: TotalTripsMetric,
@@ -17,10 +19,7 @@ const metricComponents: Record<MetricType, React.FC> = {
   sparkline: SparklineMetric,
   percentage: PercentageMetric,
 };
-const getDisplayText = (
-  analysisType: AnalysisType,
-  originCells: string[],
-) => {
+const getDisplayText = (analysisType: AnalysisType, originCells: string[]) => {
   if (!originCells || originCells.length === 0) {
     return "System-wide";
   }
@@ -33,15 +32,21 @@ export const MetricsContainer: React.FC = () => {
   const { selectedMobileMetric } = useMetricsStore();
   const { analysisType, originCells } = useMapConfigStore();
 
-  const allMetrics: MetricType[] = ["comparison", "total", "sparkline", "percentage"];
+  const allMetrics: MetricType[] = [
+    "comparison",
+    "total",
+    "sparkline",
+    "percentage",
+  ];
 
   const MetricComponentMobile = metricComponents[selectedMobileMetric];
   return (
-    <div className="pointer-events-auto flex w-full max-w-sm lg:max-w-none">
+    <div className="pointer-events-auto flex w-full lg:max-w-none">
       {/* Render the visible metrics */}
 
       <MobileMetricWrapper key={selectedMobileMetric}>
-        <MetricComponentMobile />
+        <MobileBasicMetric />
+        {/* <SparklineMetric /> */}
       </MobileMetricWrapper>
       <div className="flex hidden w-full cursor-default flex-col items-center gap-2 overflow-hidden rounded-md border-[0.5px] border-cb-white/40 bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md lg:flex">
         {/* Header */}
@@ -56,7 +61,8 @@ export const MetricsContainer: React.FC = () => {
         </p>
         {/* Metrics */}
         <div className="flex w-full flex-row items-stretch gap-8 px-4">
-          {allMetrics.map((metricType) => {
+          <TestMetric />
+          {/* {allMetrics.map((metricType) => {
             const MetricComponent = metricComponents[metricType];
             return (
               <div
@@ -66,7 +72,7 @@ export const MetricsContainer: React.FC = () => {
                 <MetricComponent />
               </div>
             );
-          })}
+          })} */}
         </div>
       </div>
 

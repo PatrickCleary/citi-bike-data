@@ -1,6 +1,6 @@
 import React from "react";
 import { useMapConfigStore } from "@/store/store";
-import HexagonOutlinedIcon from "@mui/icons-material/HexagonOutlined";
+import OpenInFullRoundedIcon from "@mui/icons-material/OpenInFullRounded";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CheckIcon from "@mui/icons-material/Check";
 import { AnalysisType } from "@/utils/api";
@@ -10,6 +10,7 @@ import { useMetricsStore, MetricType } from "@/store/metrics-store";
 import { TotalTripsMetric } from "./total-trips-metric";
 import { ComparisonMetric } from "./comparison-metric";
 import { SparklineMetric } from "./sparkline-metric";
+import dayjs from "dayjs";
 
 const metricLabels: Record<MetricType, string> = {
   total: "Total Trips",
@@ -23,10 +24,7 @@ const metricComponents: Record<MetricType, React.FC> = {
   sparkline: SparklineMetric,
 };
 
-const getDisplayText = (
-  analysisType: AnalysisType,
-  originCells: string[],
-) => {
+const getDisplayText = (analysisType: AnalysisType, originCells: string[]) => {
   if (!originCells || originCells.length === 0) {
     return "System-wide";
   }
@@ -37,38 +35,41 @@ const getDisplayText = (
 
 interface MobileMetricWrapperProps {
   children: React.ReactNode;
+  expanded: boolean;
+  setExpanded: (expanded: boolean) => void;
 }
 
 export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
   children,
+  expanded,
+  setExpanded,
 }) => {
   const { analysisType, originCells } = useMapConfigStore();
   const { selectedMobileMetric, setSelectedMobileMetric } = useMetricsStore();
   const allMetrics: MetricType[] = ["total", "comparison", "sparkline"];
 
   return (
-    <div className="flex w-full cursor-default flex-col rounded-md border-[0.5px] border-cb-white/40 bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md lg:hidden">
+    <div className="flex w-full cursor-default flex-col gap-2 rounded-md rounded-b-none border-[0.5px] border-cb-white/40 bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md md:hidden">
       {/* Header with menu button */}
       <div className="flex w-full items-center justify-between">
-        <div className="invisible p-1">
-          <MoreHorizIcon />
-        </div>
-        <p className="flex w-fit justify-center gap-[2px] px-4 text-nowrap rounded-full bg-black/5 font-light uppercase tracking-wider text-gray-600">
-          {getDisplayText(analysisType, originCells)}
-          {originCells.length > 0 && (
-            <span className={classNames("flex items-center text-gray-900")}>
-              <span>selection</span>
-              <HexagonOutlinedIcon
-                fontSize="inherit"
-                className="ml-1 text-xs"
-              />
-            </span>
-          )}
-        </p>
+        <MetricHeader />
+
+        <button
+          onClick={() => {
+            setExpanded(!expanded);
+          }}
+        >
+          <OpenInFullRoundedIcon
+            fontSize="small"
+            className="text-gray-600"
+            titleAccess="Expand metrics (desktop only)"
+          />
+        </button>
+
         <Menu>
-          <MenuButton className="flex items-center justify-center rounded-full p-1 focus:outline-none active:scale-95 active:bg-cb-white/30">
-            <MoreHorizIcon fontSize="small" className="text-gray-600" />
-          </MenuButton>
+          {/* <MenuButton className="flex items-center justify-center rounded-full p-1 focus:outline-none active:scale-95 active:bg-cb-white/30">
+              <MoreHorizIcon fontSize="small" className="text-gray-600" />
+            </MenuButton> */}
           <MenuItems
             anchor="bottom"
             transition
@@ -114,8 +115,38 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
           </MenuItems>
         </Menu>
       </div>
+
       {/* Metric content */}
-      <div className="flex flex-col items-center">{children}</div>
+      <div className="flex w-full flex-col items-center justify-center">
+        {children}
+      </div>
     </div>
+  );
+};
+
+export const MetricHeader: React.FC = (): React.ReactNode => {
+  const { selectedMonth, originCells, destinationCells } = useMapConfigStore();
+  const dateObj = dayjs(selectedMonth);
+  const startDate = dateObj.format("MMM YYYY");
+
+  const getText = () => {
+    if (destinationCells.length === 0 && originCells.length === 0) {
+      return "Total";
+    }
+    if (originCells.length > 0 && destinationCells.length === 0) {
+      return `from origin`;
+    }
+    if (originCells.length === 0 && destinationCells.length > 0) {
+      return `To destination`;
+    }
+    return `Origin to destination`;
+  };
+  return (
+    <p className="flex flex-row items-baseline gap-1 text-xs font-light uppercase text-gray-700">
+      <span className="flex w-[80px] justify-center rounded-md border border-[0.5px] border-white/10 bg-cb-lightGray tabular-nums">
+        {startDate}
+      </span>
+      • {getText()}
+    </p>
   );
 };

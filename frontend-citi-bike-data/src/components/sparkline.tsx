@@ -229,8 +229,9 @@ export const Sparkline: React.FC<SparklineProps> = ({
           {title}
         </h3>
       )}
-      <div className="h-64 w-full">
+      <div className="h-32 w-full md:h-32">
         <Line
+          width={"100%"}
           ref={chartRef}
           data={chartData}
           options={options}

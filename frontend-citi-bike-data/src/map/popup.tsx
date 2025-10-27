@@ -15,7 +15,7 @@ import PedalBikeRoundedIcon from "@mui/icons-material/PedalBikeRounded";
 import HexagonIcon from "@mui/icons-material/Hexagon";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
-import { useInteractionModeStore } from "@/store/interaction-mode-store";
+
 import dayjs from "dayjs";
 interface PopupProps {
   map: MutableRefObject<Map | null>;
@@ -32,7 +32,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   const previousTripCounts = previousQuery.data?.data.trip_counts || {};
   const { hoveredFeature, setHoveredFeature, clickedFeature } =
     usePopupStateStore();
-  const { mode } = useInteractionModeStore();
+
   const { displayType, scale, selectedMonth } = useMapConfigStore();
   const comparison = useComparison(false);
   const loading = query.isLoading;
@@ -78,13 +78,6 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
     };
   }, [map.current]);
 
-  // Clear popup when switching to selection mode
-  useEffect(() => {
-    if (mode === "selection") {
-      popupRef.current?.remove();
-      setHoveredFeature(null);
-    }
-  }, [mode, setHoveredFeature]);
 
   // Add click listener to clear clicked feature when clicking outside
   const { setClickedFeature } = usePopupStateStore();
@@ -209,7 +202,7 @@ export const PopupContent: React.FC<{
 
   // Calculate previous year's month for the "no data" message
   const comparisonDate = selectedMonth
-    ? dayjs(selectedMonth).subtract(comparisonDelta)
+    ? dayjs(selectedMonth).add(comparisonDelta)
     : null;
 
   if (noCellsSelected)

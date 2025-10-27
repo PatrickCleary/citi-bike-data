@@ -6,6 +6,7 @@ import {
 import { useMapConfigStore } from "@/store/store";
 import dayjs from "dayjs";
 import { AnimatedNumber } from "../other/animated-digits";
+import { formatter } from "@/utils/utils";
 
 export const TotalTripsMetric: React.FC = () => {
   const { selectedMonth } = useMapConfigStore();
@@ -17,21 +18,30 @@ export const TotalTripsMetric: React.FC = () => {
 
   return (
     <div className="flex cursor-default flex-col items-center">
-      <div className="flex w-full flex-row justify-center gap-1 text-left">
-        {query.isLoading ? (
-          <span className="animate-pulse text-xl tabular-nums tracking-wider text-gray-900 blur-sm">
-            12,345
+      <div className="flex w-full flex-row items-center justify-center gap-1 text-nowrap text-left text-lg sm:text-xl">
+        {queryFiltered.isLoading ? (
+          <span className="animate-pulse tabular-nums tracking-wider text-gray-900 blur-sm ">
+            <span className="hidden sm:block">12,345</span>
+            <span className="block sm:hidden">{formatter.format(12_345)}</span>
             <TripsText />
           </span>
         ) : (
           <p>
-            <AnimatedNumber value={totalTrips} className="text-gray-900" />
+            <AnimatedNumber
+              value={totalTrips}
+              className="hidden text-gray-900 sm:flex"
+            />
+            <AnimatedNumber
+              value={formatter.format(totalTrips)}
+              className="text-gray-900 sm:hidden"
+            />
             <TripsText />
           </p>
         )}
       </div>
       <h4 className="cursor-default text-xs font-light uppercase tracking-wider text-gray-500">
-        {startDate}
+        <span className="hidden sm:block">{startDate}</span>
+        <span className="block sm:hidden">{dateObj.format("MMM 'YY")}</span>
       </h4>
     </div>
   );
@@ -39,7 +49,7 @@ export const TotalTripsMetric: React.FC = () => {
 
 export const TripsText: React.FC = () => {
   return (
-    <span className="ml-2 text-xs font-light uppercase text-gray-700">
+    <span className="text-sm font-medium uppercase text-gray-700 sm:ml-2">
       Trips
     </span>
   );
