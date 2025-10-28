@@ -36,6 +36,7 @@ import { IntroModal } from "./intro-modal";
 import { useIntroModalStore } from "@/store/intro-modal-store";
 import { ZoomLevelOverlay } from "./zoom-level-overlay";
 import { MobileMetricsContainer } from "./metrics/mobile-metrics-container";
+import { DesktopMetricsContainer } from "./metrics/desktop-metrics-container";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -122,7 +123,7 @@ export const MapPage: React.FC = () => {
             </div>
           </div>
           <MobileMetricsContainer />
-          {/* <MetricsContainer /> */}
+          <DesktopMetricsContainer />
         </div>
       </div>
 

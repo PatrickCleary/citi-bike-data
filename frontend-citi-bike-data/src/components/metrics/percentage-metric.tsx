@@ -4,14 +4,16 @@ import {
   useBaselineMonthlySumData,
 } from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
+import { SeasonalShareChart } from "../seasonal-share-chart";
 import { Sparkline } from "../sparkline";
+import { BasicChartWrapper } from "../charts/basic-chart-wrapper";
 
 export const PercentageMetric: React.FC = () => {
   const { originCells, destinationCells, selectedMonth } = useMapConfigStore();
   const destinationQuery = useTripMonthlySumData();
   const originQuery = useBaselineMonthlySumData();
 
-  // Calculate percentage data over the 2-year window
+  // Calculate percentage data over the 4-year window
   const percentageData = useMemo(() => {
     if (!destinationQuery.data?.data || !originQuery.data) return undefined;
 
@@ -25,12 +27,12 @@ export const PercentageMetric: React.FC = () => {
     // Both datasets should have the same 2-year window
     const percentages = destination.map((d) => {
       const originTotal = originMap.get(d.date_month) || 0;
-      const percentage =
+      const share_percentage =
         originTotal > 0 ? (d.total_count / originTotal) * 100 : 0;
 
       return {
         date_month: d.date_month,
-        total_count: percentage,
+        total_count: share_percentage,
       };
     });
 
@@ -53,18 +55,12 @@ export const PercentageMetric: React.FC = () => {
   return (
     <div className="flex w-full cursor-default flex-col items-center">
       <div className="w-full">
-        {percentageData && percentageData.length > 0 ? (
-          <Sparkline
-            data={percentageData}
-            selectedDate={selectedMonth}
-            title="% of origin trips"
-            unit="%"
-          />
-        ) : (
-          <div className="flex h-16 items-center justify-center">
-            <p className="text-sm font-light text-gray-600">Loading...</p>
-          </div>
-        )}
+        <BasicChartWrapper
+          title="% Seasonal Share by Month"
+          data={percentageData}
+          baselineData={undefined}
+          dataLoading={!percentageData}
+        />
       </div>
     </div>
   );

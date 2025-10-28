@@ -83,7 +83,7 @@ import {
   PATH_STATION_LAYER,
   DESTINATION_LABEL_LAYER,
 } from "./layers";
-import { useMapConfigStore } from "@/store/store";
+import { useChartWindow, useMapConfigStore } from "@/store/store";
 import { useLayerVisibilityStore } from "@/store/layer-visibility-store";
 import { animateCellsByTripCount } from "./animation";
 import { useIntroModalStore } from "@/store/intro-modal-store";
@@ -327,10 +327,11 @@ export const useTripCountDataFilteredbyDestination = (
   return { ...query, data: { data: filteredData } };
 };
 
-// Hook to fetch monthly sum data for selected cells with 2-year window
+// Hook to fetch monthly sum data for selected cells with 4-year window
 // Fetches data year-by-year and caches each year separately
 export const useTripMonthlySumData = () => {
-  const { originCells, destinationCells, selectedMonth } = useMapConfigStore();
+  const { originCells, destinationCells, selectedMonth, chartWindow } =
+    useMapConfigStore();
   const maxDateQuery = useMaxDate();
   const dayjsDate = selectedMonth ? dayjs(selectedMonth) : null;
 
@@ -338,21 +339,21 @@ export const useTripMonthlySumData = () => {
   const hasOrigin = originCells.length > 0;
   const shouldFetch = hasDestination || hasOrigin;
 
-  // Calculate which years we need for the 24-month window
+  // Calculate which years we need for the 48-month window
   const yearsToFetch = useMemo(() => {
     if (!dayjsDate || !maxDateQuery.data) return [];
 
     const maxDate = dayjs(maxDateQuery.data);
 
-    // Try to center on selected date (1 year before, 1 year after)
-    let windowStart = dayjsDate.subtract(1, "year");
-    let windowEnd = dayjsDate.add(1, "year");
+    // Try to center on selected date (2 years before, 2 years after)
+    let windowStart = dayjsDate.subtract(chartWindow);
+    let windowEnd = dayjsDate.add(chartWindow);
 
-    // If the selected date + 1 year exceeds max date, shift window back
-    // to ensure we always show 24 months ending at max date
+    // If the selected date + 2 years exceeds max date, shift window back
+    // to ensure we always show 48 months ending at max date
     if (windowEnd.isAfter(maxDate)) {
       windowEnd = maxDate;
-      windowStart = maxDate.subtract(2, "years");
+      windowStart = maxDate.subtract(chartWindow).subtract(chartWindow);
     }
 
     const years: string[] = [];
@@ -416,24 +417,13 @@ export const useTripMonthlySumData = () => {
       !!maxDateQuery.data,
     staleTime: 1000 * 60 * 5,
   });
-
-  // Window the data to show exactly 24 months
-  // If selected date is near the end, shift window back to show full 24 months
+  const { windowStart, windowEnd } = useChartWindow();
+  // Window the data to show exactly 48 months
+  // If selected date is near the end, shift window back to show full 48 months
   const windowedData = useMemo(() => {
     if (!yearQueries.data || !dayjsDate || !maxDateQuery.data) return undefined;
 
     const maxDate = dayjs(maxDateQuery.data);
-
-    // Try to center on selected date (1 year before, 1 year after)
-    let windowStart = dayjsDate.subtract(1, "year").startOf("month");
-    let windowEnd = dayjsDate.add(1, "year").endOf("month");
-
-    // If the selected date + 1 year exceeds max date, shift window back
-    // to ensure we always show 24 months ending at max date
-    if (windowEnd.isAfter(maxDate)) {
-      windowEnd = maxDate.endOf("month");
-      windowStart = maxDate.subtract(2, "years").startOf("month");
-    }
 
     const filtered = yearQueries.data.filter((d) => {
       const date = dayjs(d.date_month);
@@ -453,7 +443,7 @@ export const useTripMonthlySumData = () => {
 };
 
 // Helper hook to get max date
-const useMaxDate = () => {
+export const useMaxDate = () => {
   return useQuery({
     queryKey: ["max_date"],
     queryFn: () => getMaxDate(),
@@ -463,9 +453,10 @@ const useMaxDate = () => {
 
 // Hook to fetch baseline monthly sum data
 // If destination cells are selected, uses traffic from origin cells as baseline
-// Otherwise shows 2-year window of total traffic (no cell filters)
+// Otherwise shows 4-year window of total traffic (no cell filters)
 export const useBaselineMonthlySumData = () => {
-  const { selectedMonth, originCells, destinationCells } = useMapConfigStore();
+  const { selectedMonth, originCells, destinationCells, chartWindow } =
+    useMapConfigStore();
   const maxDateQuery = useMaxDate();
   const dayjsDate = selectedMonth ? dayjs(selectedMonth) : null;
 
@@ -473,21 +464,21 @@ export const useBaselineMonthlySumData = () => {
   const useOriginAsBaseline =
     destinationCells.length > 0 && originCells.length > 0;
 
-  // Calculate which years we need for the 24-month window (when using origin as baseline)
+  // Calculate which years we need for the 48-month window (when using origin as baseline)
   const yearsToFetch = useMemo(() => {
     if (!useOriginAsBaseline || !dayjsDate || !maxDateQuery.data) return [];
 
     const maxDate = dayjs(maxDateQuery.data);
 
-    // Try to center on selected date (1 year before, 1 year after)
-    let windowStart = dayjsDate.subtract(1, "year");
-    let windowEnd = dayjsDate.add(1, "year");
+    // Try to center on selected date (2 years before, 2 years after)
+    let windowStart = dayjsDate.subtract(chartWindow);
+    let windowEnd = dayjsDate.add(chartWindow);
 
-    // If the selected date + 1 year exceeds max date, shift window back
-    // to ensure we always show 24 months ending at max date
+    // If the selected date + 2 years exceeds max date, shift window back
+    // to ensure we always show 48 months ending at max date
     if (windowEnd.isAfter(maxDate)) {
       windowEnd = maxDate;
-      windowStart = maxDate.subtract(2, "years");
+      windowStart = maxDate.subtract(chartWindow).subtract(chartWindow);
     }
 
     const years: string[] = [];
@@ -555,22 +546,25 @@ export const useBaselineMonthlySumData = () => {
   // Select the appropriate query based on whether we're using origin as baseline
   const query = useOriginAsBaseline ? originQuery : totalQuery;
 
-  // Window data to show exactly 24 months
-  // If selected date is near the end, shift window back to show full 24 months
+  // Window data to show exactly 48 months
+  // If selected date is near the end, shift window back to show full 48 months
   const windowedData = useMemo(() => {
     if (!query.data || !selectedMonth || !maxDateQuery.data) return undefined;
 
     const maxDate = dayjs(maxDateQuery.data);
 
-    // Try to center on selected date (1 year before, 1 year after)
-    let windowStart = dayjsDate!.subtract(1, "year").startOf("month");
-    let windowEnd = dayjsDate!.add(1, "year").endOf("month");
+    // Try to center on selected date (2 years before, 2 years after)
+    let windowStart = dayjsDate!.subtract(chartWindow).startOf("month");
+    let windowEnd = dayjsDate!.add(chartWindow).endOf("month");
 
-    // If the selected date + 1 year exceeds max date, shift window back
-    // to ensure we always show 24 months ending at max date
+    // If the selected date + 2 years exceeds max date, shift window back
+    // to ensure we always show 48 months ending at max date
     if (windowEnd.isAfter(maxDate)) {
       windowEnd = maxDate.endOf("month");
-      windowStart = maxDate.subtract(2, "years").startOf("month");
+      windowStart = maxDate
+        .subtract(chartWindow)
+        .subtract(chartWindow)
+        .startOf("month");
     }
 
     const filtered = query.data.filter((d) => {

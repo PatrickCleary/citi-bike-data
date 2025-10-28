@@ -1,7 +1,7 @@
 import React from "react";
 import { useMapConfigStore } from "@/store/store";
 import OpenInFullRoundedIcon from "@mui/icons-material/OpenInFullRounded";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
 import CheckIcon from "@mui/icons-material/Check";
 import { AnalysisType } from "@/utils/api";
 import classNames from "classnames";
@@ -49,7 +49,7 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
   const allMetrics: MetricType[] = ["total", "comparison", "sparkline"];
 
   return (
-    <div className="flex w-full cursor-default flex-col gap-2 rounded-md rounded-b-none border-[0.5px] border-cb-white/40 bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md md:hidden">
+    <div className="flex w-full cursor-default flex-col gap-2 rounded-md rounded-b-none border-[0.5px] bg-cb-white px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-lg md:hidden">
       {/* Header with menu button */}
       <div className="flex w-full items-center justify-between">
         <MetricHeader />
@@ -59,10 +59,12 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
             setExpanded(!expanded);
           }}
         >
-          <OpenInFullRoundedIcon
+          <KeyboardArrowUpRoundedIcon
             fontSize="small"
-            className="text-gray-600"
-            titleAccess="Expand metrics (desktop only)"
+            className={classNames(
+              "text-gray-600 transition-transform duration-200 ease-in-out",
+              expanded ? "rotate-180" : "rotate-0",
+            )}
           />
         </button>
 
@@ -117,7 +119,7 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
       </div>
 
       {/* Metric content */}
-      <div className="flex w-full flex-col items-center justify-center">
+      <div className="flex w-full flex-col items-center justify-center gap-4">
         {children}
       </div>
     </div>

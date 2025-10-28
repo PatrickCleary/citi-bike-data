@@ -55,36 +55,103 @@ export const Sparkline: React.FC<SparklineProps> = ({
 
   const chartData = useMemo(() => {
     const datasets = [];
+    const mainValues = data.map((d) => d.total_count);
 
-    // Add baseline dataset first (so it renders behind), scaled by mean values
+    // Calculate mean and standard deviation
+    const mainMean =
+      mainValues.reduce((sum, val) => sum + val, 0) / mainValues.length;
+    const mainStdDev = Math.sqrt(
+      mainValues.reduce((sum, val) => sum + Math.pow(val - mainMean, 2), 0) /
+        mainValues.length,
+    );
+
+    // Calculate ±2 standard deviation bounds
+    const upperBound = mainMean + 1.5 * mainStdDev;
+    const lowerBound = Math.max(0, mainMean - 1.5 * mainStdDev);
+
+    // Calculate smooth trend line using moving average
+    const windowSize = Math.min(6, Math.floor(mainValues.length / 3)); // 6-month moving average
+    const trendLine = mainValues.map((_, index) => {
+      const start = Math.max(0, index - Math.floor(windowSize / 2));
+      const end = Math.min(mainValues.length, index + Math.ceil(windowSize / 2));
+      const window = mainValues.slice(start, end);
+      return window.reduce((sum, val) => sum + val, 0) / window.length;
+    });
+
+    // Add upper bound
+    datasets.push({
+      label: "+2σ",
+      data: data.map(() => upperBound),
+      borderColor: "rgba(156, 163, 175, 0.4)",
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      borderDash: [3, 3],
+      fill: "+1",
+      tension: 0,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+    });
+
+    // Add lower bound
+    datasets.push({
+      label: "-2σ",
+      data: data.map(() => lowerBound),
+      borderColor: "rgba(156, 163, 175, 0.4)",
+      backgroundColor: "rgba(156, 163, 175, 0.15)",
+      borderWidth: 1,
+      borderDash: [3, 3],
+      fill: false,
+      tension: 0,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+    });
+
+    // Add trend line
+    datasets.push({
+      label: "Trend",
+      data: trendLine,
+      borderColor: "rgba(207, 114, 128, 0.4)",
+      backgroundColor: "transparent",
+      borderWidth: 2,
+      fill: false,
+      tension: 0.4,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+    });
+
     if (baselineData && baselineData.length > 0) {
-      const mainValues = data.map((d) => d.total_count);
       const baselineValues = baselineData.map((d) => d.total_count);
 
-      // Calculate mean for both datasets
-      const mainMean =
-        mainValues.reduce((sum, val) => sum + val, 0) / mainValues.length;
+      // Calculate mean and standard deviation for baseline
       const baselineMean =
         baselineValues.reduce((sum, val) => sum + val, 0) /
         baselineValues.length;
 
-      // Scale baseline so that its mean matches the main data's mean
-      // This preserves the zero baseline and makes it clear if traffic is above/below expected
-      const scaleFactor = baselineMean > 0 ? mainMean / baselineMean : 1;
-      const scaledBaselineValues = baselineValues.map(
-        (value) => value * scaleFactor,
+      const baselineStdDev = Math.sqrt(
+        baselineValues.reduce(
+          (sum, val) => sum + Math.pow(val - baselineMean, 2),
+          0,
+        ) / baselineValues.length,
       );
 
+      // Convert both to z-scores, then rescale back to main data's scale
+      const zScoredBaseline = baselineValues.map((value) => {
+        const zScore =
+          baselineStdDev > 0 ? (value - baselineMean) / baselineStdDev : 0;
+        return mainMean + zScore * mainStdDev;
+      });
+
       datasets.push({
-        data: scaledBaselineValues,
-        borderColor: "rgba(49, 104, 142, 0.3)", // Updated color
-        backgroundColor: "rgba(49, 104, 142, 0.05)", // Updated color
+        label: "Baseline",
+        data: zScoredBaseline,
+        borderColor: "rgba(49, 104, 142, 0.3)",
+        backgroundColor: "rgba(49, 104, 142, 0.05)",
         borderWidth: 1,
-        fill: true,
+        fill: false,
         tension: 0.4,
         pointRadius: 0,
         pointHoverRadius: 0,
-        pointHoverBackgroundColor: "rgba(49, 104, 142, 0.5)", // Updated color
+        pointHoverBackgroundColor: "rgba(49, 104, 142, 0.5)",
         pointHoverBorderColor: "white",
         pointHoverBorderWidth: 1,
       });
@@ -92,15 +159,19 @@ export const Sparkline: React.FC<SparklineProps> = ({
 
     // Add main dataset
     datasets.push({
-      data: data.map((d) => d.total_count),
-      borderColor: "rgba(49, 104, 142, 0.8)", // Updated color
-      backgroundColor: "rgba(49, 104, 142, 0.1)", // Updated color
+      label: "Current",
+      data: mainValues,
+      borderColor: "rgba(49, 104, 142, 0.8)",
+      backgroundColor: "rgba(49, 104, 142, 0.1)",
       borderWidth: 2,
-      fill: true,
+      fill: false,
       tension: 0.4,
       pointRadius: 0,
       pointHoverRadius: 4,
-      pointHoverBackgroundColor: "rgba(49, 104, 142, 1)", // Updated color
+      pointBackgroundColor: "rgba(49, 104, 142, 1)",
+      pointBorderColor: "white",
+      pointBorderWidth: 2,
+      pointHoverBackgroundColor: "rgba(49, 104, 142, 1)",
       pointHoverBorderColor: "white",
       pointHoverBorderWidth: 2,
     });
@@ -181,24 +252,23 @@ export const Sparkline: React.FC<SparklineProps> = ({
               });
             },
             label: (context) => {
-              // Skip baseline dataset (index 0 when baseline exists)
-              if (
-                context.datasetIndex === 0 &&
-                baselineData &&
-                baselineData.length > 0
-              ) {
-                return "";
+              const dataset = context.dataset;
+
+              if (dataset.label === "Current") {
+                const value = context.parsed.y ?? 0;
+                return `${value.toLocaleString()}${unit ?? ""}`;
               }
-              return `${context.parsed.y?.toLocaleString() ?? 0}${unit}`;
+
+              if (dataset.label === "+1σ" || dataset.label === "-1σ") {
+                return `${dataset.label}: ${context.parsed.y?.toLocaleString() ?? 0}${unit ?? ""}`;
+              }
+
+              if (dataset.label === "Baseline") {
+                return `Baseline: ${context.parsed.y?.toLocaleString() ?? 0}${unit ?? ""}`;
+              }
+
+              return "";
             },
-          },
-          filter: (tooltipItem) => {
-            // Only show tooltip for the main dataset (not baseline)
-            return !(
-              tooltipItem.datasetIndex === 0 &&
-              baselineData &&
-              baselineData.length > 0
-            );
           },
         },
       },
@@ -208,7 +278,6 @@ export const Sparkline: React.FC<SparklineProps> = ({
         },
         y: {
           display: false,
-          min: 0,
         },
       },
       interaction: {
@@ -216,7 +285,7 @@ export const Sparkline: React.FC<SparklineProps> = ({
         mode: "index",
       },
     }),
-    [],
+    [unit, baselineData],
   );
 
   const firstDate = data[0]?.date_month;

@@ -10,31 +10,24 @@ const tabStyle = classNames(
 );
 
 export const SelectionModeToggle: React.FC = () => {
-  const { selectionMode, setSelectionMode } = useMapConfigStore();
-  const selectedIndex = selectionMode === "origin" ? 0 : 1;
+  const { setOriginCells, setDestinationCells } = useMapConfigStore();
 
   return (
     <div
       className={classNames(
         MapButtonStyle,
-        "pointer-events-auto hidden md:flex w-fit p-1",
+        "pointer-events-auto hidden w-fit p-1 md:flex",
       )}
     >
-      <TabGroup
-        selectedIndex={selectedIndex}
-        onChange={(index) =>
-          setSelectionMode(index === 0 ? "origin" : "destination")
-        }
+      <button
+        onClick={() => {
+          setOriginCells([]);
+          setDestinationCells([]);
+        }}
       >
-        <TabList className="flex flex-row gap-1 text-sm text-gray-900">
-          <Tab key="origin" className={tabStyle}>
-            Origin
-          </Tab>
-          <Tab key="destination" className={tabStyle}>
-            Destination
-          </Tab>
-        </TabList>
-      </TabGroup>
+        {" "}
+        clear
+      </button>
     </div>
   );
 };

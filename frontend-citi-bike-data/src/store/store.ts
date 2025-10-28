@@ -1,4 +1,4 @@
-import { useTripCountData } from "@/map/map-config";
+import { useMaxDate, useTripCountData } from "@/map/map-config";
 import { getMaxDate } from "@/utils/api";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
@@ -21,6 +21,8 @@ interface Store {
   displayType: "absolute" | "comparison";
   normalizeComparison: boolean;
   selectionMode: "origin" | "destination";
+  chartWindow: duration.Duration;
+  setChartWindow: (window: duration.Duration) => void;
   setCellsToFetch: (cells: string[]) => void;
   clearSelection: () => void;
   setDisplayType: (type: "absolute" | "comparison") => void;
@@ -51,6 +53,8 @@ export const useMapConfigStore = create<Store>((set, get) => ({
   displayType: "absolute",
   normalizeComparison: true,
   selectionMode: "origin",
+  chartWindow: dayjs.duration(2, "year"),
+  setChartWindow: (window) => set({ chartWindow: window }),
   setCellsToFetch: (cells) => set({ cellsToFetch: cells }),
   clearSelection: () => {
     const selectionMode = get().selectionMode;
@@ -120,9 +124,8 @@ export const useFetchLatestDate = () => {
     queryFn: getMaxDate,
   });
   useEffect(() => {
-    if (query.isLoading) setSelectedMonth(undefined);
-    if (query.isError) setSelectedMonth(undefined);
     if (query.data) setSelectedMonth(query.data);
+    else setSelectedMonth(undefined);
   }, [query.data, setSelectedMonth]);
 };
 
@@ -165,4 +168,28 @@ export const useSyncTripsToFetchData = () => {
 export const useSync = () => {
   useSyncAnalysisType();
   useSyncTripsToFetchData();
+};
+
+export const useChartWindow = () => {
+  const { chartWindow, selectedMonth } = useMapConfigStore();
+  const maxDateQuery = useMaxDate();
+  const maxDate = maxDateQuery.data;
+  const dayjsDate = selectedMonth ? dayjs(selectedMonth) : null;
+  if (!maxDate || !dayjsDate) return { windowStart: null, windowEnd: null };
+  const maxDateDayjs = dayjs(maxDate);
+
+  // Try to center on selected date (2 years before, 2 years after)
+  let windowStart = dayjsDate.subtract(chartWindow).startOf("month");
+  let windowEnd = dayjsDate.add(chartWindow).endOf("month");
+
+  // If the selected date + 2 years exceeds max date, shift window back
+  // to ensure we always show 48 months ending at max date
+  if (windowEnd.isAfter(maxDate)) {
+    windowEnd = maxDateDayjs.endOf("month");
+    windowStart = maxDateDayjs
+      .subtract(chartWindow)
+      .subtract(chartWindow)
+      .startOf("month");
+  }
+  return { windowStart, windowEnd };
 };

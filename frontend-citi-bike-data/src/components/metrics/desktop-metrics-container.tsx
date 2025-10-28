@@ -1,15 +1,12 @@
 "use client";
-import { useMetricsStore, MetricType } from "@/store/metrics-store";
+import { useMetricsStore } from "@/store/metrics-store";
 import { MobileMetricWrapper } from "./mobile-metric-wrapper";
-import HexagonOutlinedIcon from "@mui/icons-material/HexagonOutlined";
 import classNames from "classnames";
 import { useMapConfigStore } from "@/store/store";
 import { MobileBasicMetric } from "./mobile-basic-metric";
-import { TestMetric } from "./test-metric";
 import { useState } from "react";
 import { SparklineMetric } from "./sparkline-metric";
 import { useComparison } from "@/map/map-config";
-import { formatter } from "@/utils/utils";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { Tab, TabGroup, TabList } from "@headlessui/react";
@@ -17,39 +14,16 @@ import { PercentageMetric } from "./percentage-metric";
 
 dayjs.extend(duration);
 
-export const MobileMetricsContainer: React.FC = () => {
+export const DesktopMetricsContainer: React.FC = () => {
   const { selectedMobileMetric } = useMetricsStore();
 
   const comparison = useComparison();
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="pointer-events-auto z-10 flex w-full flex-col items-center rounded-t-md bg-cb-white lg:hidden">
+    <div className="pointer-events-auto z-10 flex hidden w-full flex-col items-center rounded-t-md bg-cb-white lg:inline">
       {/* Render the visible metrics */}
-      <MobileMetricWrapper
-        key={selectedMobileMetric}
-        setExpanded={setExpanded}
-        expanded={expanded}
-      >
-        <MobileBasicMetric />
-        <div
-          className={classNames(
-            "grid w-full transition-all duration-300 ease-in-out",
-            expanded
-              ? "grid-rows-[1fr] opacity-100"
-              : "grid-rows-[0fr] opacity-0",
-          )}
-        >
-          <div className="overflow-hidden">
-            <div className="rounded-md bg-white p-2">
-              <SparklineMetric />
-              <PercentageMetric />
-              <ChartWindowTabs />
-            </div>
-            <div className="flex w-full justify-center"></div>
-          </div>
-        </div>
-      </MobileMetricWrapper>
+
       <div className="flex hidden w-full cursor-default flex-row items-center gap-2 overflow-hidden border-[0.5px] border-cb-white/40 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md lg:flex">
         <div className="flex w-full">
           <PercentageMetric />

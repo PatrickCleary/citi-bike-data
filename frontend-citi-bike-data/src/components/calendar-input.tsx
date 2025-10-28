@@ -16,6 +16,7 @@ import { useMapConfigStore } from "@/store/store";
 import classNames from "classnames";
 import { buttonHoverStyle } from "./display-settings";
 import { getMonthDisplayText } from "./date-control";
+import { useMaxDate } from "@/map/map-config";
 
 const MONTHS = [
   "January",
@@ -54,10 +55,7 @@ export const CalendarInput: React.FC = () => {
   const { selectedMonth, setSelectedMonth } = useMapConfigStore();
 
   const selectedDateObj = dayjs(selectedMonth);
-  const query = useQuery({
-    queryKey: ["max_date"],
-    queryFn: getMaxDate,
-  });
+  const query = useMaxDate();
 
   const error = !isMonthYearValid(
     query,
@@ -74,30 +72,30 @@ export const CalendarInput: React.FC = () => {
   };
 
   return (
-      <Popover>
-            <PopoverButton
-              title="Select Month"
-              className={
-                "active:scale-95 border-cb-lightGray flex h-12 w-24 flex-col items-center justify-center rounded-md border-[0.5px] bg-white/30 px-2 tabular-nums tracking-wide text-gray-900 drop-shadow-md backdrop-blur-md transition hover:bg-white/60"
-              }
-            >
-              <CalendarMonthIcon fontSize="small" />
-              {getMonthDisplayText(selectedMonth)}
-            </PopoverButton>
-              <PopoverPanel
+    <Popover>
+      <PopoverButton
+        title="Select Month"
+        className={
+          "flex h-12 w-24 flex-col items-center justify-center rounded-md border-[0.5px] border-cb-lightGray bg-white/30 px-2 tabular-nums tracking-wide text-gray-900 drop-shadow-md backdrop-blur-md transition hover:bg-white/60 active:scale-95"
+        }
+      >
+        <CalendarMonthIcon fontSize="small" />
+        {getMonthDisplayText(selectedMonth)}
+      </PopoverButton>
+      <PopoverPanel
         transition
         anchor="bottom"
         className="z-10 drop-shadow-md transition duration-200 ease-in-out [--anchor-gap:theme(spacing.1)] data-[closed]:translate-y-1 data-[closed]:opacity-0"
-              >
-        <div className="bg-cb-white border-cb-lightGray rounded-lg border-[0.5px] p-3 text-gray-900">
+      >
+        <div className="rounded-lg border-[0.5px] border-cb-lightGray bg-cb-white p-3 text-gray-900">
           <div className="flex w-full gap-2">
             <Listbox value={selectedDateObj.month()} onChange={updateMonth}>
-              <ListboxButton className="bg-cb-lightGray/10 data-[focus]:bg-cb-white data-[hover]:bg-cb-white border-cb-lightGray w-32 rounded-md border-[0.5px] px-3 py-2 text-left text-center font-light tracking-wide text-gray-700 focus:outline-none data-[focus]:text-gray-900">
+              <ListboxButton className="w-32 rounded-md border-[0.5px] border-cb-lightGray bg-cb-lightGray/10 px-3 py-2 text-left text-center font-light tracking-wide text-gray-700 focus:outline-none data-[focus]:bg-cb-white data-[hover]:bg-cb-white data-[focus]:text-gray-900">
                 {MONTHS[selectedDateObj.month()]}
               </ListboxButton>
               <ListboxOptions
                 anchor="top"
-                className="bg-cb-white border-cb-lightGray z-20 mt-2 max-h-60 w-[var(--button-width)] origin-top-left overflow-auto rounded-lg border border-[0.5px] border-white/10 text-gray-900 drop-shadow-md [--anchor-gap:theme(spacing.1)] [--anchor-gap:theme(spacing.3)]"
+                className="z-20 mt-2 max-h-60 w-[var(--button-width)] origin-top-left overflow-auto rounded-lg border border-[0.5px] border-cb-lightGray border-white/10 bg-cb-white text-gray-900 drop-shadow-md [--anchor-gap:theme(spacing.1)] [--anchor-gap:theme(spacing.3)]"
               >
                 {MONTHS.map((month, index) => {
                   const isValid = isMonthYearValid(
@@ -121,12 +119,12 @@ export const CalendarInput: React.FC = () => {
               </ListboxOptions>
             </Listbox>
             <Listbox value={selectedDateObj.year()} onChange={updateYear}>
-              <ListboxButton className="bg-cb-lightGray/10 data-[focus]:bg-cb-white data-[hover]:bg-cb-white border-cb-lightGray w-32 rounded-md border-[0.5px] px-3 py-2 text-left text-center font-light tracking-wide text-gray-700 focus:outline-none data-[focus]:text-gray-900">
+              <ListboxButton className="w-32 rounded-md border-[0.5px] border-cb-lightGray bg-cb-lightGray/10 px-3 py-2 text-left text-center font-light tracking-wide text-gray-700 focus:outline-none data-[focus]:bg-cb-white data-[hover]:bg-cb-white data-[focus]:text-gray-900">
                 {selectedDateObj.year()}
               </ListboxButton>
               <ListboxOptions
                 anchor="top"
-                className="bg-cb-white border-cb-lightGray z-20 mt-2 max-h-60 w-[var(--button-width)] origin-top-left overflow-auto rounded-lg border border-[0.5px] border-white/10 text-gray-900 drop-shadow-md [--anchor-gap:theme(spacing.1)] [--anchor-gap:theme(spacing.3)]"
+                className="z-20 mt-2 max-h-60 w-[var(--button-width)] origin-top-left overflow-auto rounded-lg border border-[0.5px] border-cb-lightGray border-white/10 bg-cb-white text-gray-900 drop-shadow-md [--anchor-gap:theme(spacing.1)] [--anchor-gap:theme(spacing.3)]"
               >
                 {YEARS.map((year) => {
                   const isValid = isMonthYearValid(
@@ -158,7 +156,7 @@ export const CalendarInput: React.FC = () => {
             </div>
           )}
         </div>
-              </PopoverPanel>
-      </Popover>
+      </PopoverPanel>
+    </Popover>
   );
 };
