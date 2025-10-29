@@ -10,7 +10,7 @@ import { isMobileDevice } from "@/utils/mobile-detection";
 import classNames from "classnames";
 import { useMapConfigStore } from "@/store/store";
 import { AnalysisType } from "@/utils/api";
-import { MobileBasicMetric } from "./mobile-basic-metric";
+import { BasicMetric } from "./mobile-basic-metric";
 import { TestMetric } from "./test-metric";
 
 const metricComponents: Record<MetricType, React.FC> = {
@@ -45,7 +45,7 @@ export const MetricsContainer: React.FC = () => {
       {/* Render the visible metrics */}
 
       <MobileMetricWrapper key={selectedMobileMetric}>
-        <MobileBasicMetric />
+        <BasicMetric />
         {/* <SparklineMetric /> */}
       </MobileMetricWrapper>
       <div className="flex hidden w-full cursor-default flex-col items-center gap-2 overflow-hidden rounded-md border-[0.5px] border-cb-white/40 bg-white/30 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md lg:flex">

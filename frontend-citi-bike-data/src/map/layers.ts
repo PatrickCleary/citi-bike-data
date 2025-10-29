@@ -97,7 +97,7 @@ export const ORIGIN_LABEL_LAYER: LayerSpecification = {
   type: "symbol",
   layout: {
     "icon-offset": [0, 25],
-    "icon-size":.8,
+    "icon-size": 0.8,
     "icon-image": "origin_label",
     "icon-allow-overlap": true,
   },
@@ -136,21 +136,9 @@ export const DESTINATION_LABEL_LAYER: LayerSpecification = {
   type: "symbol",
   layout: {
     "icon-offset": [0, 25],
-    "icon-size":.8,
+    "icon-size": 0.8,
     "icon-image": "destination_label",
     "icon-allow-overlap": true,
-  },
-};
-
-export const INFO_MODE_SELECTED_LAYER_ID = "info_mode_selected_hex_layer";
-
-export const INFO_MODE_SELECTED_LAYER: LayerSpecification = {
-  id: INFO_MODE_SELECTED_LAYER_ID,
-  source: "info_mode_selected_hex",
-  type: "line",
-  paint: {
-    "line-width": 3,
-    "line-color": "#ffffff",
   },
 };
 

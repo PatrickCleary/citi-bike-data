@@ -8,6 +8,8 @@ import duration from "dayjs/plugin/duration";
 
 dayjs.extend(duration);
 
+export type ChartDatasetView = "rolling_avg" | "main";
+
 interface Store {
   cellsToFetch: string[];
   originCells: string[];
@@ -22,7 +24,11 @@ interface Store {
   normalizeComparison: boolean;
   selectionMode: "origin" | "destination";
   chartWindow: duration.Duration;
+  chartDatasetView: ChartDatasetView;
+  showBaseline: boolean;
   setChartWindow: (window: duration.Duration) => void;
+  setChartDatasetView: (view: ChartDatasetView) => void;
+  setShowBaseline: (show: boolean) => void;
   setCellsToFetch: (cells: string[]) => void;
   clearSelection: () => void;
   setDisplayType: (type: "absolute" | "comparison") => void;
@@ -54,7 +60,11 @@ export const useMapConfigStore = create<Store>((set, get) => ({
   normalizeComparison: true,
   selectionMode: "origin",
   chartWindow: dayjs.duration(2, "year"),
+  chartDatasetView: "rolling_avg",
+  showBaseline: true,
   setChartWindow: (window) => set({ chartWindow: window }),
+  setChartDatasetView: (view) => set({ chartDatasetView: view }),
+  setShowBaseline: (show) => set({ showBaseline: show }),
   setCellsToFetch: (cells) => set({ cellsToFetch: cells }),
   clearSelection: () => {
     const selectionMode = get().selectionMode;

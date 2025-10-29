@@ -6,8 +6,7 @@ import {
   useTripCountDataFilteredbyDestination,
 } from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+
 import dayjs from "dayjs";
 import classNames from "classnames";
 import { AnimatedNumber } from "../other/animated-digits";

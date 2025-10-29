@@ -44,15 +44,6 @@ export const DESTINATION_LABEL_SOURCE: SourceSpecification = {
   },
 };
 
-export const INFO_MODE_SELECTED_SOURCE_ID = "info_mode_selected_hex";
-export const INFO_MODE_SELECTED_SOURCE: SourceSpecification = {
-  type: "geojson",
-  data: {
-    type: "FeatureCollection",
-    features: [],
-  },
-};
-
 export const SUBWAY_LINES_SOURCE_ID = "subway_lines";
 
 export const SUBWAY_LINES_SOURCE: SourceSpecification = {

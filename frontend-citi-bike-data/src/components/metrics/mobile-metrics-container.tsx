@@ -1,73 +1,108 @@
 "use client";
 import { useMetricsStore, MetricType } from "@/store/metrics-store";
 import { MobileMetricWrapper } from "./mobile-metric-wrapper";
-import HexagonOutlinedIcon from "@mui/icons-material/HexagonOutlined";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import classNames from "classnames";
 import { useMapConfigStore } from "@/store/store";
-import { MobileBasicMetric } from "./mobile-basic-metric";
-import { TestMetric } from "./test-metric";
+import { BasicMetric } from "./mobile-basic-metric";
+
 import { useState } from "react";
 import { SparklineMetric } from "./sparkline-metric";
 import { useComparison } from "@/map/map-config";
-import { formatter } from "@/utils/utils";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { Tab, TabGroup, TabList } from "@headlessui/react";
 import { PercentageMetric } from "./percentage-metric";
+import { Menu, MenuItem, IconButton } from "@mui/material";
 
 dayjs.extend(duration);
+
+type ChartType = "sparkline" | "percentage";
 
 export const MobileMetricsContainer: React.FC = () => {
   const { selectedMobileMetric } = useMetricsStore();
 
   const comparison = useComparison();
   const [expanded, setExpanded] = useState(false);
+  const [chartType, setChartType] = useState<ChartType>("sparkline");
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleChartTypeChange = (type: ChartType) => {
+    setChartType(type);
+    handleMenuClose();
+  };
 
   return (
-    <div className="pointer-events-auto z-10 flex w-full flex-col items-center rounded-t-md bg-cb-white lg:hidden">
+    <div className="pointer-events-auto z-10 flex w-full flex-col items-center rounded-t-md bg-white lg:hidden">
       {/* Render the visible metrics */}
       <MobileMetricWrapper
         key={selectedMobileMetric}
         setExpanded={setExpanded}
         expanded={expanded}
       >
-        <MobileBasicMetric />
+        <BasicMetric />
         <div
           className={classNames(
-            "grid w-full transition-all duration-300 ease-in-out",
+            "grid w-full bg-cb-white px-4 pb-2 transition-all duration-300 ease-in-out",
             expanded
               ? "grid-rows-[1fr] opacity-100"
               : "grid-rows-[0fr] opacity-0",
           )}
         >
-          <div className="overflow-hidden">
-            <div className="rounded-md bg-white p-2">
-              <SparklineMetric />
-              <PercentageMetric />
-              <ChartWindowTabs />
+          <div className="bg overflow-hidden">
+            <div className="flex flex-row justify-between">
+              <IconButton
+                onClick={handleMenuClick}
+                size="small"
+                aria-controls={menuOpen ? "chart-type-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={menuOpen ? "true" : undefined}
+              >
+                <MoreHorizIcon className="text-cb-blue" fontSize="small" />
+              </IconButton>
+              <Menu
+                id="chart-type-menu"
+                anchorEl={anchorEl}
+                open={menuOpen}
+                onClose={handleMenuClose}
+                MenuListProps={{
+                  "aria-labelledby": "chart-type-button",
+                }}
+              >
+                <MenuItem
+                  onClick={() => handleChartTypeChange("sparkline")}
+                  selected={chartType === "sparkline"}
+                >
+                  Trips
+                </MenuItem>
+                <MenuItem
+                  onClick={() => handleChartTypeChange("percentage")}
+                  selected={chartType === "percentage"}
+                >
+                  Percentages
+                </MenuItem>
+              </Menu>
             </div>
-            <div className="flex w-full justify-center"></div>
+            {chartType === "sparkline" && <SparklineMetric />}
+            {chartType === "percentage" && <PercentageMetric />}
           </div>
         </div>
       </MobileMetricWrapper>
-      <div className="flex hidden w-full cursor-default flex-row items-center gap-2 overflow-hidden border-[0.5px] border-cb-white/40 px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-md backdrop-blur-md lg:flex">
-        <div className="flex w-full">
-          <PercentageMetric />
-        </div>
-        <div className="flex w-full">
-          <SparklineMetric />
-        </div>
-        <ChartWindowTabs />
-      </div>
-
-      {/* Add/Switch Menu - only on desktop, mobile has it in wrapper */}
     </div>
   );
 };
 
 export const ChartWindowTabs: React.FC = () => {
-  const { analysisType, originCells, chartWindow, setChartWindow } =
-    useMapConfigStore();
+  const { chartWindow, setChartWindow } = useMapConfigStore();
   const chartTabs: {
     [key: number]: { durationObj: duration.Duration; label: string };
   } = {
@@ -91,16 +126,12 @@ export const ChartWindowTabs: React.FC = () => {
   };
 
   return (
-    <TabGroup
-      selectedIndex={getActiveTab()}
-      onChange={handleTabChange}
-      className={""}
-    >
-      <TabList className={"flex w-full flex-row"}>
+    <TabGroup selectedIndex={getActiveTab()} onChange={handleTabChange}>
+      <TabList className={"flex w-fit flex-row gap-1 p-1"}>
         {Object.values(chartTabs).map((tab, index) => (
           <Tab
             key={index}
-            className="h-10 w-full text-nowrap border-cb-blue px-4 py-1 text-center text-sm text-xs font-medium uppercase tracking-wide text-gray-700 active:scale-95 data-[selected]:border-b-[0.5px] data-[selected]:text-cb-blue"
+            className="flex h-10 w-16 w-full items-center justify-center text-nowrap rounded-full px-3 uppercase text-cb-blue focus:bg-cb-blue/20 focus:outline-none data-[hover]:bg-cb-blue/10 data-[selected]:bg-cb-blue/30 data-[selected]:data-[hover]:bg-cb-blue/30 lg:h-fit"
           >
             {tab.label}
           </Tab>

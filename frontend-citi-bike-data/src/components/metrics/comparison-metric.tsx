@@ -1,8 +1,8 @@
 import React from "react";
 import { useComparison } from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
+import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDown";
 import dayjs from "dayjs";
 import classNames from "classnames";
 import { AnimatedNumber } from "../other/animated-digits";
@@ -28,12 +28,12 @@ export const ComparisonMetric: React.FC = () => {
           )}
         >
           {isPositiveChange ? (
-            <TrendingUpIcon
+            <TrendingUpRoundedIcon
               fontSize="medium"
               className={comparison.isLoading ? "invisible" : ""}
             />
           ) : (
-            <TrendingDownIcon
+            <TrendingDownRoundedIcon
               fontSize="medium"
               className={comparison.isLoading ? "invisible" : ""}
             />

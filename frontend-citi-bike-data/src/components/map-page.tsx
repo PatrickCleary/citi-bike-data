@@ -13,7 +13,6 @@ import {
   useUpdateOriginShape,
   useUpdateDestinationShape,
   useDimNonSelectedCells,
-  useUpdateInfoModeSelectedCell,
   usePrefetchTripCountData,
   useUpdateBikeLaneFilter,
 } from "@/map/map-config";
@@ -56,7 +55,7 @@ export const MapPage: React.FC = () => {
   useUpdateDestinationShape(map, mapLoaded);
   useDimNonSelectedCells(map, mapLoaded);
   useSync();
-  useUpdateInfoModeSelectedCell(map, mapLoaded);
+
   useAddPMTilesProtocol();
   usePrefetchTripCountData();
   useLocationMarker(map, mapLoaded);
@@ -111,8 +110,8 @@ export const MapPage: React.FC = () => {
         {/* <div className="pointer-events-none fixed top-4 z-10 flex hidden w-full flex-col items-center gap-4 px-16 md:left-1/2 md:top-4 md:flex md:-translate-x-1/2 md:flex-row md:justify-center">
           <MetricsContainer />
         </div> */}
-        <div className="pointer-events-none fixed bottom-0 z-10 flex w-full flex-col gap-2">
-          <div className="px-4">
+        <div className="pointer-events-none fixed bottom-0 z-10 w-full gap-2 flex flex-col">
+          <div className="px-4 flex flex-col gap-1">
             <Legend />
             <LayerControl map={map} mapLoaded={mapLoaded} />
             <DisplaySettings />

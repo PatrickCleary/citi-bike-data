@@ -30,7 +30,7 @@ export async function searchLocation(query: string): Promise<LocationResult[]> {
   if (!response.ok) {
     throw new Error(`Geocoding API error: ${response.statusText}`);
   }
-  console.log(response);
+
   const data: StadiaGeocodingResult = await response.json();
 
   return data.features.map((feature) => ({

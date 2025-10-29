@@ -44,14 +44,13 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
   expanded,
   setExpanded,
 }) => {
-  const { analysisType, originCells } = useMapConfigStore();
   const { selectedMobileMetric, setSelectedMobileMetric } = useMetricsStore();
   const allMetrics: MetricType[] = ["total", "comparison", "sparkline"];
 
   return (
-    <div className="flex w-full cursor-default flex-col gap-2 rounded-md rounded-b-none border-[0.5px] bg-cb-white px-4 py-2 font-sans font-bold tracking-wide text-black drop-shadow-lg md:hidden">
+    <div className="flex w-full cursor-default flex-col gap-2 pt-2">
       {/* Header with menu button */}
-      <div className="flex w-full items-center justify-between">
+      <div className="flex w-full items-center justify-between px-4">
         <MetricHeader />
 
         <button
@@ -119,7 +118,7 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
       </div>
 
       {/* Metric content */}
-      <div className="flex w-full flex-col items-center justify-center gap-4">
+      <div className="flex w-full flex-col items-center justify-center">
         {children}
       </div>
     </div>
@@ -129,26 +128,25 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
 export const MetricHeader: React.FC = (): React.ReactNode => {
   const { selectedMonth, originCells, destinationCells } = useMapConfigStore();
   const dateObj = dayjs(selectedMonth);
-  const startDate = dateObj.format("MMM YYYY");
+  const startDate = dateObj.format("MMMM YYYY");
 
   const getText = () => {
     if (destinationCells.length === 0 && originCells.length === 0) {
-      return "Total";
+      return "Total trips";
     }
     if (originCells.length > 0 && destinationCells.length === 0) {
-      return `from origin`;
+      return `Trips from origin`;
     }
     if (originCells.length === 0 && destinationCells.length > 0) {
-      return `To destination`;
+      return `Trips to destination`;
     }
-    return `Origin to destination`;
+    return `Trips from origin to destination`;
   };
   return (
-    <p className="flex flex-row items-baseline gap-1 text-xs font-light uppercase text-gray-700">
-      <span className="flex w-[80px] justify-center rounded-md border border-[0.5px] border-white/10 bg-cb-lightGray tabular-nums">
-        {startDate}
-      </span>
-      • {getText()}
+    <p className="flex flex-row items-baseline gap-1 text-xs font-light tracking-wide text-gray-700">
+      {/* <span className="flex w-[80px] justify-center rounded-md border border-[0.5px] border-white/10 bg-cb-lightGray tabular-nums"> */}
+      {getText()} in {startDate}
+      {/* </span> */}
     </p>
   );
 };

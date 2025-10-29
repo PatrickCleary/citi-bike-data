@@ -1,216 +1,162 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BasicChart } from "./basic-chart";
-import { useChartWindow, useMapConfigStore } from "@/store/store";
-import dayjs from "dayjs";
+import { useMapConfigStore } from "@/store/store";
+import { ChartDataMonthly } from "./chart-types";
+import {
+  addBoundsDatasets,
+  addMainDataset,
+  addRollingAvgDataset,
+  addZScoreBaselineDataset,
+  calculateStats,
+  getLabels,
+} from "./chart-utils";
+import { ChartDataset } from "chart.js";
 
 export interface StatisticalOptions {
   stdDeviationNum: number;
   smoothingWindowSize: number;
 }
 
-export const CHART_OPTIONS: StatisticalOptions = {
-  stdDeviationNum: 1.5,
-  smoothingWindowSize: 6,
-};
+export interface DatasetConfig {
+  bounds?: boolean;
+  rolling_avg?: boolean;
+  baseline?: boolean;
+  main?: boolean;
+}
+
 interface BasicChartWrapperProps {
-  data:
-    | Array<{
-        date_month: string;
-        total_count: number;
-      }>
-    | undefined;
+  data: ChartDataMonthly | undefined;
   dataLoading?: boolean;
-  baselineData?:
-    | Array<{
-        date_month: string;
-        total_count: number;
-      }>
-    | undefined;
+  baselineData?: ChartDataMonthly | undefined;
 
   title?: string;
   unit?: string;
   chartOptions?: Partial<StatisticalOptions>;
+  /**
+   * Configure which datasets to include and their initial state.
+   * - If a dataset key is undefined, it won't be available at all (no toggle shown)
+   * - If a dataset key is true/false, it will be available with that initial state
+   * Example: { bounds: false, rolling_avg: true, main: true }
+   * This excludes "baseline" entirely while including bounds (off), rolling_avg (on), and main (on)
+   */
+  datasetConfig?: DatasetConfig;
+  showDatasetToggles?: boolean;
+
+  children: React.ReactNode;
 }
+
+export const CHART_OPTIONS: StatisticalOptions = {
+  stdDeviationNum: 1.5,
+  smoothingWindowSize: 3,
+};
+
+export const DEFAULT_DATASET_CONFIG: Required<DatasetConfig> = {
+  bounds: false,
+  rolling_avg: true,
+  baseline: true,
+  main: true,
+};
 
 export const BasicChartWrapper: React.FC<BasicChartWrapperProps> = ({
   data,
   baselineData,
-  dataLoading,
   title,
+  unit,
   chartOptions = CHART_OPTIONS,
+  datasetConfig,
+  showDatasetToggles = false,
+  children,
 }) => {
   const { selectedMonth } = useMapConfigStore();
-  const { windowStart, windowEnd } = useChartWindow();
-
   const chartOptionsFinal: StatisticalOptions = {
     ...CHART_OPTIONS,
     ...chartOptions,
   };
 
-  const selectedIndex = data?.findIndex((d) => d.date_month === selectedMonth);
+  // Merge default config with provided config
+  // Only include keys that are explicitly defined in datasetConfig, or all defaults if none provided
+  const initialConfig = datasetConfig
+    ? Object.fromEntries(
+        Object.entries(DEFAULT_DATASET_CONFIG).filter(([key]) =>
+          Object.prototype.hasOwnProperty.call(datasetConfig, key),
+        ),
+      )
+    : DEFAULT_DATASET_CONFIG;
+
+  const mergedConfig = { ...initialConfig, ...datasetConfig } as DatasetConfig;
+
+  // Use internal state for toggles if enabled, otherwise use merged config
+  const [internalDatasetConfig, setInternalDatasetConfig] =
+    useState<DatasetConfig>(mergedConfig);
+
+  const datasetConfigFinal: DatasetConfig = showDatasetToggles
+    ? internalDatasetConfig
+    : mergedConfig;
+
+  const selectedIndex =
+    data?.findIndex((d) => d.date_month === selectedMonth) ?? -1;
+
   const chartData = useMemo(() => {
-    const datasets = [];
-    if (!data) {
-      return null;
-    }
-    const mainValues = data?.map((d) => d.total_count);
+    const datasets: ChartDataset<"line">[] = [];
+    if (!data) return null;
 
-    // Calculate mean and standard deviation
-    const mainMean =
-      mainValues.reduce((sum, val) => sum + val, 0) / mainValues.length;
-    const mainStdDev = Math.sqrt(
-      mainValues.reduce((sum, val) => sum + Math.pow(val - mainMean, 2), 0) /
-        mainValues.length,
-    );
-
-    // Calculate ± standard deviation bounds
-    const upperBound =
-      mainMean + chartOptionsFinal.stdDeviationNum * mainStdDev;
-    const lowerBound = Math.max(
-      0,
-      mainMean - chartOptionsFinal.stdDeviationNum * mainStdDev,
-    );
+    const dataValues = data?.map((d) => d.total_count);
+    const statistics = calculateStats(dataValues);
 
     // Calculate smooth trend line using moving average
     const windowSize = Math.min(
       chartOptionsFinal.smoothingWindowSize,
-      Math.floor(mainValues.length / 3),
-    ); // 6-month moving average
-    const trendLine = mainValues.map((_, index) => {
-      const start = Math.max(0, index - Math.floor(windowSize / 2));
-      const end = Math.min(
-        mainValues.length,
-        index + Math.ceil(windowSize / 2),
+      Math.floor(dataValues.length / 3),
+    );
+
+    // Add datasets based on configuration (only if defined and true)
+    if (datasetConfigFinal.bounds === true) {
+      addBoundsDatasets(
+        datasets,
+        dataValues.length,
+        chartOptionsFinal.stdDeviationNum,
+        statistics,
       );
-      const window = mainValues.slice(start, end);
-      return window.reduce((sum, val) => sum + val, 0) / window.length;
-    });
-
-    // Add upper bound
-    datasets.push({
-      label: "Upper Bound",
-      data: data.map(() => upperBound),
-      borderColor: "rgba(156, 163, 175, 0.4)",
-      backgroundColor: "transparent",
-      borderWidth: 1,
-      borderDash: [3, 3],
-      fill: "+1",
-      tension: 0,
-      pointRadius: 0,
-      pointHoverRadius: 0,
-    });
-
-    // Add lower bound
-    datasets.push({
-      label: "Lower Bound",
-      data: data.map(() => lowerBound),
-      borderColor: "rgba(156, 163, 175, 0.4)",
-      backgroundColor: "rgba(156, 163, 175, 0.15)",
-      borderWidth: 1,
-      borderDash: [3, 3],
-      fill: false,
-      tension: 0,
-      pointRadius: 0,
-      pointHoverRadius: 0,
-    });
-
-    // Add trend line
-    datasets.push({
-      label: "Trend",
-      data: trendLine,
-      borderColor: "rgba(207, 114, 128, 0.4)",
-      backgroundColor: "transparent",
-      borderWidth: 2,
-      fill: false,
-      tension: 0.4,
-      pointRadius: 0,
-      pointHoverRadius: 0,
-    });
-
-    if (baselineData && baselineData.length > 0) {
-      const baselineValues = baselineData.map((d) => d.total_count);
-
-      // Calculate mean and standard deviation for baseline
-      const baselineMean =
-        baselineValues.reduce((sum, val) => sum + val, 0) /
-        baselineValues.length;
-
-      const baselineStdDev = Math.sqrt(
-        baselineValues.reduce(
-          (sum, val) => sum + Math.pow(val - baselineMean, 2),
-          0,
-        ) / baselineValues.length,
-      );
-
-      // Convert both to z-scores, then rescale back to main data's scale
-      const zScoredBaseline = baselineValues.map((value) => {
-        const zScore =
-          baselineStdDev > 0 ? (value - baselineMean) / baselineStdDev : 0;
-        return mainMean + zScore * mainStdDev;
-      });
-
-      datasets.push({
-        label: "Baseline",
-        data: zScoredBaseline,
-        borderColor: "rgba(49, 104, 142, 0.3)",
-        backgroundColor: "rgba(49, 104, 142, 0.05)",
-        borderWidth: 1,
-        fill: false,
-        tension: 0.4,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-        pointHoverBackgroundColor: "rgba(49, 104, 142, 0.5)",
-        pointHoverBorderColor: "white",
-        pointHoverBorderWidth: 1,
-      });
     }
 
-    // Add main dataset
-    datasets.push({
-      label: "Current",
-      data: mainValues,
-      borderColor: "rgba(49, 104, 142, 0.8)",
-      backgroundColor: "rgba(49, 104, 142, 0.1)",
-      borderWidth: 2,
-      fill: false,
-      tension: 0.4,
-      pointRadius: 0,
-      pointHoverRadius: 4,
-      pointBackgroundColor: "rgba(49, 104, 142, 1)",
-      pointBorderColor: "white",
-      pointBorderWidth: 2,
-      pointHoverBackgroundColor: "rgba(49, 104, 142, 1)",
-      pointHoverBorderColor: "white",
-      pointHoverBorderWidth: 2,
-    });
+    if (datasetConfigFinal.rolling_avg === true) {
+      addRollingAvgDataset(datasets, dataValues, windowSize);
+    }
+
+    if (datasetConfigFinal.baseline === true && baselineData) {
+      addZScoreBaselineDataset(datasets, baselineData, statistics, datasetConfigFinal.rolling_avg === true);
+    }
+
+    if (datasetConfigFinal.main === true) {
+      addMainDataset(datasets, dataValues);
+    }
 
     return {
-      labels: data.map((d) => dayjs(d.date_month).format("MMM YYYY")),
+      labels: getLabels(data),
       datasets,
     };
-  }, [data, baselineData]);
+  }, [data, baselineData, datasetConfigFinal, chartOptionsFinal]);
 
   return (
     <div className="relative flex w-full flex-col">
-      {title && (
-        <h3 className="mb-2 font-outfit text-sm font-light text-gray-500 md:hidden">
-          {title}
-        </h3>
-      )}
+      <div className="flex flex-row justify-between">
+        {title && (
+          <h3 className="mb-2 font-outfit text-sm font-light text-gray-500">
+            {title}
+          </h3>
+        )}
+        {children}
+      </div>
+
       {chartData ? (
         <BasicChart
           data={chartData}
-          statisticalOptions={chartOptionsFinal}
-          selectedIndex={selectedIndex ?? -1}
+          selectedIndex={selectedIndex}
+          unit={unit}
         />
       ) : (
-        <div className="flex h-32 animate-pulse items-center justify-center bg-black" />
+        <div className="h-32 animate-pulse flex items-center justify-center bg-white/30" />
       )}
-
-      <div className="mt-1 flex justify-between text-xs font-light uppercase tracking-wide text-gray-500">
-        {windowStart && <div>{dayjs(windowStart).format("MMM YYYY")}</div>}
-        {windowEnd && <div>{dayjs(windowEnd).format("MMM YYYY")}</div>}
-      </div>
     </div>
   );
 };

@@ -13,6 +13,8 @@ import {
 import { Line } from "react-chartjs-2";
 import type { ChartData, ChartOptions, Point } from "chart.js";
 import { StatisticalOptions } from "./basic-chart-wrapper";
+import { formatter } from "@/utils/utils";
+import { ChartLineData } from "./chart-types";
 
 ChartJS.register(
   CategoryScale,
@@ -24,31 +26,24 @@ ChartJS.register(
 );
 
 interface BasicChartProps {
-  data: ChartData<"line", (number | Point | null)[], unknown>;
-  statisticalOptions: StatisticalOptions;
+  data: ChartLineData;
   selectedIndex: number;
-
-  title?: string;
   unit?: string;
 }
 
-export const CHART_OPTIONS: StatisticalOptions = {
-  stdDeviationNum: 1.5,
-  smoothingWindowSize: 6,
+// Get the total number of data points from the chart data
+const getDataLength = (data: ChartLineData): number => {
+  return data.labels?.length ?? 0;
 };
-
 export const BasicChart: React.FC<BasicChartProps> = ({
   data,
-  statisticalOptions = CHART_OPTIONS,
   selectedIndex,
   unit,
 }) => {
   const chartRef = useRef<ChartJS<"line">>(null);
-  const dataRef = useRef(data);
-  const chartOptionsFinal = { ...CHART_OPTIONS, ...statisticalOptions };
 
-  // Update refs when props change
-  dataRef.current = data;
+  const selectedIndexRef = useRef(selectedIndex);
+  selectedIndexRef.current = selectedIndex;
   // Custom plugin to draw vertical line at selected date
   const verticalLinePlugin = useMemo(
     () => ({
@@ -56,14 +51,17 @@ export const BasicChart: React.FC<BasicChartProps> = ({
       afterDatasetsDraw(chart: ChartJS<"line">) {
         const { ctx, chartArea, scales } = chart;
 
-        if (selectedIndex === -1 || !chartArea || !scales.x) return;
+        if (!selectedIndexRef.current || !chartArea || !scales.x) return;
 
-        const xPosition = scales.x.getPixelForValue(selectedIndex);
+        if (selectedIndexRef.current === -1) return;
+
+        const xPosition = scales.x.getPixelForValue(selectedIndexRef.current);
+
         ctx.save();
         ctx.beginPath();
         ctx.moveTo(xPosition, chartArea.top);
         ctx.lineTo(xPosition, chartArea.bottom);
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1;
         ctx.strokeStyle = "rgba(49, 104, 142, 0.8)";
         ctx.setLineDash([5, 5]);
         ctx.stroke();
@@ -79,9 +77,6 @@ export const BasicChart: React.FC<BasicChartProps> = ({
       maintainAspectRatio: false,
       animation: false,
       plugins: {
-        legend: {
-          display: false,
-        },
         tooltip: {
           enabled: true,
           displayColors: false,
@@ -96,6 +91,8 @@ export const BasicChart: React.FC<BasicChartProps> = ({
           },
           bodyFont: {
             size: 11,
+            family: "Outfit, sans-serif",
+            weight: "light",
           },
           callbacks: {
             title: (context) => {
@@ -107,8 +104,16 @@ export const BasicChart: React.FC<BasicChartProps> = ({
             },
             label: (context) => {
               const dataset = context.dataset;
+              const label = dataset.label;
 
-              if (dataset.label === "Current") {
+              // Show value for "Current" dataset
+              if (label === "Current") {
+                const value = context.parsed.y ?? 0;
+                return `${value.toLocaleString()}${unit ?? ""}`;
+              }
+
+              // Show value for rolling average datasets (e.g., "3-month avg")
+              if (label && label.includes("-month avg")) {
                 const value = context.parsed.y ?? 0;
                 return `${value.toLocaleString()}${unit ?? ""}`;
               }
@@ -120,10 +125,60 @@ export const BasicChart: React.FC<BasicChartProps> = ({
       },
       scales: {
         x: {
-          display: false,
+          display: true,
+          grid: {
+            display: false,
+            drawBorder: false,
+          },
+          afterBuildTicks: (axis) => {
+            const dataLength = getDataLength(data);
+            if (dataLength > 0) {
+              // Force ticks to include first and last data points
+              axis.ticks = [
+                { value: 0, label: axis.getLabelForValue(0) },
+                {
+                  value: dataLength - 1,
+                  label: axis.getLabelForValue(dataLength - 1),
+                },
+              ];
+            }
+          },
+          ticks: {
+            font: {
+              size: 10,
+              family: "Outfit, sans-serif",
+              weight: "light",
+            },
+            color: "rgba(107, 114, 128, 1)",
+            maxRotation: 0,
+            minRotation: 0,
+          },
         },
         y: {
-          display: false,
+          ticks: {
+            callback: function (value, index, ticks) {
+              return formatter.format(value);
+            },
+            font: {
+              size: 10,
+              family: "Outfit, sans-serif",
+              weight: "light",
+            },
+          },
+          title: {
+            display: true,
+
+            font: {
+              size: 14,
+              family: "Outfit, sans-serif",
+              weight: "bold",
+            },
+          },
+          grid: {
+            drawBorder: false,
+
+            // display: false,
+          },
         },
       },
       interaction: {
@@ -131,7 +186,7 @@ export const BasicChart: React.FC<BasicChartProps> = ({
         mode: "index",
       },
     }),
-    [unit],
+    [unit, data],
   );
 
   return (

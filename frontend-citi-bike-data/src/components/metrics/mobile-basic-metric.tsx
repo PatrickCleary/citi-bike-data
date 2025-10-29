@@ -1,31 +1,22 @@
 import React from "react";
-import {
-  useComparison,
-  useTripCountData,
-  useTripCountDataFilteredbyDestination,
-} from "@/map/map-config";
+import { useComparison } from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import dayjs from "dayjs";
 import classNames from "classnames";
-import { AnimatedNumber } from "../other/animated-digits";
-import { TripsText } from "./total-trips-metric";
 import { formatter } from "@/utils/utils";
+import TrendingFlatRoundedIcon from "@mui/icons-material/TrendingFlatRounded";
+import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
+import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDown";
 
 import relativeTime from "dayjs/plugin/relativeTime"; // For humanize()
 import { SvgIconOwnProps } from "@mui/material/SvgIcon";
+import { LoadingNumber } from "../other/loading-number";
+import { Subtext } from "../basic/subtext";
 dayjs.extend(relativeTime);
 
-export const MobileBasicMetric: React.FC = () => {
-  const { selectedMonth } = useMapConfigStore();
-
-  const query = useTripCountData();
-  const queryFiltered = useTripCountDataFilteredbyDestination(query);
-  const totalTrips = queryFiltered?.data?.data.sum_all_values || 0;
-
+export const BasicMetric: React.FC = () => {
   return (
-    <div className="flex w-full cursor-default">
+    <div className="pb-2 flex w-full cursor-default lg:mb-0 lg:px-0 px-4 drop-shadow-sm lg:drop-shadow-none bg-white">
       <div className="flex w-full flex-row flex-nowrap items-baseline gap-2">
         <DeltaComparedToOriginBadge />
       </div>
@@ -41,161 +32,174 @@ const TrendIcon: React.FC<{
 }> = ({ isPositive, isLoading, fontSize = "medium", className }) => {
   if (isLoading)
     return (
-      <TrendingUpIcon
+      <TrendingUpRoundedIcon
         fontSize={fontSize}
         className={classNames(className, "animate-pulse text-gray-700 blur-sm")}
       />
     );
   if (isPositive)
     return (
-      <TrendingUpIcon
+      <TrendingUpRoundedIcon
         fontSize={fontSize}
         className={classNames(className, isLoading ? "invisible" : "")}
       />
     );
 
   return (
-    <TrendingDownIcon
+    <TrendingDownRoundedIcon
       fontSize={fontSize}
       className={classNames(className, isLoading ? "invisible" : "")}
     />
   );
 };
 
-const TripDeltaBadge: React.FC<{}> = () => {
-  const { selectedMonth, comparisonDelta } = useMapConfigStore();
-  const dateObj = dayjs(selectedMonth);
-
+const DeltaComparedToOriginBadge: React.FC<{}> = () => {
   const comparison = useComparison();
-  const isPositiveChange = comparison.absoluteChange > 0;
+  const { selectedMonth, comparisonDelta } = useMapConfigStore();
+
+  const isPositiveChange = comparison.percentageChange > 0;
+  const dateObj = dayjs(selectedMonth);
+  const compDate = dateObj.add(comparisonDelta);
+  const compDateString = compDate.format("MMM 'YY");
 
   return (
-    <div
-      className={classNames(
-        "flex flex-1 flex-row items-baseline gap-1 rounded-md",
-      )}
-    >
-      <div
-        className={classNames(
-          {
-            "text-cb-gray-700 border-cb-lightGray/10 bg-cb-lightGray":
-              comparison.isLoading,
-            "text-cb-increase-pastel border-cb-increase/10 bg-cb-increase":
-              !comparison.isLoading && isPositiveChange,
-            "text-cb-decrease-pastel border-cb-decrease/10 bg-cb-decrease":
-              !comparison.isLoading && !isPositiveChange,
-          },
-          "inline-flex items-baseline rounded-full px-2 py-[2px] text-lg text-sm font-medium tabular-nums sm:text-xl",
-        )}
-      >
-        <TrendIcon
-          isPositive={isPositiveChange}
-          isLoading={comparison.isLoading}
-          fontSize="small"
-          className="self-center"
-        />
-        <span
-          className={classNames(
-            "flex w-14 justify-center text-sm font-medium tabular-nums",
-          )}
-        >
-          {comparison.isLoading ? (
-            <span className="animate-pulse text-gray-900 blur-sm">+12.3%</span>
-          ) : (
-            <>
-              {isPositiveChange ? "+" : ""}
-              {formatter.format(comparison.percentageChange)}%
-            </>
-          )}
-        </span>
+    <div className="flex w-full flex-col gap-2 lg:gap-4">
+      <div className="flex flex-col justify-between gap-1 md:gap-1 lg:flex-col lg:items-start ">
+        <div className="flex flex-col items-start gap-0 text-xs font-light leading-tight text-gray-600">
+          <span className="tabular-nums">
+            <LoadingNumber
+              value={formatter.format(comparison.currentTotal)}
+              isLoading={comparison.isLoading}
+              className="text-xl font-semibold tabular-nums text-gray-900 lg:text-3xl"
+            />{" "}
+            <Subtext>Trips</Subtext>
+          </span>
+        </div>
+        <div className="flex w-full flex-row items-baseline gap-2">
+          <div
+            className={classNames(
+              {
+                "text-cb-gray-700 border-cb-lightGray/10 bg-cb-lightGray":
+                  comparison.isLoading,
+                "border-cb-increase/10 bg-cb-increase text-cb-white":
+                  !comparison.isLoading && isPositiveChange,
+                "border-cb-decrease/10 bg-cb-decrease text-cb-white":
+                  !comparison.isLoading && !isPositiveChange,
+              },
+              "inline-flex items-baseline text-nowrap rounded-full px-2.5 py-0.5 text-base font-medium tabular-nums",
+            )}
+          >
+            <TrendIcon
+              isPositive={isPositiveChange}
+              isLoading={comparison.isLoading}
+              fontSize="small"
+              className="mr-[4px] self-center"
+            />
+
+            <LoadingNumber
+              value={
+                formatter.format(Math.abs(comparison.percentageChange)) + "%"
+              }
+              isLoading={comparison.isLoading}
+              className="text-sm tabular-nums lg:text-base"
+            />
+          </div>
+
+          <Subtext>
+            vs {compDateString} ({formatter.format(comparison.previousTotal)}{" "}
+            trips)
+          </Subtext>
+        </div>
       </div>
-      <p className="text-xs font-light uppercase tracking-wider text-gray-700">
-        VS {dateObj.add(comparisonDelta).format("MMM 'YY")}
-      </p>
+      <ContextText compDate={compDate} />
     </div>
   );
 };
 
-const DeltaComparedToOriginBadge: React.FC<{}> = () => {
-  const comparison = useComparison();
-  const { originCells, destinationCells, selectedMonth, comparisonDelta } =
+export const ContextText: React.FC<{ compDate: dayjs.Dayjs }> = ({
+  compDate,
+}) => {
+  const { destinationCells, originCells, selectedMonth, comparisonDelta } =
     useMapConfigStore();
-
-  // Don't show anything if no cells are selected
-  if (originCells.length === 0 && destinationCells.length === 0) {
-    return null;
-  }
-
-  const isPositiveChange = comparison.normalizedPercentageChange > 0;
-  const dateObj = dayjs(selectedMonth);
-  const comparisonDate = dateObj.add(comparisonDelta).format("MMM YYYY");
-
-  // Determine subtext based on selection
-  const hasOrigin = originCells.length > 0;
-  const hasDestination = destinationCells.length > 0;
-  const baseComparison =
-    hasOrigin && hasDestination ? "trips from Origin" : "system-wide trips";
-  const subtext = `vs ${comparisonDate} ${baseComparison}`;
-
-  return (
-    <div className="flex w-full flex-col gap-0.5">
-      <div className="flex flex-row items-center justify-between gap-3">
-        <div
-          className={classNames(
-            {
-              "text-cb-gray-700 border-cb-lightGray/10 bg-cb-lightGray":
-                comparison.isLoading,
-              "text-cb-increase-pastel border-cb-increase/10 bg-cb-increase":
-                !comparison.isLoading && isPositiveChange,
-              "text-cb-decrease-pastel border-cb-decrease/10 bg-cb-decrease":
-                !comparison.isLoading && !isPositiveChange,
-            },
-            "inline-flex items-center rounded-full px-2.5 py-0.5 text-base font-medium tabular-nums sm:text-lg",
-          )}
-        >
-          <TrendIcon
-            isPositive={isPositiveChange}
-            isLoading={comparison.isLoading}
-            fontSize="small"
-            className="mr-0.5"
-          />
-          <span className="tabular-nums">
-            {comparison.isLoading ? (
-              <span className="animate-pulse text-gray-900 blur-sm">
-                +12.3%
-              </span>
-            ) : (
-              <>
-                {isPositiveChange ? "+" : ""}
-                {formatter.format(comparison.normalizedPercentageChange)}%
-              </>
-            )}
-          </span>
-        </div>
-        <div className="flex flex-col items-end gap-0 text-xs font-light leading-tight text-gray-600">
-          <span className="tabular-nums">
-            {comparison.isLoading ? (
-              <span className="animate-pulse blur-sm">12K trips</span>
-            ) : (
-              <>{formatter.format(comparison.currentTotal)} trips</>
-            )}
-          </span>
-          <span className="text-xs tabular-nums uppercase tracking-wide opacity-75">
-            {comparison.isLoading ? (
-              <span className="animate-pulse blur-sm">+12% vs Sep 24</span>
-            ) : (
-              <>
-                {comparison.percentageChange > 0 ? "+" : ""}
-                {formatter.format(comparison.percentageChange)}% vs{" "}
-                {dateObj.add(comparisonDelta).format("MMM 'YY")}
-              </>
-            )}
-          </span>
-        </div>
-      </div>
-      <p className="text-xs font-light uppercase tracking-wide text-gray-500 opacity-75">
-        {subtext}
+  const comparison = useComparison();
+  if (destinationCells.length === 0 && originCells.length === 0) {
+    return (
+      <p className="text-xs font-light text-gray-600">
+        {/* System-wide traffic has increased{" "}
+        {formatter.format(comparison.percentageChange)}% since{" "}
+        {compDate.format("MMM YYYY")} */}
       </p>
-    </div>
+    );
+  }
+  if (originCells.length > 0 && destinationCells.length === 0) {
+    const isPositive = comparison.normalizedPercentageChange > 0;
+    const isNegative = comparison.normalizedPercentageChange < 0;
+    return (
+      <div className="flex flex-row items-center gap-2 rounded-md border-[0.5px] border-gray-300 bg-gray-200 px-2 py-1">
+        <ChangeIcon isNegative={isNegative} isPositive={isPositive} />
+
+        <p className="text-xs font-light text-gray-600">
+          Traffic from here is {isPositive ? "up" : "down"}{" "}
+          {formatter.format(Math.abs(comparison.normalizedPercentageChange))}%
+          vs {compDate.format("MMM YYYY")}{" "}
+          <span className="font-semibold">
+            relative to system-wide traffic.
+          </span>
+        </p>
+      </div>
+    );
+  }
+  if (originCells.length > 0 && destinationCells.length > 0) {
+    const isPositive = comparison.normalizedPercentageChange > 0;
+    const isNegative = comparison.normalizedPercentageChange < 0;
+    return (
+      <div className="flex flex-row items-center gap-2 rounded-md border-[0.5px] border-gray-300 bg-gray-200 px-2 py-1">
+        <ChangeIcon isNegative={isNegative} isPositive={isPositive} />
+
+        <p className="text-xs font-light text-gray-600">
+          Traffic on this route is {isPositive ? "up" : "down"}{" "}
+          <span
+            className={classNames("font-semibold", {
+              "text-cb-increase": isPositive,
+              "text-cb-decrease": isNegative,
+              "text-gray-700": !isPositive && !isNegative,
+            })}
+          >
+            {formatter.format(Math.abs(comparison.normalizedPercentageChange))}%
+          </span>{" "}
+          vs {compDate.format("MMM 'YY")}{" "}
+          <span className="font-semibold">
+            relative to traffic leaving the origin.
+          </span>
+        </p>
+      </div>
+    );
+  }
+  return <p>none</p>;
+};
+
+export const ChangeIcon: React.FC<{
+  isNegative: boolean;
+  isPositive: boolean;
+}> = ({ isNegative, isPositive }) => {
+  if (isNegative)
+    return (
+      <TrendingDownRoundedIcon
+        fontSize="small"
+        className={classNames("text-cb-decrease")}
+      />
+    );
+  if (isPositive)
+    return (
+      <TrendingUpRoundedIcon
+        fontSize="small"
+        className={classNames("text-cb-increase")}
+      />
+    );
+  return (
+    <TrendingFlatRoundedIcon
+      fontSize="small"
+      className={classNames("text-gray-700")}
+    />
   );
 };

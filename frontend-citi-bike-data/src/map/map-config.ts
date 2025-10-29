@@ -29,8 +29,6 @@ import {
   BIKE_DOCKS_CURRENT_SOURCE_ID,
   HEX_SOURCE,
   HEX_SOURCE_ID,
-  INFO_MODE_SELECTED_SOURCE,
-  INFO_MODE_SELECTED_SOURCE_ID,
   NJ_LIGHT_RAIL_LINES_SOURCE,
   NJ_LIGHT_RAIL_LINES_SOURCE_ID,
   NJ_LIGHT_RAIL_STATIONS_SOURCE,
@@ -67,7 +65,6 @@ import {
   HEX_LAYER_LINE,
   HEX_LAYER_GLOW,
   HEX_SOURCE_LAYER_ID,
-  INFO_MODE_SELECTED_LAYER,
   NJ_LIGHT_RAIL_LINE_LAYER,
   NJ_LIGHT_RAIL_STATION_LAYER,
   NJ_RAIL_LINE_LAYER,
@@ -204,7 +201,6 @@ const addHexLayer = (
     { id: HEX_SOURCE_ID, source: HEX_SOURCE },
     { id: ORIGIN_SOURCE_ID, source: ORIGIN_SOURCE },
     { id: DESTINATION_SOURCE_ID, source: DESTINATION_SOURCE },
-    { id: INFO_MODE_SELECTED_SOURCE_ID, source: INFO_MODE_SELECTED_SOURCE },
     { id: DESTINATION_LABEL_SOURCE_ID, source: DESTINATION_LABEL_SOURCE },
     { id: ORIGIN_LABEL_SOURCE_ID, source: ORIGIN_LABEL_SOURCE },
   ];
@@ -222,7 +218,6 @@ const addHexLayer = (
     DESTINATION_LAYER_LINE_INSET,
     ORIGIN_LABEL_LAYER,
     DESTINATION_LABEL_LAYER,
-    INFO_MODE_SELECTED_LAYER,
   ];
   layers.forEach((layer) => {
     if (!mapObj.getLayer(layer.id)) {
@@ -1056,12 +1051,12 @@ const getCellEventHandlers = (
                 previousFeatureState?.baseOpacity || DEFAULT_HEX_OPACITY;
               // Only animate if it's not already at base opacity
               if (currentOpacity !== baseOpacity) {
-                animateOpacity(
-                  map,
-                  hoveredFeatureId,
-                  currentOpacity,
-                  baseOpacity,
-                );
+                // animateOpacity(
+                //   map,
+                //   hoveredFeatureId,
+                //   currentOpacity,
+                //   baseOpacity,
+                // );
               } else {
                 // Just set hover state to false if already at correct opacity
                 map.current?.setFeatureState(
@@ -1086,7 +1081,7 @@ const getCellEventHandlers = (
               newFeatureState?.opacity ||
               newFeatureState?.baseOpacity ||
               DEFAULT_HEX_OPACITY;
-            animateOpacity(map, h3Id, startOpacity, 0.85, 100);
+            // animateOpacity(map, h3Id, startOpacity, 0.85, 100);
           }
         },
       },
@@ -1107,7 +1102,7 @@ const getCellEventHandlers = (
               featureState?.baseOpacity || DEFAULT_HEX_OPACITY;
 
             // Animate back to base opacity
-            animateOpacity(map, hoveredFeatureId, currentOpacity, baseOpacity);
+            // animateOpacity(map, hoveredFeatureId, currentOpacity, baseOpacity);
 
             // Clear the hovered feature
             hoveredFeatureId = null;
@@ -1305,25 +1300,6 @@ export const useDimNonSelectedCells = (
       );
     });
   }, [originCells, destinationCells, map, mapLoaded, query.data]);
-};
-
-export const useUpdateInfoModeSelectedCell = (
-  map: MutableRefObject<Map | null>,
-  mapLoaded: boolean,
-) => {
-  const { infoModeSelectedCell } = usePopupStateStore();
-
-  useEffect(() => {
-    if (!mapLoaded) return;
-
-    const cells = infoModeSelectedCell ? [infoModeSelectedCell] : [];
-    const geoJson = convertCellsToGeoJSON(cells);
-
-    const source = map.current?.getSource(
-      INFO_MODE_SELECTED_SOURCE_ID,
-    ) as maplibregl.GeoJSONSource;
-    source?.setData(geoJson);
-  }, [infoModeSelectedCell, map, mapLoaded]);
 };
 
 const convertCellsToGeoJSON = (
