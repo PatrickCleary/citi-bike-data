@@ -659,8 +659,15 @@ export const useComparison = (filter = true) => {
     ? previousSystemQuery.data?.data.sum_all_values || 0
     : previousQueryFiltered.data?.data.sum_all_values || 0;
 
-  const currentTripCounts = queryFiltered.data?.data.trip_counts || {};
-  const previousTripCounts = previousQueryFiltered.data?.data.trip_counts || {};
+  let currentTripCounts = filter
+    ? queryFiltered.data?.data.trip_counts
+    : query.data?.data.trip_counts;
+  if (!currentTripCounts) currentTripCounts = {};
+
+  let previousTripCounts = filter
+    ? previousQueryFiltered.data?.data.trip_counts
+    : previousQuery.data?.data.trip_counts;
+  if (!previousTripCounts) previousTripCounts = {};
 
   // Calculate absolute and percentage change for main comparison
   const absoluteChange = currentTotal - previousTotal;
@@ -1051,12 +1058,12 @@ const getCellEventHandlers = (
                 previousFeatureState?.baseOpacity || DEFAULT_HEX_OPACITY;
               // Only animate if it's not already at base opacity
               if (currentOpacity !== baseOpacity) {
-                // animateOpacity(
-                //   map,
-                //   hoveredFeatureId,
-                //   currentOpacity,
-                //   baseOpacity,
-                // );
+                animateOpacity(
+                  map,
+                  hoveredFeatureId,
+                  currentOpacity,
+                  baseOpacity,
+                );
               } else {
                 // Just set hover state to false if already at correct opacity
                 map.current?.setFeatureState(
@@ -1070,7 +1077,7 @@ const getCellEventHandlers = (
               }
             }
 
-            // Start animating new feature from its current/base opacity to 0.85
+            // Start animating new feature from its current/base opacity to 0.8
             hoveredFeatureId = h3Id;
             const newFeatureState = map.current?.getFeatureState({
               source: HEX_SOURCE_ID,
@@ -1081,7 +1088,7 @@ const getCellEventHandlers = (
               newFeatureState?.opacity ||
               newFeatureState?.baseOpacity ||
               DEFAULT_HEX_OPACITY;
-            // animateOpacity(map, h3Id, startOpacity, 0.85, 100);
+            animateOpacity(map, h3Id, startOpacity, 0.8, 100);
           }
         },
       },
@@ -1102,7 +1109,7 @@ const getCellEventHandlers = (
               featureState?.baseOpacity || DEFAULT_HEX_OPACITY;
 
             // Animate back to base opacity
-            // animateOpacity(map, hoveredFeatureId, currentOpacity, baseOpacity);
+            animateOpacity(map, hoveredFeatureId, currentOpacity, baseOpacity);
 
             // Clear the hovered feature
             hoveredFeatureId = null;

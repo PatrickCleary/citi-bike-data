@@ -27,7 +27,7 @@ export const SparklineMetric: React.FC = () => {
 
   return (
     <div className="flex w-full flex-col items-center">
-      <div className="w-full max-w-md">
+      <div className="w-full">
         <BasicChartWrapper
           data={!!sumQuery.data?.data ? sumQuery.data.data : baselineQuery.data}
           baselineData={baselineQuery.data}

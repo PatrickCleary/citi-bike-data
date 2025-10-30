@@ -49,9 +49,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
   const digits = formattedNumber.split("");
 
   return (
-    <span
-      className={classNames("tabular-nums tracking-wider", className)}
-    >
+    <span className={className}>
       {digits.map((digit, index) => (
         <AnimatedDigit
           key={`${animationKey}-${index}`}

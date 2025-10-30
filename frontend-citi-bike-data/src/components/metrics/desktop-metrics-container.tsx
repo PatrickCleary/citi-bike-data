@@ -4,15 +4,11 @@ import { BasicMetric } from "./mobile-basic-metric";
 import { useMemo } from "react";
 import { SparklineMetric } from "./sparkline-metric";
 import { useTripMonthlySumData } from "@/map/map-config";
-import dayjs from "dayjs";
-import duration from "dayjs/plugin/duration";
 import { Tab, TabGroup, TabList } from "@headlessui/react";
 import { PercentageMetric } from "./percentage-metric";
 import { CHART_OPTIONS } from "../charts/basic-chart-wrapper";
 import { MetricHeader } from "./mobile-metric-wrapper";
-import { ChartWindowTabs } from "./mobile-metrics-container";
-
-dayjs.extend(duration);
+import { ChartWindowTabs, StyledTabs } from "./chart-window-tabs";
 
 export const DesktopMetricsContainer: React.FC = () => {
   return (
@@ -26,7 +22,7 @@ export const DesktopMetricsContainer: React.FC = () => {
       </div>
       {/* Render the visible metrics */}
       <div className="flex flex-1 flex-col bg-cb-white lg:pl-2">
-        <div className="flex items-center justify-between border-b border-gray-200">
+        <div className="flex items-center gap-4 border-b border-gray-200 py-1">
           <ChartWindowTabs />
           <ChartDatasetToggles />
         </div>
@@ -34,7 +30,7 @@ export const DesktopMetricsContainer: React.FC = () => {
           <div className="flex w-full max-w-lg">
             <PercentageMetric />
           </div>
-          <div className="flex w-full max-w-lg">
+          <div className="flex max-w-lg w-full">
             <SparklineMetric />
           </div>
         </div>
@@ -59,8 +55,12 @@ export const ChartDatasetToggles: React.FC = () => {
   }, [data]);
 
   const tabs = [
-    { value: "rolling_avg", label: `${trendWindowSize}-month avg`, title: "Show trend line" },
     { value: "main", label: "Monthly", title: "Show current data" },
+    {
+      value: "rolling_avg",
+      label: `${trendWindowSize}-month avg`,
+      title: "Show trend line",
+    },
   ];
 
   // Determine which tab is active based on chartDatasetView
@@ -73,20 +73,10 @@ export const ChartDatasetToggles: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center gap-2 px-4">
-      <TabGroup selectedIndex={getActiveTab()} onChange={handleTabChange}>
-        <TabList className="flex flex-row gap-1">
-          {tabs.map((tab, index) => (
-            <Tab
-              key={index}
-              className="flex h-10 w-16 w-full items-center justify-center text-nowrap rounded-full px-3 text-cb-blue data-[hover]:bg-cb-blue/10 data-[selected]:bg-cb-blue/30 data-[selected]:data-[hover]:bg-cb-blue/30 uppercase lg:h-fit focus:outline-none focus:bg-cb-blue/20"
-              title={tab.title}
-            >
-              {tab.label}
-            </Tab>
-          ))}
-        </TabList>
-      </TabGroup>
-    </div>
+    <StyledTabs
+      tabs={Object.values(tabs).map((tab) => tab.label)}
+      onChange={handleTabChange}
+      selectedIndex={getActiveTab()}
+    />
   );
 };

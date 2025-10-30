@@ -16,7 +16,7 @@ import classNames from "classnames";
 import React, { MutableRefObject, useRef } from "react";
 
 export const buttonHoverStyle =
-  "data-[selected]:bg-cb-green/30 focus:outline-none data-[focus]:bg-cb-green/20  data-[selected]:data-[focus]:bg-cb-green/30 data-[hover]:bg-cb-green/20  data-[selected]:data-[hover]:bg-cb-green/30  transition ease-out duration-100";
+  "data-[selected]:bg-cb-blue/30 focus:outline-none data-[focus]:bg-cb-blue/20  data-[selected]:data-[focus]:bg-cb-blue/30 data-[hover]:bg-cb-blue/20  data-[selected]:data-[hover]:bg-cb-blue/30  transition ease-out duration-100";
 
 const tabStyle = classNames(
   "uppercase tracking-wide text-xs flex flex-row gap-2 justify-center items-center  transition rounded-full focus:outline-none w-32 px-2 py-1 text-gray-900 active:scale-95",
@@ -143,7 +143,7 @@ export const DisplaySettings: React.FC = () => {
               <Switch
                 checked={normalizeComparison}
                 onChange={setNormalizeComparison}
-                className="group relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-300 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-cb-green focus-visible:ring-offset-2 data-[checked]:bg-cb-green"
+                className="group relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-300 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-cb-green focus-visible:ring-offset-2 data-[checked]:bg-cb-blue"
               >
                 <span
                   aria-hidden="true"

@@ -29,11 +29,11 @@ export const TotalTripsMetric: React.FC = () => {
           <p>
             <AnimatedNumber
               value={totalTrips}
-              className="hidden text-gray-900 sm:flex"
+              className="hidden text-gray-900 sm:flex tracking-wider"
             />
             <AnimatedNumber
               value={formatter.format(totalTrips)}
-              className="text-gray-900 sm:hidden"
+              className="text-gray-900 sm:hidden tracking-wider"
             />
             <TripsText />
           </p>

@@ -2,7 +2,7 @@
 import { MutableRefObject, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import maplibregl, { Map, Popup } from "maplibre-gl";
-import { usePopupStateStore } from "@/store/popup-store";
+import { ClickedFeature, usePopupStateStore } from "@/store/popup-store";
 import {
   useTripCountData,
   useComparison,
@@ -30,8 +30,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
   const previousQuery = useComparisonData();
   const tripCounts = query.data?.data.trip_counts || {};
   const previousTripCounts = previousQuery.data?.data.trip_counts || {};
-  const { hoveredFeature, setHoveredFeature, clickedFeature } =
-    usePopupStateStore();
+  const { hoveredFeature, clickedFeature } = usePopupStateStore();
 
   const { displayType, scale, selectedMonth } = useMapConfigStore();
   const comparison = useComparison(false);
@@ -68,7 +67,7 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
     // create a new popup instance, but do not set its location or content yet
     popupRef.current = new maplibregl.Popup({
       closeOnClick: false,
-      offset: 10,
+      // offset: 10,
       // anchor: "top",
       closeButton: false,
     });
@@ -77,7 +76,6 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
       if (popupRef.current) popupRef.current.remove();
     };
   }, [map.current]);
-
 
   // Add click listener to clear clicked feature when clicking outside
   const { setClickedFeature } = usePopupStateStore();
@@ -179,11 +177,6 @@ export const PopupContent: React.FC<{
     originCells.length === 0 && destinationCells.length === 0;
   const isSelected = clickedFeature?.isDestination || clickedFeature?.isOrigin;
 
-  const handleRemove = () => {
-    if (clickedFeature?.isDestination) addOrRemoveDestinationCell(cellId);
-    if (clickedFeature?.isOrigin) addOrRemoveOriginCell(cellId);
-    setClickedFeature(null);
-  };
   const handleAddOrigin = () => [
     addOrRemoveOriginCell(cellId),
     setClickedFeature(null),
@@ -267,31 +260,9 @@ export const PopupContent: React.FC<{
             )}
           </>
         )}
-        {!isSelected && showButtons && (
-          <div className="mt-2 flex flex-col gap-1">
-            <button
-              onClick={handleAddOrigin}
-              className="pointer-events-auto rounded-md bg-black/70 px-3 py-1 text-xs font-medium text-white transition hover:bg-black active:scale-95"
-            >
-              Add to origin
-            </button>
-            <button
-              onClick={handleAddDestination}
-              className="pointer-events-auto rounded-md bg-white/70 px-3 py-1 text-xs font-medium text-black transition hover:bg-white active:scale-95"
-            >
-              Add to destination
-            </button>
-          </div>
-        )}
+        {!isSelected && showButtons && <AddButtons cellId={cellId} />}
         {isSelected && (
-          <div className="mt-2 text-xs font-medium text-gray-500">
-            <button
-              onClick={handleRemove}
-              className="pointer-events-auto rounded-md bg-black/70 px-3 py-1 text-xs font-medium text-white transition hover:bg-black active:scale-95"
-            >
-              Remove from {clickedFeature?.isOrigin ? "origin" : "destination"}
-            </button>
-          </div>
+          <RemovalButtons clickedFeature={clickedFeature} cellId={cellId} />
         )}
       </PopupDiv>
     );
@@ -347,31 +318,9 @@ export const PopupContent: React.FC<{
           )}
         </>
       )}
-      {!isSelected && showButtons && (
-        <div className="mt-2 flex flex-col gap-1">
-          <button
-            onClick={handleAddOrigin}
-            className="pointer-events-auto rounded-md bg-black/70 px-3 py-1 text-xs font-medium text-white transition hover:bg-black active:scale-95"
-          >
-            Add to origin
-          </button>
-          <button
-            onClick={handleAddDestination}
-            className="pointer-events-auto rounded-md bg-white/70 px-3 py-1 text-xs font-medium text-black transition hover:bg-white active:scale-95"
-          >
-            Add to destination
-          </button>
-        </div>
-      )}
+      {!isSelected && showButtons && <AddButtons cellId={cellId} />}
       {isSelected && (
-        <div className="mt-2 text-xs font-medium text-gray-500">
-          <button
-            onClick={handleRemove}
-            className="pointer-events-auto rounded-md bg-black/70 px-3 py-1 text-xs font-medium text-white transition hover:bg-black active:scale-95"
-          >
-            Remove from {clickedFeature?.isOrigin ? "origin" : "destination"}
-          </button>
-        </div>
+        <RemovalButtons clickedFeature={clickedFeature} cellId={cellId} />
       )}
     </PopupDiv>
   );
@@ -566,4 +515,85 @@ const interpolateColor = (
 
   // Convert back to hex
   return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+};
+
+export const RemovalButtons: React.FC<{
+  clickedFeature: ClickedFeature;
+  cellId: string;
+}> = ({ clickedFeature, cellId }) => {
+  const {
+    addOrRemoveDestinationCell,
+    addOrRemoveOriginCell,
+    originCells,
+    destinationCells,
+    setDestinationCells,
+    setOriginCells,
+  } = useMapConfigStore();
+  const { setClickedFeature } = usePopupStateStore();
+
+  const handleRemove = () => {
+    if (clickedFeature?.isDestination) addOrRemoveDestinationCell(cellId);
+    if (clickedFeature?.isOrigin) addOrRemoveOriginCell(cellId);
+    setClickedFeature(null);
+  };
+  const handleClear = () => {
+    if (clickedFeature?.isDestination) setDestinationCells([]);
+    if (clickedFeature?.isOrigin) setOriginCells([]);
+    setClickedFeature(null);
+  };
+  const multipleCells =
+    (clickedFeature?.isDestination && destinationCells.length > 1) ||
+    (clickedFeature?.isOrigin && originCells.length > 1);
+  return (
+    <div className="mt-2 flex w-full flex-col gap-1 font-light">
+      <button
+        onClick={handleRemove}
+        className="pointer-events-auto h-11 rounded-md bg-red-600/80 px-3 py-1 text-xs text-white transition hover:bg-red-600 active:scale-95 lg:h-fit"
+      >
+        Remove from {clickedFeature?.isOrigin ? "origin" : "destination"}
+      </button>
+      {multipleCells && (
+        <button
+          onClick={handleClear}
+          className="pointer-events-auto h-11 rounded-md bg-cb-white/70 px-3 py-1 text-xs text-red-600 transition hover:bg-cb-white active:scale-95 lg:h-fit"
+        >
+          Clear {clickedFeature?.isOrigin ? "origin" : "destination"}
+        </button>
+      )}
+    </div>
+  );
+};
+
+export const AddButtons: React.FC<{
+  cellId: string;
+}> = ({ cellId }) => {
+  const { addOrRemoveDestinationCell, addOrRemoveOriginCell } =
+    useMapConfigStore();
+  const { setClickedFeature } = usePopupStateStore();
+
+  const handleAddOrigin = () => [
+    addOrRemoveOriginCell(cellId),
+    setClickedFeature(null),
+  ];
+  const handleAddDestination = () => [
+    addOrRemoveDestinationCell(cellId),
+    setClickedFeature(null),
+  ];
+
+  return (
+    <div className="mt-2 flex w-full flex-col gap-1 font-light uppercase">
+      <button
+        onClick={handleAddOrigin}
+        className="pointer-events-auto h-11 rounded-md bg-cb-blue/80 px-3 py-1 text-xs text-white transition hover:bg-cb-blue active:scale-95 lg:h-fit"
+      >
+        Add to origin
+      </button>
+      <button
+        onClick={handleAddDestination}
+        className="pointer-events-auto h-11 rounded-md bg-cb-blue/80 px-3 py-1 text-xs text-white transition hover:bg-cb-blue active:scale-95 lg:h-fit"
+      >
+        Add to destination
+      </button>
+    </div>
+  );
 };

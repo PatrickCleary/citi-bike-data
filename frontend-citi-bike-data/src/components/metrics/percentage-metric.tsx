@@ -51,7 +51,7 @@ export const PercentageMetric: React.FC = () => {
       const share_percentage =
         baselineTotal > 0 ? (d.total_count / baselineTotal) * 100 : 0;
 
-      const roundedPercentage = Math.round(share_percentage * 10) / 10;
+      const roundedPercentage = Math.round(share_percentage * 100) / 100;
 
       return {
         date_month: d.date_month,
@@ -103,7 +103,7 @@ export const PercentageMetric: React.FC = () => {
 
   return (
     <div className="flex w-full flex-col items-center">
-      <div className="w-full max-w-md">
+      <div className="w-full">
         <BasicChartWrapper
           title={percentageTitle}
           data={percentageData}

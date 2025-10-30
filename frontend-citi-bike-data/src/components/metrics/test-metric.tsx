@@ -9,8 +9,6 @@ import { useMapConfigStore } from "@/store/store";
 
 import dayjs from "dayjs";
 import classNames from "classnames";
-import { AnimatedNumber } from "../other/animated-digits";
-import { TripsText } from "./total-trips-metric";
 import { formatter } from "@/utils/utils";
 import { Switch } from "@headlessui/react";
 
@@ -29,14 +27,12 @@ export const TestMetric: React.FC = () => {
   const totalTrips = queryFiltered?.data?.data.sum_all_values || 0;
   const totalTripsFromOrigin = query.data?.data.sum_all_values || 0;
   let percentTrips = (100 * totalTrips) / totalTripsFromOrigin;
-  
 
   const thisMonthsTotal =
     originQuery.data?.find((item) => item["date_month"] === selectedMonth)
       ?.total_count || 0;
   const percentTripsOfTotal = (100 * totalTrips) / thisMonthsTotal;
-  if (percentTrips === 100 )
-    percentTrips = percentTripsOfTotal
+  if (percentTrips === 100) percentTrips = percentTripsOfTotal;
 
   return (
     <div className="flex cursor-default flex-row items-center">

@@ -3,43 +3,52 @@ import { useMetricsStore, MetricType } from "@/store/metrics-store";
 import { MobileMetricWrapper } from "./mobile-metric-wrapper";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import classNames from "classnames";
-import { useMapConfigStore } from "@/store/store";
 import { BasicMetric } from "./mobile-basic-metric";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { SparklineMetric } from "./sparkline-metric";
-import { useComparison } from "@/map/map-config";
+import { useComparison, useTripMonthlySumData } from "@/map/map-config";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import { Tab, TabGroup, TabList } from "@headlessui/react";
 import { PercentageMetric } from "./percentage-metric";
-import { Menu, MenuItem, IconButton } from "@mui/material";
+import {
+  Menu,
+  MenuButton,
+  MenuItems,
+  MenuItem as HeadlessMenuItem,
+} from "@headlessui/react";
+import { ChartWindowTabs } from "./chart-window-tabs";
+import { useMapConfigStore } from "@/store/store";
+import { CHART_OPTIONS } from "../charts/basic-chart-wrapper";
+import { buttonHoverStyle } from "../display-settings";
 
 dayjs.extend(duration);
 
 type ChartType = "sparkline" | "percentage";
+const CHARTS: Array<{ type: ChartType; label: string }> = [
+  { type: "sparkline", label: "Trips" },
+  { type: "percentage", label: "Percentages" },
+];
 
 export const MobileMetricsContainer: React.FC = () => {
   const { selectedMobileMetric } = useMetricsStore();
+  const { chartDatasetView, setChartDatasetView } = useMapConfigStore();
 
   const comparison = useComparison();
   const [expanded, setExpanded] = useState(false);
   const [chartType, setChartType] = useState<ChartType>("sparkline");
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const menuOpen = Boolean(anchorEl);
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const sumQuery = useTripMonthlySumData();
+  const data = sumQuery.data?.data;
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleChartTypeChange = (type: ChartType) => {
-    setChartType(type);
-    handleMenuClose();
-  };
+  // Calculate the window size for the label
+  const trendWindowSize = useMemo(() => {
+    if (!data) return CHART_OPTIONS.smoothingWindowSize;
+    return Math.min(
+      CHART_OPTIONS.smoothingWindowSize,
+      Math.floor(data.length / 3),
+    );
+  }, [data]);
 
   return (
     <div className="pointer-events-auto z-10 flex w-full flex-col items-center rounded-t-md bg-white lg:hidden">
@@ -59,37 +68,68 @@ export const MobileMetricsContainer: React.FC = () => {
           )}
         >
           <div className="bg overflow-hidden">
-            <div className="flex flex-row justify-between">
-              <IconButton
-                onClick={handleMenuClick}
-                size="small"
-                aria-controls={menuOpen ? "chart-type-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={menuOpen ? "true" : undefined}
-              >
-                <MoreHorizIcon className="text-cb-blue" fontSize="small" />
-              </IconButton>
-              <Menu
-                id="chart-type-menu"
-                anchorEl={anchorEl}
-                open={menuOpen}
-                onClose={handleMenuClose}
-                MenuListProps={{
-                  "aria-labelledby": "chart-type-button",
-                }}
-              >
-                <MenuItem
-                  onClick={() => handleChartTypeChange("sparkline")}
-                  selected={chartType === "sparkline"}
+            <div className="flex flex-row items-center justify-between">
+              <ChartWindowTabs />
+
+              <Menu>
+                <MenuButton className="flex h-10 w-10 items-center justify-center rounded-full text-cb-blue transition hover:bg-cb-blue/10 focus:outline-none active:scale-95">
+                  <MoreHorizIcon fontSize="small" />
+                </MenuButton>
+                <MenuItems
+                  anchor="bottom end"
+                  transition
+                  className="z-10 w-48 origin-top-right rounded-lg border-[0.5px] border-cb-lightGray bg-cb-white shadow-lg drop-shadow-md duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:translate-y-1 data-[closed]:opacity-0"
                 >
-                  Trips
-                </MenuItem>
-                <MenuItem
-                  onClick={() => handleChartTypeChange("percentage")}
-                  selected={chartType === "percentage"}
-                >
-                  Percentages
-                </MenuItem>
+                  <div className="p-1">
+                    <p className="px-3 py-2 text-xs font-light uppercase tracking-wide text-gray-400">
+                      Data View
+                    </p>
+                    <HeadlessMenuItem>
+                      <button
+                        onClick={() => setChartDatasetView("main")}
+                        className={classNames(
+                          "w-full cursor-pointer text-cb-blue  rounded-md px-3 py-2 text-left text-sm font-light tracking-wide",
+                          buttonHoverStyle,
+                          chartDatasetView === "main" && "bg-cb-blue/30",
+                        )}
+                      >
+                        Monthly
+                      </button>
+                    </HeadlessMenuItem>
+                    <HeadlessMenuItem>
+                      <button
+                        onClick={() => setChartDatasetView("rolling_avg")}
+                        className={classNames(
+                          "w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm font-light tracking-wide text-cb-blue",
+                          buttonHoverStyle,
+                          chartDatasetView === "rolling_avg" && "bg-cb-blue/30",
+                        )}
+                      >
+                        {trendWindowSize}-month avg
+                      </button>
+                    </HeadlessMenuItem>
+
+                    <div className="my-1 h-[0.5px] bg-cb-lightGray" />
+
+                    <p className="px-3 py-2 text-xs font-light uppercase tracking-wide text-gray-400">
+                      Chart Type
+                    </p>
+                    {CHARTS.map((chart) => (
+                      <HeadlessMenuItem key={chart.type}>
+                        <button
+                          onClick={() => setChartType(chart.type)}
+                          className={classNames(
+                            "w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm font-light tracking-wide text-cb-blue",
+                            buttonHoverStyle,
+                            chartType === chart.type && "bg-cb-blue/30",
+                          )}
+                        >
+                          {chart.label}
+                        </button>
+                      </HeadlessMenuItem>
+                    ))}
+                  </div>
+                </MenuItems>
               </Menu>
             </div>
             {chartType === "sparkline" && <SparklineMetric />}
@@ -98,45 +138,5 @@ export const MobileMetricsContainer: React.FC = () => {
         </div>
       </MobileMetricWrapper>
     </div>
-  );
-};
-
-export const ChartWindowTabs: React.FC = () => {
-  const { chartWindow, setChartWindow } = useMapConfigStore();
-  const chartTabs: {
-    [key: number]: { durationObj: duration.Duration; label: string };
-  } = {
-    0: { durationObj: dayjs.duration(6, "months"), label: "1 year" },
-    1: { durationObj: dayjs.duration(12, "months"), label: "2 years" },
-    2: { durationObj: dayjs.duration(24, "months"), label: "4 years" },
-  };
-
-  // Determine which tab is active based on chartWindow
-  const getActiveTab = () => {
-    const months = chartWindow.asMonths();
-    if (months === 6) return 0;
-    if (months === 12) return 1;
-    if (months === 24) return 2;
-    return 1; // default to 2 years
-  };
-
-  const handleTabChange = (index: number) => {
-    const tabObj = chartTabs[index];
-    setChartWindow(tabObj.durationObj);
-  };
-
-  return (
-    <TabGroup selectedIndex={getActiveTab()} onChange={handleTabChange}>
-      <TabList className={"flex w-fit flex-row gap-1 p-1"}>
-        {Object.values(chartTabs).map((tab, index) => (
-          <Tab
-            key={index}
-            className="flex h-10 w-16 w-full items-center justify-center text-nowrap rounded-full px-3 uppercase text-cb-blue focus:bg-cb-blue/20 focus:outline-none data-[hover]:bg-cb-blue/10 data-[selected]:bg-cb-blue/30 data-[selected]:data-[hover]:bg-cb-blue/30 lg:h-fit"
-          >
-            {tab.label}
-          </Tab>
-        ))}
-      </TabList>
-    </TabGroup>
   );
 };

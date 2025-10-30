@@ -21,7 +21,7 @@ body {
 
 
 .maplibregl-popup-content {
-  /* padding: 0 !important;  */
+  padding: 0 !important; 
   background-color: transparent !important;
   box-shadow: none !important;
   border-radius: 8px !important;
@@ -30,6 +30,12 @@ body {
   overflow-x: hidden !important;
 }
 
-.maplibregl-popup-tip {
-  display: none !important;
+
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  /* display: none !important; */    
+    align-self: center !important;
+    border-bottom: none !important;
+    border-top-color: #ffffff40 !important;
+
+
 }

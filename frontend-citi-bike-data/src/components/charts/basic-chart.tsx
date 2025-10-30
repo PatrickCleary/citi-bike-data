@@ -26,13 +26,14 @@ ChartJS.register(
 );
 
 interface BasicChartProps {
-  data: ChartLineData;
+  data: ChartLineData | undefined;
   selectedIndex: number;
   unit?: string;
 }
 
 // Get the total number of data points from the chart data
-const getDataLength = (data: ChartLineData): number => {
+const getDataLength = (data: ChartLineData | undefined): number => {
+  if (!data) return 0;
   return data.labels?.length ?? 0;
 };
 export const BasicChart: React.FC<BasicChartProps> = ({
@@ -194,7 +195,10 @@ export const BasicChart: React.FC<BasicChartProps> = ({
       <Line
         width={"100%"}
         ref={chartRef}
-        data={data}
+        data={
+          data ??
+          ({ datasets: [], labels: [" ", " "] } as ChartData<"line">)
+        }
         options={options}
         plugins={[verticalLinePlugin]}
       />

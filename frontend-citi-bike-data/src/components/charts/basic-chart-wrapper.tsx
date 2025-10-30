@@ -98,7 +98,7 @@ export const BasicChartWrapper: React.FC<BasicChartWrapperProps> = ({
 
   const chartData = useMemo(() => {
     const datasets: ChartDataset<"line">[] = [];
-    if (!data) return null;
+    if (!data) return undefined;
 
     const dataValues = data?.map((d) => d.total_count);
     const statistics = calculateStats(dataValues);
@@ -124,7 +124,12 @@ export const BasicChartWrapper: React.FC<BasicChartWrapperProps> = ({
     }
 
     if (datasetConfigFinal.baseline === true && baselineData) {
-      addZScoreBaselineDataset(datasets, baselineData, statistics, datasetConfigFinal.rolling_avg === true);
+      addZScoreBaselineDataset(
+        datasets,
+        baselineData,
+        statistics,
+        datasetConfigFinal.rolling_avg === true,
+      );
     }
 
     if (datasetConfigFinal.main === true) {
@@ -147,16 +152,7 @@ export const BasicChartWrapper: React.FC<BasicChartWrapperProps> = ({
         )}
         {children}
       </div>
-
-      {chartData ? (
-        <BasicChart
-          data={chartData}
-          selectedIndex={selectedIndex}
-          unit={unit}
-        />
-      ) : (
-        <div className="h-32 animate-pulse flex items-center justify-center bg-white/30" />
-      )}
+      <BasicChart data={chartData} selectedIndex={selectedIndex} unit={unit} />
     </div>
   );
 };

@@ -59,7 +59,7 @@ export const useMapConfigStore = create<Store>((set, get) => ({
   displayType: "absolute",
   normalizeComparison: true,
   selectionMode: "origin",
-  chartWindow: dayjs.duration(2, "year"),
+  chartWindow: dayjs.duration(6, "months"),
   chartDatasetView: "rolling_avg",
   showBaseline: true,
   setChartWindow: (window) => set({ chartWindow: window }),

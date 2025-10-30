@@ -1,7 +1,7 @@
 import React from "react";
 import { useComparison } from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
-import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
+import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDown";
 import dayjs from "dayjs";
 import classNames from "classnames";
@@ -48,9 +48,10 @@ export const ComparisonMetric: React.FC = () => {
               {isPositiveChange ? "+" : ""}
               <AnimatedNumber
                 value={Math.abs(comparison.absoluteChange)}
-                className={
-                  isPositiveChange ? "text-cb-increase" : "text-cb-decrease"
-                }
+                className={classNames(
+                  isPositiveChange ? "text-cb-increase" : "text-cb-decrease",
+                  "tracking-wider",
+                )}
               />
               <TripsText />
             </span>

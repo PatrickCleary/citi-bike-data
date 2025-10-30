@@ -25,6 +25,7 @@ export const CLICKED_POPUP = new maplibregl.Popup({
   closeButton: false,
   closeOnClick: false,
   maxWidth: "200px",
+
 });
 export const usePopupStateStore = create<PopupStateStore>((set) => ({
   hoveredFeature: null,
