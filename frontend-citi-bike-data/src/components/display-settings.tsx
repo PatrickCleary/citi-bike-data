@@ -33,7 +33,6 @@ const comparisonGradient = `linear-gradient(to right,
 
 export const DisplaySettings: React.FC = () => {
   const {
-    swapAnalysisType,
     analysisType,
     scaleType,
     setScaleType,
@@ -73,27 +72,6 @@ export const DisplaySettings: React.FC = () => {
         transition
         className="pointer-events-auto z-10 flex origin-bottom-left flex-col gap-2 rounded-lg border-[0.5px] border-cb-lightGray bg-cb-white p-6 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
-        <TabGroup
-          selectedIndex={selectedIndexAnalysis}
-          onChange={() => swapAnalysisType()}
-        >
-          <TabList className={"flex flex-row gap-2 text-sm text-gray-900"}>
-            <Tab key={"arrivals"} className={tabStyle}>
-              <span
-                className="material-symbols-outlined"
-                style={{ fontSize: "1.25rem" }}
-              >
-                bike_dock
-              </span>
-              Drop-offs
-            </Tab>
-            <Tab key={"departures"} className={tabStyle}>
-              <PedalBikeRounded fontSize="small" />
-              Pickups
-            </Tab>
-          </TabList>
-        </TabGroup>
-
         <p className="cursor-default text-xs uppercase tracking-wide text-gray-400">
           Mode
         </p>
@@ -130,14 +108,14 @@ export const DisplaySettings: React.FC = () => {
         </TabGroup>
 
         {displayType === "comparison" && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 pl-4 pt-2">
             <div className="flex flex-row items-center justify-between gap-4">
               <div className="flex flex-col">
-                <p className="cursor-default text-xs font-medium uppercase tracking-wide text-gray-700">
-                  Normalize by origin traffic
+                <p className="cursor-default text-xs font-light uppercase tracking-wide text-gray-500">
+                  Normalize values
                 </p>
                 <p className="cursor-default text-xs text-gray-400">
-                  Account for overall ridership changes
+                  Account for ridership changes
                 </p>
               </div>
               <Switch
@@ -156,8 +134,6 @@ export const DisplaySettings: React.FC = () => {
 
         {displayType === "absolute" && (
           <>
-            <hr className="bg-cb-lightGray" />
-
             <p className="cursor-default text-xs uppercase tracking-wide text-gray-400">
               Scale
             </p>
@@ -168,7 +144,9 @@ export const DisplaySettings: React.FC = () => {
                   setScaleType(index === 0 ? "dynamic" : "custom")
                 }
               >
-                <TabList className={"flex flex-row gap-2 text-sm text-gray-900"}>
+                <TabList
+                  className={"flex flex-row gap-2 text-sm text-gray-900"}
+                >
                   <Tab key={"dynamic"} className={tabStyle}>
                     Dynamic
                   </Tab>

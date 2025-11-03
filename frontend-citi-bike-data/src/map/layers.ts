@@ -96,8 +96,8 @@ export const ORIGIN_LABEL_LAYER: LayerSpecification = {
   source: ORIGIN_LABEL_SOURCE_ID,
   type: "symbol",
   layout: {
-    "icon-offset": [0, 25],
-    "icon-size":.8,
+    // "icon-offset": [0, 25],
+    "icon-size": 0.8,
     "icon-image": "origin_label",
     "icon-allow-overlap": true,
   },
@@ -135,12 +135,12 @@ export const DESTINATION_LABEL_LAYER: LayerSpecification = {
   source: DESTINATION_LABEL_SOURCE_ID,
   type: "symbol",
   layout: {
-    "icon-offset": [0, 25],
-    "icon-size":.8,
+    // "icon-offset": [0, 25],
+    "icon-size": 0.8,
     "icon-image": "destination_label",
     "icon-allow-overlap": true,
   },
-}; 
+};
 
 const SUBWAY_LINE_LAYER_ID = "subway_line_tiles_line_layer";
 export const SUBWAY_SOURCE_LAYER_ID = "subway_lines";

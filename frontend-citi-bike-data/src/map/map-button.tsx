@@ -8,7 +8,7 @@ interface MapButtonProps {
 }
 
 export const MapButtonStyle =
-  "flex h-12 w-12 items-center active:scale-95 justify-center rounded-md border-[0.5px] bg-white/30 drop-shadow-md backdrop-blur-md transition border-cb-lightGray text-gray-900 hover:bg-white/60";
+  "flex h-12 w-12 items-center active:scale-95 justify-center rounded-md border-[0.5px] bg-white transition border-cb-lightGray text-gray-900 hover:bg-white/60";
 
 export const MapButton: React.FC<MapButtonProps> = ({
   disabled,
@@ -21,7 +21,7 @@ export const MapButton: React.FC<MapButtonProps> = ({
       title={title}
       disabled={disabled}
       className={classNames(
-        "flex h-12 w-12 items-center justify-center rounded-md border-[0.5px] bg-white/30 drop-shadow-md backdrop-blur-md transition active:scale-95",
+        "flex h-12 w-12 items-center justify-center rounded-md border-[0.5px] bg-white transition active:scale-95",
         disabled
           ? "border-cb-lightGray/50 bg-cb-lightGray/60 text-gray-400"
           : "border-cb-lightGray text-gray-900 hover:bg-white/60",

@@ -79,7 +79,7 @@ export const MobileMetricWrapper: React.FC<MobileMetricWrapperProps> = ({
             <p className="mb-4 px-2 py-1 text-sm font-light uppercase tracking-wide text-gray-500">
               Metrics
             </p>
-            <div className="flex flex-col gap-4">
+            <div className="m">
               {allMetrics.map((metricType) => {
                 const isSelected = selectedMobileMetric === metricType;
                 const MetricComponent = metricComponents[metricType];

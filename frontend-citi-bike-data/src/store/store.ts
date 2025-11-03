@@ -37,7 +37,6 @@ interface Store {
   setNormalizeComparison: (normalize: boolean) => void;
   setSelectionMode: (mode: "origin" | "destination") => void;
   setAnalysisType: (type: "departures" | "arrivals") => void;
-  swapAnalysisType: () => void;
   setSelectedMonth: (month: string | undefined) => void;
   setDepartureCountMap: (map: Record<string, number>) => void;
   setOriginCells: (originCells: string[]) => void;
@@ -60,7 +59,7 @@ export const useMapConfigStore = create<Store>((set, get) => ({
   normalizeComparison: true,
   selectionMode: "origin",
   chartWindow: dayjs.duration(6, "months"),
-  chartDatasetView: "rolling_avg",
+  chartDatasetView: "main",
   showBaseline: true,
   setChartWindow: (window) => set({ chartWindow: window }),
   setChartDatasetView: (view) => set({ chartDatasetView: view }),
@@ -81,11 +80,6 @@ export const useMapConfigStore = create<Store>((set, get) => ({
     set({ normalizeComparison: normalize }),
   setSelectionMode: (mode) => set({ selectionMode: mode }),
   setAnalysisType: (type) => set({ analysisType: type }),
-  swapAnalysisType: () =>
-    set((state) => ({
-      analysisType:
-        state.analysisType === "departures" ? "arrivals" : "departures",
-    })),
   setSelectedMonth: (month) => set({ selectedMonth: month }),
   setDepartureCountMap: (map) => set({ departureCountMap: map }),
   setOriginCells: (originCells) => set({ originCells: originCells }),

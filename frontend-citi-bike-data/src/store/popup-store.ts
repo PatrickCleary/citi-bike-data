@@ -22,7 +22,7 @@ interface PopupStateStore {
 
 // Desktop only
 export const CLICKED_POPUP = new maplibregl.Popup({
-  closeButton: false,
+  // closeButton: false,
   closeOnClick: false,
   maxWidth: "200px",
 

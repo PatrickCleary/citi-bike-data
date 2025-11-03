@@ -920,10 +920,10 @@ export const useUpdateMapStyleOnDataChange = (
   const { layersAdded } = useLayerVisibilityStore();
   const mapObj = map.current;
   if (!mapLoaded) return;
-  const departureCountMap = query.data?.data.trip_counts;
+  const departureCountMap = query.data?.data?.trip_counts ?? {};
   const previousDepartureCountMap = previousQuery.data?.data?.trip_counts ?? {};
   const currentTotal = query.data?.data.sum_all_values || 0;
-  const previousTotal = previousQuery.data?.data.sum_all_values || 0;
+  const previousTotal = previousQuery.data?.data?.sum_all_values || 0;
   const hexLayer = map.current?.getLayer(HEX_LAYER.id);
   if (scale[0] >= scale[1]) return;
   // Don't hide hex layer while loading - keep previous data visible
@@ -1325,29 +1325,24 @@ const convertCellsToGeoJSON = (
     features: features,
   };
 };
-// Helper function to calculate the bottom-most (southernmost) point of a polygon
-const findBottomMostPoint = (polygon: number[][][]): [number, number] => {
+// Helper function to calculate the centroid (center) of a polygon
+const findCentroid = (polygon: number[][][]): [number, number] => {
   // polygon is an array of rings, we only need the outer ring (first element)
   const ring = polygon[0];
 
-  let bottomMostPoint: [number, number] = [
-    Number.POSITIVE_INFINITY,
-    Number.POSITIVE_INFINITY,
-  ];
+  let sumX = 0;
+  let sumY = 0;
+  const numPoints = ring.length;
 
   for (const [x, y] of ring) {
-    if (
-      y < bottomMostPoint[1] ||
-      (y === bottomMostPoint[1] && x < bottomMostPoint[0])
-    ) {
-      bottomMostPoint = [x, y];
-    }
+    sumX += x;
+    sumY += y;
   }
 
-  return bottomMostPoint;
+  return [sumX / numPoints, sumY / numPoints];
 };
 
-// Helper function to calculate the top-right point of origin cells for label placement
+// Helper function to calculate the centroid of origin/destination cells for label placement
 // Creates one label per disconnected polygon region
 const convertCellsToLabelGeoJSON = (
   cells: string[],
@@ -1361,15 +1356,15 @@ const convertCellsToLabelGeoJSON = (
     };
   }
 
-  // Calculate top-right point for each polygon and create a label point
+  // Calculate centroid for each polygon and create a label point
   const features = polygons.map((polygon) => {
-    const bottomPoint = findBottomMostPoint(polygon);
+    const centerPoint = findCentroid(polygon);
 
     return {
       type: "Feature" as const,
       geometry: {
         type: "Point" as const,
-        coordinates: bottomPoint,
+        coordinates: centerPoint,
       },
       properties: {
         title: title,

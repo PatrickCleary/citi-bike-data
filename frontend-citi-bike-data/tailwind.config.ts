@@ -32,7 +32,7 @@ export default {
 
       colors: {
         cb: {
-          white: "#F2F3F0",
+          white: "#F5F8FA",
           lightGray: "#C3C9CC",
           darkPurple: "#440154",
           purple: "#482878",

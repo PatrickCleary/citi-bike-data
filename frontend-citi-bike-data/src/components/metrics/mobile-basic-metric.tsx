@@ -68,7 +68,7 @@ const DeltaComparedToOriginBadge: React.FC<{}> = () => {
         <div className="flex flex-col items-start gap-0 text-xs font-light leading-tight text-gray-600">
           <span className="tabular-nums">
             <LoadingNumber
-              value={formatter.format(comparison.currentTotal)}
+              value={comparison.currentTotal}
               isLoading={comparison.isLoading}
               className="text-xl font-semibold tabular-nums tracking-wider text-gray-900 lg:text-3xl"
             />{" "}

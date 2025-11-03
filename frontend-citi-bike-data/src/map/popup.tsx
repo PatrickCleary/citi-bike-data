@@ -1,5 +1,8 @@
 "use client";
 import { MutableRefObject, useEffect, useRef } from "react";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
 import { createPortal } from "react-dom";
 import maplibregl, { Map, Popup } from "maplibre-gl";
 import { ClickedFeature, usePopupStateStore } from "@/store/popup-store";
@@ -17,6 +20,9 @@ import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 
 import dayjs from "dayjs";
+import classNames from "classnames";
+import AddHexIcon from "@/icons/add-hex";
+import MinusHexIcon from "@/icons/minus-hex";
 interface PopupProps {
   map: MutableRefObject<Map | null>;
 }
@@ -186,9 +192,13 @@ export const PopupContent: React.FC<{
     setClickedFeature(null),
   ];
 
+  const showTripCountMetric = () => {
+    if (clickedFeature?.isOrigin) return false;
+    if (clickedFeature?.isDestination && originCells.length === 0) return false;
+    return true;
+  };
+
   const cellComparison = cellId ? comparison.getCellComparison(cellId) : null;
-  const showComparison =
-    cellComparison && !comparison.isLoading && cellComparison.previousCount > 0;
   const isPositiveChange = cellComparison
     ? cellComparison.absoluteChange > 0
     : false;
@@ -201,21 +211,14 @@ export const PopupContent: React.FC<{
   if (noCellsSelected)
     return (
       <PopupDiv>
+        {showButtons && <CloseButton onClick={() => setClickedFeature(null)} />}
+
         <div className="flex flex-row items-center justify-center gap-2 font-sans">
           <ArrDepIcon analysisType={analysisType} />
-
-          <div className="flex flex-row items-center justify-center gap-1">
-            {loading ? (
-              <span className="animate-pulse tabular-nums blur-sm">0</span>
-            ) : (
-              <span className="font-bold tabular-nums tracking-wider">
-                {formatter.format(hoveredTripCount ?? 0)}{" "}
-              </span>
-            )}
-            <span className="text-xs font-medium uppercase tracking-wide">
-              trips
-            </span>
-          </div>
+          <TripCountPopupMetric
+            tripCount={hoveredTripCount}
+            loading={loading}
+          />
         </div>
         <p className="flex flex-row items-center gap-1 text-center text-xs font-light uppercase tracking-wide">
           {analysisType === "arrivals" ? "arrived here" : "began from"}
@@ -228,99 +231,40 @@ export const PopupContent: React.FC<{
           />
         </p>
         {displayType === "comparison" && (
-          <>
-            {comparison.isLoading ? (
-              <div className="mt-0.5 flex items-center gap-1 text-xs blur-sm">
-                <TrendingUpRoundedIcon fontSize="small" />
-                <span className="font-medium tabular-nums">+000</span>
-                <span>(+0.0%)</span>
-              </div>
-            ) : showComparison ? (
-              <div
-                className={`mt-0.5 flex items-center gap-1 text-xs ${isPositiveChange ? "text-cb-increase" : "text-cb-decrease"}`}
-              >
-                {isPositiveChange ? (
-                  <TrendingUpRoundedIcon fontSize="small" />
-                ) : (
-                  <TrendingDownRoundedIcon fontSize="small" />
-                )}
-                <span className="font-medium tabular-nums">
-                  {isPositiveChange ? "+" : ""}
-                  {formatter.format(cellComparison.absoluteChange ?? 0)}
-                </span>
-                <span>
-                  ({isPositiveChange ? "+" : ""}
-                  {cellComparison.percentageChange.toFixed(1)}%)
-                </span>
-              </div>
-            ) : (
-              <div className="mt-0.5 text-xs text-gray-400">
-                no data in {comparisonDate?.format("MMMM, YYYY")}
-              </div>
-            )}
-          </>
+          <ComparisonPopupMetric
+            cellId={cellId}
+            comparisonDate={comparisonDate}
+          />
         )}
-        {!isSelected && showButtons && <AddButtons cellId={cellId} />}
-        {isSelected && (
-          <RemovalButtons clickedFeature={clickedFeature} cellId={cellId} />
+        {showButtons && (
+          <SelectionButtons cellId={cellId} clickedFeature={clickedFeature} />
         )}
       </PopupDiv>
     );
 
   return (
     <PopupDiv>
-      <div className="flex flex-row items-center justify-center gap-2 font-sans">
-        <ArrDepIcon analysisType={analysisType} />
-        <div className="flex flex-row items-center gap-1">
-          <span className="font-bold tabular-nums tracking-wider">
-            {loading ? (
-              <span className="animate-pulse blur-sm">000</span>
-            ) : (
-              <span>{formatter.format(hoveredTripCount ?? 0)}</span>
-            )}
-          </span>
-          <span className="text-xs font-medium uppercase tracking-wide">
-            Trips
-          </span>
-        </div>
-      </div>
-      <ArrDepText analysisType={analysisType} hexColor={hexColor} />
-      {displayType === "comparison" && (
+      {showButtons && <CloseButton onClick={() => setClickedFeature(null)} />}
+      {showTripCountMetric() && (
         <>
-          {comparison.isLoading ? (
-            <div className="mt-0.5 flex items-center gap-1 text-xs blur-sm">
-              <TrendingUpRoundedIcon fontSize="small" />
-              <span className="font-medium tabular-nums">+000</span>
-              <span>(+0.0%)</span>
-            </div>
-          ) : showComparison ? (
-            <div
-              className={`mt-0.5 flex items-center gap-1 text-xs ${isPositiveChange ? "text-cb-increase" : "text-cb-decrease"}`}
-            >
-              {isPositiveChange ? (
-                <TrendingUpRoundedIcon fontSize="small" />
-              ) : (
-                <TrendingDownRoundedIcon fontSize="small" />
-              )}
-              <span className="font-medium tabular-nums">
-                {isPositiveChange ? "+" : ""}
-                {formatter.format(cellComparison.absoluteChange)}
-              </span>
-              <span>
-                ({isPositiveChange ? "+" : ""}
-                {cellComparison.percentageChange.toFixed(1)}%)
-              </span>
-            </div>
-          ) : (
-            <div className="mt-0.5 text-xs text-gray-400">
-              no data in {comparisonDate?.format("MMMM, YYYY")}
-            </div>
-          )}
+          <div className="flex flex-row items-center justify-center gap-2 font-sans">
+            <ArrDepIcon analysisType={analysisType} />
+            <TripCountPopupMetric
+              tripCount={hoveredTripCount}
+              loading={loading}
+            />
+          </div>
+          <ArrDepText analysisType={analysisType} hexColor={hexColor} />
         </>
       )}
-      {!isSelected && showButtons && <AddButtons cellId={cellId} />}
-      {isSelected && (
-        <RemovalButtons clickedFeature={clickedFeature} cellId={cellId} />
+      {displayType === "comparison" && (
+        <ComparisonPopupMetric
+          cellId={cellId}
+          comparisonDate={comparisonDate}
+        />
+      )}
+      {showButtons && (
+        <SelectionButtons cellId={cellId} clickedFeature={clickedFeature} />
       )}
     </PopupDiv>
   );
@@ -328,7 +272,7 @@ export const PopupContent: React.FC<{
 
 const PopupDiv: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="rounded-2 flex flex-col items-center rounded-md border-[.5px] border-cb-white/50 bg-white/30 px-2 py-1 text-center font-sans text-lg tabular-nums text-black text-neutral-800 drop-shadow-md backdrop-blur-md">
+    <div className="rounded-2 flex min-w-[160px] flex-col items-center rounded-md border-[.5px] border-cb-white/50 bg-white/30 px-2 px-4 py-1 py-2 text-center font-sans text-lg tabular-nums text-black text-neutral-800 drop-shadow-md backdrop-blur-md">
       {children}
     </div>
   );
@@ -546,16 +490,29 @@ export const RemovalButtons: React.FC<{
     (clickedFeature?.isOrigin && originCells.length > 1);
   return (
     <div className="mt-2 flex w-full flex-col gap-1 font-light">
-      <button
-        onClick={handleRemove}
-        className="pointer-events-auto h-11 rounded-md bg-red-600/80 px-3 py-1 text-xs text-white transition hover:bg-red-600 active:scale-95 lg:h-fit"
-      >
-        Remove from {clickedFeature?.isOrigin ? "origin" : "destination"}
-      </button>
+      <div className="flex w-full flex-row justify-center gap-1">
+        <button
+          // onClick={handleAddOrigin}
+          disabled
+          className="pointer-events-auto flex h-11 w-24 flex-col items-center justify-center gap-[2px] rounded-md bg-black px-3 py-1 text-xs uppercase tracking-wider text-white opacity-20 transition active:scale-95 lg:h-fit"
+        >
+          <PedalBikeRoundedIcon fontSize="small" />
+          origin
+        </button>
+        <button
+          onClick={handleRemove}
+          className="pointer-events-auto flex h-11 w-24 flex-col items-center justify-center gap-[2px] rounded-md bg-black px-3 py-1 text-xs uppercase tracking-wider text-white shadow-[inset_0_0_0_2px_black,inset_0_0_0_3px_rgb(255,255,255)] transition active:scale-95 lg:h-fit"
+        >
+          <span className="material-symbols-outlined h-[20px] w-[20px]">
+            bike_dock
+          </span>
+          DEST
+        </button>
+      </div>
       {multipleCells && (
         <button
           onClick={handleClear}
-          className="pointer-events-auto h-11 rounded-md bg-cb-white/70 px-3 py-1 text-xs text-red-600 transition hover:bg-cb-white active:scale-95 lg:h-fit"
+          className="pointer-events-auto h-11 rounded-md px-3 py-1 text-xs text-red-600 transition hover:bg-cb-white active:scale-95 lg:h-fit"
         >
           Clear {clickedFeature?.isOrigin ? "origin" : "destination"}
         </button>
@@ -564,36 +521,174 @@ export const RemovalButtons: React.FC<{
   );
 };
 
-export const AddButtons: React.FC<{
+export const SelectionButtons: React.FC<{
   cellId: string;
-}> = ({ cellId }) => {
-  const { addOrRemoveDestinationCell, addOrRemoveOriginCell } =
-    useMapConfigStore();
+  clickedFeature: ClickedFeature;
+}> = ({ cellId, clickedFeature }) => {
+  const {
+    addOrRemoveDestinationCell,
+    addOrRemoveOriginCell,
+    setDestinationCells,
+    setOriginCells,
+  } = useMapConfigStore();
+  const isSelected = clickedFeature?.isDestination || clickedFeature?.isOrigin;
+
+  const handleClear = () => {
+    if (clickedFeature?.isDestination) setDestinationCells([]);
+    if (clickedFeature?.isOrigin) setOriginCells([]);
+    setClickedFeature(null);
+  };
   const { setClickedFeature } = usePopupStateStore();
 
-  const handleAddOrigin = () => [
-    addOrRemoveOriginCell(cellId),
-    setClickedFeature(null),
-  ];
-  const handleAddDestination = () => [
-    addOrRemoveDestinationCell(cellId),
-    setClickedFeature(null),
-  ];
+  const handleOriginSelect = () => {
+    if (clickedFeature?.isDestination) {
+      addOrRemoveDestinationCell(cellId);
+    }
+
+    addOrRemoveOriginCell(cellId);
+    setClickedFeature(null);
+  };
+  const handleDestinationSelect = () => {
+    if (clickedFeature?.isOrigin) {
+      addOrRemoveOriginCell(cellId);
+    }
+    addOrRemoveDestinationCell(cellId);
+    setClickedFeature(null);
+  };
 
   return (
     <div className="mt-2 flex w-full flex-col gap-1 font-light uppercase">
-      <button
-        onClick={handleAddOrigin}
-        className="pointer-events-auto h-11 rounded-md bg-cb-blue/80 px-3 py-1 text-xs text-white transition hover:bg-cb-blue active:scale-95 lg:h-fit"
-      >
-        Add to origin
-      </button>
-      <button
-        onClick={handleAddDestination}
-        className="pointer-events-auto h-11 rounded-md bg-cb-blue/80 px-3 py-1 text-xs text-white transition hover:bg-cb-blue active:scale-95 lg:h-fit"
-      >
-        Add to destination
-      </button>
+      <div className="flex w-full flex-row justify-center gap-1">
+        <button
+          onClick={handleOriginSelect}
+          className={classNames(
+            "pointer-events-auto flex h-11 w-24 flex-col items-center justify-center gap-[2px] rounded-md border-[0.5px] border-cb-lightGray px-3 py-1 text-xs uppercase tracking-wider transition active:scale-95 lg:h-fit",
+            clickedFeature?.isOrigin
+              ? "bg-cb-white text-cb-blue hover:bg-cb-blue hover:text-cb-white"
+              : "bg-cb-blue text-cb-white hover:bg-cb-white hover:text-cb-blue",
+            {
+              hidden: clickedFeature?.isDestination,
+            },
+          )}
+        >
+          {clickedFeature?.isOrigin ? (
+            <MinusHexIcon width={24} height={24} />
+          ) : (
+            <AddHexIcon width={24} height={24} />
+          )}
+          origin
+        </button>
+        <button
+          onClick={handleDestinationSelect}
+          className={classNames(
+            "pointer-events-auto flex h-11 w-24 flex-col items-center justify-center gap-[2px] rounded-md border-[0.5px] border-cb-lightGray px-3 py-1 text-xs uppercase tracking-wider text-cb-blue transition hover:text-cb-white active:scale-95 lg:h-fit",
+            clickedFeature?.isDestination
+              ? "bg-cb-blue/80 text-cb-white hover:bg-cb-blue"
+              : "bg-cb-blue text-cb-white hover:bg-cb-white hover:text-cb-blue",
+
+            {
+              hidden: clickedFeature?.isOrigin,
+            },
+          )}
+        >
+          {clickedFeature?.isDestination ? (
+            <MinusHexIcon width={24} height={24} />
+          ) : (
+            <AddHexIcon width={24} height={24} />
+          )}
+          DEST
+        </button>
+      </div>
+      {isSelected && (
+        <button
+          onClick={() => handleClear()}
+          className="pointer-events-auto h-11 rounded-md px-3 py-1 text-xs text-cb-blue transition hover:bg-cb-white/20 active:scale-95 lg:h-fit"
+        >
+          Clear {clickedFeature?.isOrigin ? "origin" : "destination"}
+        </button>
+      )}
     </div>
+  );
+};
+
+const ComparisonPopupMetric: React.FC<{
+  cellId: string;
+  comparisonDate: dayjs.Dayjs | null;
+}> = ({ cellId, comparisonDate }) => {
+  const comparison = useComparison(false);
+  const cellComparison = comparison.getCellComparison(cellId);
+  const isPositiveChange = cellComparison
+    ? cellComparison.absoluteChange > 0
+    : false;
+
+  const hasComparison =
+    cellComparison && !comparison.isLoading && cellComparison.previousCount > 0;
+  if (comparison.isLoading) {
+    return (
+      <div className="mt-0.5 flex items-center gap-1 text-xs blur-sm">
+        <TrendingUpRoundedIcon fontSize="small" />
+        <span className="font-medium tabular-nums">000</span>
+        <span>(+0.0%)</span>
+      </div>
+    );
+  }
+
+  if (hasComparison) {
+    return (
+      <div
+        className={`mt-0.5 flex items-center gap-1 text-xs ${
+          isPositiveChange ? "text-cb-increase" : "text-cb-decrease"
+        }`}
+      >
+        {isPositiveChange ? (
+          <TrendingUpRoundedIcon fontSize="small" />
+        ) : (
+          <TrendingDownRoundedIcon fontSize="small" />
+        )}
+        <span className="font-medium tabular-nums">
+          {formatter.format(Math.abs(cellComparison.absoluteChange))}
+        </span>
+
+        <span>
+          ({isPositiveChange ? "+" : ""}
+          {cellComparison.percentageChange.toFixed(1)}%)
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-0.5 text-xs font-light text-gray-600">
+      No data in {comparisonDate?.format("MMM YYYY")}
+    </div>
+  );
+};
+
+const TripCountPopupMetric: React.FC<{
+  tripCount: number | undefined;
+  loading: boolean;
+}> = ({ tripCount, loading }) => {
+  return (
+    <div className="flex flex-row items-center justify-center gap-1">
+      {loading ? (
+        <span className="animate-pulse tabular-nums blur-sm">0</span>
+      ) : (
+        <span className="font-bold tabular-nums tracking-wider">
+          {formatter.format(tripCount ?? 0)}{" "}
+        </span>
+      )}
+      <span className="text-xs font-medium uppercase tracking-wide">trips</span>
+    </div>
+  );
+};
+
+const CloseButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  return (
+    <button
+      onClick={onClick}
+      className="pointer-events-auto absolute right-0 top-0 h-8 w-8 rounded-full text-gray-500 hover:bg-white/30"
+    >
+      <CloseRoundedIcon fontSize="small" />
+    </button>
   );
 };
