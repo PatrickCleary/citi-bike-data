@@ -1,19 +1,21 @@
 "use client";
-import { useMapConfigStore } from "@/store/store";
+import { useMapConfigStore, usePreset } from "@/store/store";
 import { BasicMetric } from "./mobile-basic-metric";
 import { useMemo } from "react";
 import { SparklineMetric } from "./sparkline-metric";
 import { useTripMonthlySumData } from "@/map/map-config";
-import { Tab, TabGroup, TabList } from "@headlessui/react";
 import { PercentageMetric } from "./percentage-metric";
 import { CHART_OPTIONS } from "../charts/basic-chart-wrapper";
 import { MetricHeader } from "./mobile-metric-wrapper";
 import { ChartWindowTabs, StyledTabs } from "./chart-window-tabs";
+import { PRESETS } from "@/constants/trip-pairs";
 
 export const DesktopMetricsContainer: React.FC = () => {
+  const setPreset = usePreset();
+
   return (
     <div className="pointer-events-auto z-10 flex hidden w-full flex-row items-start rounded-t-md bg-white drop-shadow-lg lg:flex">
-      <div className="grow-1 flex w-80 max-w-80 min-w-80 flex-grow items-start p-4">
+      <div className="grow-1 flex w-80 min-w-80 max-w-80 flex-grow items-start p-4">
         <div className="flex flex-col gap-2">
           <MetricHeader />
 
@@ -28,10 +30,23 @@ export const DesktopMetricsContainer: React.FC = () => {
         </div>
         <div className="flex hidden w-full cursor-default flex-row items-center gap-2 overflow-hidden px-4 py-2 tracking-wide lg:flex">
           <div className="flex w-full max-w-lg">
+            <SparklineMetric />
+          </div>
+          <div className="flex w-full max-w-lg">
             <PercentageMetric />
           </div>
-          <div className="flex max-w-lg w-full">
-            <SparklineMetric />
+          <div className="flex flex-wrap">
+            {Object.values(PRESETS).map((preset) => (
+              <button
+                className="m-1 rounded bg-cb-blue px-3 py-1 text-sm font-medium text-cb-white"
+                key={preset.name}
+                onClick={() => {
+                  setPreset(preset);
+                }}
+              >
+                {preset.name}
+              </button>
+            ))}
           </div>
         </div>
       </div>

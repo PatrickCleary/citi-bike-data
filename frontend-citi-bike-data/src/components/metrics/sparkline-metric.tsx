@@ -9,8 +9,7 @@ import { useMapConfigStore } from "@/store/store";
 export const SparklineMetric: React.FC = () => {
   const sumQuery = useTripMonthlySumData();
   const baselineQuery = useBaselineMonthlySumData();
-  const { chartDatasetView, originCells, destinationCells } =
-    useMapConfigStore();
+  const { chartDatasetView } = useMapConfigStore();
   const [showBaseline, setShowBaseline] = useState(true);
 
   const datasetConfig = useMemo(
@@ -22,9 +21,6 @@ export const SparklineMetric: React.FC = () => {
     [chartDatasetView, showBaseline],
   );
 
-  // Check if we have both origin and destination selected (for baseline toggle)
-  const hasBaselineData = originCells.length > 0 && destinationCells.length > 0;
-
   return (
     <div className="flex w-full flex-col items-center">
       <div className="w-full">
@@ -34,7 +30,6 @@ export const SparklineMetric: React.FC = () => {
           unit=" trips"
           dataLoading={!baselineQuery.data}
           datasetConfig={datasetConfig}
-          showDatasetToggles={false}
           title={"Trips vs. Baseline"}
         >
           <ToggleBaselineButton

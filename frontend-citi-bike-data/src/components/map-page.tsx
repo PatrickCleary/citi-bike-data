@@ -15,10 +15,10 @@ import {
   useDimNonSelectedCells,
   usePrefetchTripCountData,
   useUpdateBikeLaneFilter,
+  useUpdateMapBounds,
 } from "@/map/map-config";
 import { useLocationMarker } from "@/map/use-location-marker";
 
-import { MetricsContainer } from "./metrics/metrics-container";
 import Popup from "@/map/popup";
 import { addImages } from "@/map/utils";
 import { LayerControl } from "./layer-control";
@@ -59,6 +59,7 @@ export const MapPage: React.FC = () => {
   usePrefetchTripCountData();
   useLocationMarker(map, mapLoaded);
   useUpdateBikeLaneFilter(map, mapLoaded);
+  useUpdateMapBounds(map, mapLoaded);
   const handleIdle = useCallback(() => {
     if (loading) {
       setLoading(false);
@@ -106,11 +107,8 @@ export const MapPage: React.FC = () => {
       <div className="h-full w-full" ref={mapContainer}>
         <Logo />
         <ZoomLevelOverlay map={map} mapLoaded={mapLoaded} />
-        {/* <div className="pointer-events-none fixed top-4 z-10 flex hidden w-full flex-col items-center gap-4 px-16 md:left-1/2 md:top-4 md:flex md:-translate-x-1/2 md:flex-row md:justify-center">
-          <MetricsContainer />
-        </div> */}
-        <div className="pointer-events-none fixed bottom-0 z-10 w-full gap-2 flex flex-col">
-          <div className="px-4 flex flex-col gap-1">
+        <div className="pointer-events-none fixed bottom-0 z-10 flex w-full flex-col gap-2">
+          <div className="flex flex-col gap-1 px-4">
             <Legend />
             <LayerControl map={map} mapLoaded={mapLoaded} />
             <DisplaySettings />
@@ -137,7 +135,7 @@ export const Logo: React.FC = () => {
   return (
     <button
       onClick={() => setIsOpen(true)}
-      className="fixed left-4 top-4 z-10 flex flex-row items-center overflow-hidden rounded-md drop-shadow-md backdrop-blur-sm transition hover:bg-cb-white/70 active:scale-95 md:bg-cb-white/50"
+      className="fixed left-4 top-4 z-10 flex flex-row items-center overflow-hidden rounded-md drop-shadow-md backdrop-blur-sm transition hover:bg-white active:scale-95 md:bg-cb-white"
       aria-label="Open introduction modal"
     >
       <IconLogo className="md:hidden" width={32} />

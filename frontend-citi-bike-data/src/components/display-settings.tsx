@@ -1,5 +1,6 @@
 import { MapButtonStyle } from "@/map/map-button";
 import { useMapConfigStore, useUpdateScaleMax } from "@/store/store";
+import { InfoModal } from "@/components/info-modal/info-modal";
 import {
   Input,
   Menu,
@@ -10,10 +11,10 @@ import {
   TabGroup,
   TabList,
 } from "@headlessui/react";
-import PedalBikeRounded from "@mui/icons-material/PedalBikeRounded";
 import TuneIcon from "@mui/icons-material/Tune";
 import classNames from "classnames";
 import React, { MutableRefObject, useRef } from "react";
+import { DisplayInfo } from "./info-modal/display-info";
 
 export const buttonHoverStyle =
   "data-[selected]:bg-cb-blue/30 focus:outline-none data-[focus]:bg-cb-blue/20  data-[selected]:data-[focus]:bg-cb-blue/30 data-[hover]:bg-cb-blue/20  data-[selected]:data-[hover]:bg-cb-blue/30  transition ease-out duration-100";
@@ -33,7 +34,6 @@ const comparisonGradient = `linear-gradient(to right,
 
 export const DisplaySettings: React.FC = () => {
   const {
-    analysisType,
     scaleType,
     setScaleType,
     scale,
@@ -44,7 +44,7 @@ export const DisplaySettings: React.FC = () => {
     setNormalizeComparison,
   } = useMapConfigStore();
   useUpdateScaleMax();
-  const selectedIndexAnalysis = analysisType === "arrivals" ? 0 : 1;
+
   const selectedDisplayTypeIndex = displayType === "absolute" ? 0 : 1;
   const selectedIndexScale = scaleType === "dynamic" ? 0 : 1;
 
@@ -67,14 +67,21 @@ export const DisplaySettings: React.FC = () => {
       >
         <TuneIcon fontSize="small" />
       </MenuButton>
+
       <MenuItems
+        unmount={false}
         anchor="top start"
         transition
         className="pointer-events-auto z-10 flex origin-bottom-left flex-col gap-2 rounded-lg border-[0.5px] border-cb-lightGray bg-cb-white p-6 font-light text-black shadow-lg duration-100 ease-out [--anchor-gap:theme(spacing.1)] focus:outline-none data-[closed]:-translate-x-1 data-[closed]:translate-y-1 data-[closed]:opacity-0"
       >
-        <p className="cursor-default text-xs uppercase tracking-wide text-gray-400">
-          Mode
-        </p>
+        <div className="flex w-full flex-row gap-2">
+          <p className="cursor-default text-xs uppercase tracking-wide text-gray-400">
+            Mode
+          </p>
+          <InfoModal>
+            <DisplayInfo />
+          </InfoModal>
+        </div>
         <TabGroup
           selectedIndex={selectedDisplayTypeIndex}
           onChange={() =>
@@ -108,28 +115,36 @@ export const DisplaySettings: React.FC = () => {
         </TabGroup>
 
         {displayType === "comparison" && (
-          <div className="flex flex-col gap-2 pl-4 pt-2">
-            <div className="flex flex-row items-center justify-between gap-4">
-              <div className="flex flex-col">
-                <p className="cursor-default text-xs font-light uppercase tracking-wide text-gray-500">
-                  Normalize values
-                </p>
-                <p className="cursor-default text-xs text-gray-400">
-                  Account for ridership changes
-                </p>
+          <>
+            <div className="flex flex-col gap-2 pl-4 pt-2">
+              <div className="flex flex-row items-center justify-between gap-4">
+                <div className="flex flex-col">
+                  <p className="cursor-default text-xs font-light uppercase tracking-wide text-gray-500">
+                    Normalize values
+                  </p>
+                  <p className="cursor-default text-xs text-gray-400">
+                    Account for ridership changes
+                  </p>
+                </div>
+                <Switch
+                  checked={normalizeComparison}
+                  onChange={setNormalizeComparison}
+                  className="group relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-300 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-cb-green focus-visible:ring-offset-2 data-[checked]:bg-cb-blue"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out group-data-[checked]:translate-x-5"
+                  />
+                </Switch>
               </div>
-              <Switch
-                checked={normalizeComparison}
-                onChange={setNormalizeComparison}
-                className="group relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-300 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-cb-green focus-visible:ring-offset-2 data-[checked]:bg-cb-blue"
-              >
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out group-data-[checked]:translate-x-5"
-                />
-              </Switch>
             </div>
-          </div>
+            <p className="max-w-sm text-sm text-gray-700">
+              Comparison mode shows the change in traffic between the currently
+              selected month and the same month of the past year. Normalization
+              adjusts the value so that overall ridership changes are accounted
+              for.
+            </p>
+          </>
         )}
 
         {displayType === "absolute" && (

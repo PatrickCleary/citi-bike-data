@@ -7,23 +7,20 @@ import {
 } from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
 
-import dayjs from "dayjs";
 import classNames from "classnames";
 import { formatter } from "@/utils/utils";
 import { Switch } from "@headlessui/react";
 
 export const TestMetric: React.FC = () => {
-  const { selectedMonth, comparisonDelta } = useMapConfigStore();
+  const { selectedMonth } = useMapConfigStore();
   const [unit, setUnit] = React.useState<"absolute" | "percent">("absolute");
-  const dateObj = dayjs(selectedMonth);
+
   const originQuery = useBaselineMonthlySumData();
 
   const query = useTripCountData();
   const queryFiltered = useTripCountDataFilteredbyDestination(query);
-  const comparisonDate = dateObj.subtract(comparisonDelta).format("MMMM YYYY");
+
   const comparison = useComparison();
-  const isPositiveChange = comparison.absoluteChange > 0;
-  const isBaselinePositive = comparison.baselineAbsoluteChange > 0;
   const totalTrips = queryFiltered?.data?.data.sum_all_values || 0;
   const totalTripsFromOrigin = query.data?.data.sum_all_values || 0;
   let percentTrips = (100 * totalTrips) / totalTripsFromOrigin;

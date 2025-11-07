@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { BasicChart } from "./basic-chart";
 import { useMapConfigStore } from "@/store/store";
 import { ChartDataMonthly } from "./chart-types";
@@ -40,9 +40,8 @@ interface BasicChartWrapperProps {
    * This excludes "baseline" entirely while including bounds (off), rolling_avg (on), and main (on)
    */
   datasetConfig?: DatasetConfig;
-  showDatasetToggles?: boolean;
 
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const CHART_OPTIONS: StatisticalOptions = {
@@ -64,7 +63,7 @@ export const BasicChartWrapper: React.FC<BasicChartWrapperProps> = ({
   unit,
   chartOptions = CHART_OPTIONS,
   datasetConfig,
-  showDatasetToggles = false,
+
   children,
 }) => {
   const { selectedMonth } = useMapConfigStore();
@@ -85,13 +84,7 @@ export const BasicChartWrapper: React.FC<BasicChartWrapperProps> = ({
 
   const mergedConfig = { ...initialConfig, ...datasetConfig } as DatasetConfig;
 
-  // Use internal state for toggles if enabled, otherwise use merged config
-  const [internalDatasetConfig, setInternalDatasetConfig] =
-    useState<DatasetConfig>(mergedConfig);
-
-  const datasetConfigFinal: DatasetConfig = showDatasetToggles
-    ? internalDatasetConfig
-    : mergedConfig;
+  const datasetConfigFinal = mergedConfig;
 
   const selectedIndex =
     data?.findIndex((d) => d.date_month === selectedMonth) ?? -1;
@@ -124,12 +117,7 @@ export const BasicChartWrapper: React.FC<BasicChartWrapperProps> = ({
     }
 
     if (datasetConfigFinal.baseline === true && baselineData) {
-      addZScoreBaselineDataset(
-        datasets,
-        baselineData,
-        statistics,
-        datasetConfigFinal.rolling_avg === true,
-      );
+      addZScoreBaselineDataset(datasets, baselineData, statistics);
     }
 
     if (datasetConfigFinal.main === true) {

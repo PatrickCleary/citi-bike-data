@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import { useEffect } from "react";
 import { create } from "zustand";
 import duration from "dayjs/plugin/duration";
+import { LngLatBoundsLike } from "maplibre-gl";
 
 dayjs.extend(duration);
 
@@ -26,6 +27,7 @@ interface Store {
   chartWindow: duration.Duration;
   chartDatasetView: ChartDatasetView;
   showBaseline: boolean;
+  targetBounds: LngLatBoundsLike | null;
   setChartWindow: (window: duration.Duration) => void;
   setChartDatasetView: (view: ChartDatasetView) => void;
   setShowBaseline: (show: boolean) => void;
@@ -43,6 +45,7 @@ interface Store {
   setDestinationCells: (destinationCells: string[]) => void;
   addOrRemoveOriginCell: (cell: string) => void;
   addOrRemoveDestinationCell: (cell: string) => void;
+  setTargetBounds: (bounds: LngLatBoundsLike | null) => void;
 }
 
 export const useMapConfigStore = create<Store>((set, get) => ({
@@ -61,6 +64,7 @@ export const useMapConfigStore = create<Store>((set, get) => ({
   chartWindow: dayjs.duration(6, "months"),
   chartDatasetView: "main",
   showBaseline: true,
+  targetBounds: null,
   setChartWindow: (window) => set({ chartWindow: window }),
   setChartDatasetView: (view) => set({ chartDatasetView: view }),
   setShowBaseline: (show) => set({ showBaseline: show }),
@@ -107,6 +111,7 @@ export const useMapConfigStore = create<Store>((set, get) => ({
         return { destinationCells: [...state.destinationCells, cell] };
       }
     }),
+  setTargetBounds: (bounds) => set({ targetBounds: bounds }),
 }));
 
 export const useUpdateScaleMax = () => {
@@ -196,4 +201,29 @@ export const useChartWindow = () => {
       .startOf("month");
   }
   return { windowStart, windowEnd };
+};
+
+export const usePreset = () => {
+  const {
+    setOriginCells,
+    setDestinationCells,
+    setSelectedMonth,
+    setTargetBounds,
+  } = useMapConfigStore();
+
+  return (config: {
+    originCells: string[];
+    destinationCells: string[];
+    bounds: LngLatBoundsLike | null;
+    date: string | null;
+  }) => {
+    setOriginCells(config.originCells);
+    setDestinationCells(config.destinationCells);
+    if (config.date) {
+      setSelectedMonth(config.date);
+    }
+    if (config.bounds) {
+      setTargetBounds(config.bounds);
+    }
+  };
 };

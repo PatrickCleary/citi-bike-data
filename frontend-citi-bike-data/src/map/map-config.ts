@@ -13,12 +13,12 @@ import {
 } from "@/utils/api";
 import { HoveredFeature, usePopupStateStore } from "@/store/popup-store";
 import maplibregl, {
-  GeoJSONFeature,
   Map,
   Event,
   MapMouseEvent,
   LngLatLike,
   FilterSpecification,
+  MapGeoJSONFeature,
 } from "maplibre-gl";
 import { MutableRefObject, useEffect, useState, useMemo, useRef } from "react";
 
@@ -89,7 +89,10 @@ export type EventHandler = {
   eventType: "click" | "mousemove" | "mouseleave";
   layer: string;
   handler: (
-    e: Event & { features?: GeoJSONFeature[]; lngLat: LngLatLike },
+    e: Event & {
+      features?: MapGeoJSONFeature[];
+      lngLat: LngLatLike;
+    },
   ) => void;
 };
 export const useApplyLayers = (
@@ -97,28 +100,15 @@ export const useApplyLayers = (
   mapLoaded: boolean,
 ) => {
   const { setLayersAdded } = useLayerVisibilityStore();
-  const { addOrRemoveOriginCell, addOrRemoveDestinationCell } =
-    useMapConfigStore();
   const { setHoveredFeature } = usePopupStateStore();
   useEffect(() => {
     if (!mapLoaded) return;
     addBikeLaneLayer(map);
     addTransitLayers(map);
-    addHexLayer(
-      map,
-      addOrRemoveOriginCell,
-      addOrRemoveDestinationCell,
-      setHoveredFeature,
-    );
+    addHexLayer(map, setHoveredFeature);
     addDockLayer(map);
     setLayersAdded(true);
-  }, [
-    mapLoaded,
-    map,
-    addOrRemoveOriginCell,
-    addOrRemoveDestinationCell,
-    setHoveredFeature,
-  ]);
+  }, [mapLoaded, map, setHoveredFeature]);
 };
 const addTransitLayers = (map: MutableRefObject<Map | null>) => {
   if (!map.current) return;
@@ -185,18 +175,11 @@ const addBikeLaneLayer = (map: MutableRefObject<Map | null>) => {
 
 const addHexLayer = (
   map: MutableRefObject<Map | null>,
-  addOrRemoveOriginCell: (cell: string) => void,
-  addOrRemoveDestinationCell: (cell: string) => void,
   setHoveredFeature: (feature: HoveredFeature | null) => void,
 ) => {
   if (!map.current) return;
   const mapObj = map.current;
-  const eventHandlers = getCellEventHandlers(
-    map,
-    addOrRemoveOriginCell,
-    addOrRemoveDestinationCell,
-    setHoveredFeature,
-  );
+  const eventHandlers = getCellEventHandlers(map, setHoveredFeature);
   const sources = [
     { id: HEX_SOURCE_ID, source: HEX_SOURCE },
     { id: ORIGIN_SOURCE_ID, source: ORIGIN_SOURCE },
@@ -417,8 +400,6 @@ export const useTripMonthlySumData = () => {
   // If selected date is near the end, shift window back to show full 48 months
   const windowedData = useMemo(() => {
     if (!yearQueries.data || !dayjsDate || !maxDateQuery.data) return undefined;
-
-    const maxDate = dayjs(maxDateQuery.data);
 
     const filtered = yearQueries.data.filter((d) => {
       const date = dayjs(d.date_month);
@@ -970,14 +951,15 @@ export const useUpdateMapStyleOnDataChange = (
 
 const getCellEventHandlers = (
   map: MutableRefObject<Map | null>,
-  addOrRemoveOriginCell: (cell: string) => void,
-  addOrRemoveDestinationCell: (cell: string) => void,
   setHoveredFeature: (feature: HoveredFeature | null) => void,
 ): {
   eventType: "click" | "mousemove" | "mouseleave";
   layer: string;
   handler: (
-    e: Event & { features?: GeoJSONFeature[]; lngLat: LngLatLike },
+    e: Event & {
+      features?: MapGeoJSONFeature[];
+      lngLat: LngLatLike;
+    },
   ) => void;
 }[] => {
   let hoveredFeatureId: null | string = null;
@@ -1457,4 +1439,25 @@ export const useUpdateBikeLaneFilter = (
 
     map.current.setFilter(NYC_BIKE_LANE_LAYER.id, filter);
   }, [selectedMonth, map, mapLoaded]);
+};
+
+// Hook to update map bounds when targetBounds changes
+export const useUpdateMapBounds = (
+  map: MutableRefObject<Map | null>,
+  mapLoaded: boolean,
+) => {
+  const { targetBounds, setTargetBounds } = useMapConfigStore();
+
+  useEffect(() => {
+    if (!mapLoaded || !map.current || !targetBounds) return;
+
+    // Fit the map to the bounds with some padding
+    map.current.fitBounds(targetBounds, {
+      padding: 50,
+      duration: 1000, // Smooth animation over 1 second
+    });
+
+    // Clear the targetBounds after applying to prevent re-triggering
+    setTargetBounds(null);
+  }, [targetBounds, map, mapLoaded, setTargetBounds]);
 };

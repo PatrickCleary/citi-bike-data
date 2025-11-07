@@ -1,5 +1,5 @@
 "use client";
-import { useMetricsStore, MetricType } from "@/store/metrics-store";
+import { useMetricsStore } from "@/store/metrics-store";
 import { MobileMetricWrapper } from "./mobile-metric-wrapper";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import classNames from "classnames";
@@ -7,7 +7,7 @@ import { BasicMetric } from "./mobile-basic-metric";
 
 import { useState, useMemo } from "react";
 import { SparklineMetric } from "./sparkline-metric";
-import { useComparison, useTripMonthlySumData } from "@/map/map-config";
+import { useTripMonthlySumData } from "@/map/map-config";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { PercentageMetric } from "./percentage-metric";
@@ -34,7 +34,6 @@ export const MobileMetricsContainer: React.FC = () => {
   const { selectedMobileMetric } = useMetricsStore();
   const { chartDatasetView, setChartDatasetView } = useMapConfigStore();
 
-  const comparison = useComparison();
   const [expanded, setExpanded] = useState(false);
   const [chartType, setChartType] = useState<ChartType>("sparkline");
 
@@ -88,7 +87,7 @@ export const MobileMetricsContainer: React.FC = () => {
                       <button
                         onClick={() => setChartDatasetView("main")}
                         className={classNames(
-                          "w-full cursor-pointer text-cb-blue  rounded-md px-3 py-2 text-left text-sm font-light tracking-wide",
+                          "w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm font-light tracking-wide text-cb-blue",
                           buttonHoverStyle,
                           chartDatasetView === "main" && "bg-cb-blue/30",
                         )}

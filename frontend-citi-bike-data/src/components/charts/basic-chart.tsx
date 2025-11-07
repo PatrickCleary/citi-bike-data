@@ -11,8 +11,8 @@ import {
   Filler,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import type { ChartData, ChartOptions, Point } from "chart.js";
-import { StatisticalOptions } from "./basic-chart-wrapper";
+import type { ChartData, ChartOptions } from "chart.js";
+
 import { formatter } from "@/utils/utils";
 import { ChartLineData } from "./chart-types";
 
@@ -88,12 +88,10 @@ export const BasicChart: React.FC<BasicChartProps> = ({
           titleFont: {
             size: 11,
             family: "Outfit, sans-serif",
-            weight: "light",
           },
           bodyFont: {
             size: 11,
             family: "Outfit, sans-serif",
-            weight: "light",
           },
           callbacks: {
             title: (context) => {
@@ -129,7 +127,6 @@ export const BasicChart: React.FC<BasicChartProps> = ({
           display: true,
           grid: {
             display: false,
-            drawBorder: false,
           },
           afterBuildTicks: (axis) => {
             const dataLength = getDataLength(data);
@@ -148,7 +145,6 @@ export const BasicChart: React.FC<BasicChartProps> = ({
             font: {
               size: 10,
               family: "Outfit, sans-serif",
-              weight: "light",
             },
             color: "rgba(107, 114, 128, 1)",
             maxRotation: 0,
@@ -157,13 +153,13 @@ export const BasicChart: React.FC<BasicChartProps> = ({
         },
         y: {
           ticks: {
-            callback: function (value, index, ticks) {
+            callback: function (value) {
+              if (typeof value !== "number") return value;
               return formatter.format(value);
             },
             font: {
               size: 10,
               family: "Outfit, sans-serif",
-              weight: "light",
             },
           },
           title: {
@@ -176,8 +172,6 @@ export const BasicChart: React.FC<BasicChartProps> = ({
             },
           },
           grid: {
-            drawBorder: false,
-
             // display: false,
           },
         },
@@ -196,8 +190,7 @@ export const BasicChart: React.FC<BasicChartProps> = ({
         width={"100%"}
         ref={chartRef}
         data={
-          data ??
-          ({ datasets: [], labels: [" ", " "] } as ChartData<"line">)
+          data ?? ({ datasets: [], labels: [" ", " "] } as ChartData<"line">)
         }
         options={options}
         plugins={[verticalLinePlugin]}

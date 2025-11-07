@@ -9,8 +9,8 @@ import {
   PopoverPanel,
 } from "@headlessui/react";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { getMaxDate } from "@/utils/api";
+import { UseQueryResult } from "@tanstack/react-query";
+
 import dayjs from "dayjs";
 import { useMapConfigStore } from "@/store/store";
 import classNames from "classnames";
@@ -76,7 +76,7 @@ export const CalendarInput: React.FC = () => {
       <PopoverButton
         title="Select Month"
         className={
-          "flex h-12 w-24 flex-col items-center justify-center rounded-md border-[0.5px] border-cb-lightGray bg-white px-2 tabular-nums tracking-wide text-gray-900 drop-shadow-md backdrop-blur-md transition hover:bg-white/60 active:scale-95"
+          "flex h-12 w-24 flex-col items-center justify-center rounded-md border-[0.5px] border-cb-lightGray bg-cb-white hover:bg-white px-2 tabular-nums tracking-wide text-gray-900 drop-shadow-md backdrop-blur-md transition active:scale-95"
         }
       >
         <CalendarMonthIcon fontSize="small" />

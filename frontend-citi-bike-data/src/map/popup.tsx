@@ -1,8 +1,6 @@
 "use client";
 import { MutableRefObject, useEffect, useRef } from "react";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
 import { createPortal } from "react-dom";
 import maplibregl, { Map, Popup } from "maplibre-gl";
 import { ClickedFeature, usePopupStateStore } from "@/store/popup-store";
@@ -140,7 +138,6 @@ export const PopupComponent: React.FC<PopupProps> = ({ map }) => {
             loading={loading}
             hexColor={hexColor}
             cellId={activeFeature?.id as string}
-            comparison={comparison}
             selectedMonth={selectedMonth}
             showButtons={isClicked}
           />,
@@ -157,7 +154,7 @@ export const PopupContent: React.FC<{
   hoveredTripCount: number | undefined;
   hexColor: string;
   cellId: string;
-  comparison: ReturnType<typeof useComparison>;
+
   selectedMonth: string | undefined;
   showButtons: boolean;
 }> = ({
@@ -165,7 +162,7 @@ export const PopupContent: React.FC<{
   hoveredTripCount,
   hexColor,
   cellId,
-  comparison,
+
   selectedMonth,
   showButtons,
 }) => {
@@ -175,33 +172,16 @@ export const PopupContent: React.FC<{
     displayType,
     destinationCells,
     comparisonDelta,
-    addOrRemoveOriginCell,
-    addOrRemoveDestinationCell,
   } = useMapConfigStore();
   const { setClickedFeature, clickedFeature } = usePopupStateStore();
   const noCellsSelected =
     originCells.length === 0 && destinationCells.length === 0;
-  const isSelected = clickedFeature?.isDestination || clickedFeature?.isOrigin;
-
-  const handleAddOrigin = () => [
-    addOrRemoveOriginCell(cellId),
-    setClickedFeature(null),
-  ];
-  const handleAddDestination = () => [
-    addOrRemoveDestinationCell(cellId),
-    setClickedFeature(null),
-  ];
 
   const showTripCountMetric = () => {
     if (clickedFeature?.isOrigin) return false;
     if (clickedFeature?.isDestination && originCells.length === 0) return false;
     return true;
   };
-
-  const cellComparison = cellId ? comparison.getCellComparison(cellId) : null;
-  const isPositiveChange = cellComparison
-    ? cellComparison.absoluteChange > 0
-    : false;
 
   // Calculate previous year's month for the "no data" message
   const comparisonDate = selectedMonth
@@ -211,7 +191,9 @@ export const PopupContent: React.FC<{
   if (noCellsSelected)
     return (
       <PopupDiv>
-        {showButtons && <CloseButton onClick={() => setClickedFeature(null)} />}
+        {showButtons && clickedFeature && (
+          <CloseButton onClick={() => setClickedFeature(null)} />
+        )}
 
         <div className="flex flex-row items-center justify-center gap-2 font-sans">
           <ArrDepIcon analysisType={analysisType} />
@@ -236,7 +218,7 @@ export const PopupContent: React.FC<{
             comparisonDate={comparisonDate}
           />
         )}
-        {showButtons && (
+        {showButtons && clickedFeature && (
           <SelectionButtons cellId={cellId} clickedFeature={clickedFeature} />
         )}
       </PopupDiv>
@@ -263,7 +245,7 @@ export const PopupContent: React.FC<{
           comparisonDate={comparisonDate}
         />
       )}
-      {showButtons && (
+      {showButtons && clickedFeature && (
         <SelectionButtons cellId={cellId} clickedFeature={clickedFeature} />
       )}
     </PopupDiv>

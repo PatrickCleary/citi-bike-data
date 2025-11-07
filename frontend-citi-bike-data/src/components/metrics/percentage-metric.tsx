@@ -7,13 +7,8 @@ import { useMapConfigStore } from "@/store/store";
 import { BasicChartWrapper } from "../charts/basic-chart-wrapper";
 
 export const PercentageMetric: React.FC = () => {
-  const {
-    originCells,
-    destinationCells,
-    setOriginCells,
-    setDestinationCells,
-    chartDatasetView,
-  } = useMapConfigStore();
+  const { originCells, destinationCells, chartDatasetView } =
+    useMapConfigStore();
 
   const selectedQuery = useTripMonthlySumData();
   const baselineQuery = useBaselineMonthlySumData();
@@ -75,29 +70,7 @@ export const PercentageMetric: React.FC = () => {
 
   if (!shouldDisplay) {
     return (
-      <div className="flex h-16 items-center justify-center text-gray-500">
-        <p className="text-sm font-light">Select origin or destination</p>
-        <button
-          className="hover:bg-cb-darkBlue ml-4 rounded bg-cb-blue px-3 py-1 text-sm font-medium text-cb-white"
-          onClick={() => {
-            setOriginCells([
-              "892a100dbd3ffff",
-              "892a100d86fffff",
-              "892a100d86bffff",
-              "892a100dbd7ffff",
-            ]);
-            setDestinationCells([
-              "892a100d84bffff",
-              "892a100da87ffff",
-              "892a100da97ffff",
-              "892a100d85bffff",
-              "892a100d843ffff",
-            ]);
-          }}
-        >
-          bedford
-        </button>
-      </div>
+      <div className="flex h-16 items-center justify-center text-gray-500"></div>
     );
   }
 
@@ -110,7 +83,6 @@ export const PercentageMetric: React.FC = () => {
           unit="%"
           dataLoading={!percentageData}
           datasetConfig={datasetConfigForPercentage}
-          showDatasetToggles={false}
         />
       </div>
     </div>

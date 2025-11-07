@@ -29,7 +29,7 @@ const AnimatedDigit: React.FC<AnimatedDigitProps> = ({
 };
 
 interface AnimatedNumberProps {
-  value: string;
+  value: string | number;
   className?: string;
 }
 

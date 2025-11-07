@@ -1,5 +1,4 @@
 import { API_URL } from "@/components/constants";
-import { useQuery } from "@tanstack/react-query";
 
 export type AnalysisType = "departures" | "arrivals";
 

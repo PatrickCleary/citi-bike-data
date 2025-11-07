@@ -53,7 +53,7 @@ const TrendIcon: React.FC<{
   );
 };
 
-const DeltaComparedToOriginBadge: React.FC<{}> = () => {
+const DeltaComparedToOriginBadge: React.FC = () => {
   const comparison = useComparison();
   const { selectedMonth, comparisonDelta } = useMapConfigStore();
 
