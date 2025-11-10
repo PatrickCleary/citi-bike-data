@@ -45,10 +45,6 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin=""
         />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=bike_dock&display=swap"
-        />
       </head>
       <body className={outfit.className}>
         <Analytics />
@@ -65,9 +61,6 @@ export default function RootLayout({
           `}
         </Script>
         <Providers>{children}</Providers>
-        {/* <span className="material-symbols-outlined hidden h-0 w-0">
-          bike_dock
-        </span> */}
       </body>
     </html>
   );

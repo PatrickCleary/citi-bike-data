@@ -20,6 +20,7 @@ import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import dayjs from "dayjs";
 import classNames from "classnames";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import BikeDockIcon from "@/icons/bike-dock";
 interface PopupProps {
   map: MutableRefObject<Map | null>;
 }
@@ -312,7 +313,7 @@ const ArrDepIcon: React.FC<{ analysisType: "arrivals" | "departures" }> = ({
   analysisType,
 }) => {
   if (analysisType === "arrivals") {
-    return <span className="material-symbols-outlined">bike_dock</span>;
+    return <BikeDockIcon />;
   }
   return <PedalBikeRoundedIcon />;
 };
@@ -477,16 +478,14 @@ export const RemovalButtons: React.FC<{
           disabled
           className="pointer-events-auto flex h-11 w-24 flex-col items-center justify-center gap-[2px] rounded-md bg-black px-3 py-1 text-xs uppercase tracking-wider text-white opacity-20 transition active:scale-95 lg:h-fit"
         >
-          <PedalBikeRoundedIcon fontSize="small" />
+          <PedalBikeRoundedIcon />
           origin
         </button>
         <button
           onClick={handleRemove}
           className="pointer-events-auto flex h-11 w-24 flex-col items-center justify-center gap-[2px] rounded-md bg-black px-3 py-1 text-xs uppercase tracking-wider text-white opacity-20 transition active:scale-95 lg:h-fit"
         >
-          <span className="material-symbols-outlined h-[20px] w-[20px]">
-            bike_dock
-          </span>
+          <BikeDockIcon />
           DEST
         </button>
       </div>
@@ -660,7 +659,7 @@ const AddOriginButton: React.FC<{
     >
       <div className="relative flex h-full w-full items-center justify-center">
         <div className="absolute translate-y-0 text-cb-blue transition-all duration-200 group-hover:-translate-y-2 group-hover:opacity-0">
-          <PedalBikeRoundedIcon fontSize="small" />
+          <PedalBikeRoundedIcon />
         </div>
         <span className="absolute translate-y-2 text-sm font-medium text-cb-blue opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
           {selected ? "Remove cell" : "Add as origin"}
@@ -685,9 +684,7 @@ const AddDestinationButton: React.FC<{
     >
       <div className="relative flex h-full w-full items-center justify-center">
         <div className="absolute translate-y-0 transition-all duration-200 group-hover:-translate-y-2 group-hover:opacity-0">
-          <span className="material-symbols-outlined h-[20px] w-[20px]">
-            bike_dock
-          </span>
+          <BikeDockIcon />
         </div>
         <span className="absolute translate-y-2 text-sm font-medium opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
           {selected ? "Remove cell" : "Add as destination"}
