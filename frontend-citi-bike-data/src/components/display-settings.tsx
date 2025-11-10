@@ -1,6 +1,5 @@
 import { MapButtonStyle } from "@/map/map-button";
 import { useMapConfigStore, useUpdateScaleMax } from "@/store/store";
-import { InfoModal } from "@/components/info-modal/info-modal";
 import {
   Input,
   Menu,
@@ -14,7 +13,6 @@ import {
 import TuneIcon from "@mui/icons-material/Tune";
 import classNames from "classnames";
 import React, { MutableRefObject, useRef } from "react";
-import { DisplayInfo } from "./info-modal/display-info";
 
 export const buttonHoverStyle =
   "data-[selected]:bg-cb-blue/30 focus:outline-none data-[focus]:bg-cb-blue/20  data-[selected]:data-[focus]:bg-cb-blue/30 data-[hover]:bg-cb-blue/20  data-[selected]:data-[hover]:bg-cb-blue/30  transition ease-out duration-100";
