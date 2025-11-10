@@ -31,7 +31,6 @@ export const PercentageMetric: React.FC = () => {
   // Calculate percentage data over the 4-year window
   const percentageData = useMemo(() => {
     if (!selectedQuery.data?.data || !baselineQuery.data) return undefined;
-
     const selected = selectedQuery.data.data;
     const baseline = baselineQuery.data;
 

@@ -27,7 +27,7 @@ const BedfordBikeLane: MapConfig = {
     [-74.02523, 40.65417],
     [-73.87941, 40.70993],
   ],
-  date: "2025-05-01",
+  // date: "2025-10-01",
 };
 
 const QueensboroBridge: MapConfig = {
@@ -66,7 +66,7 @@ const QueensboroBridge: MapConfig = {
     [-73.98569, 40.71859],
     [-73.90212, 40.78276],
   ],
-  date: "2025-05-01",
+  // date: "2025-05-01",
 };
 
 export const PRESETS: { [key: string]: MapConfig } = {

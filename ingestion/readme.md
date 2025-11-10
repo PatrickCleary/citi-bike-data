@@ -9,6 +9,7 @@
 - `SET statement_timeout = 0;`
 - `SELECT * FROM process_date_range(<YYYY-MM-DD start_date>, <YYYY-MM-DD end_date>); `
 7. Also run the process_date_range for the previous month (trips in the files are based on end date and our data uses start date).
+8. run `REFRESH MATERIALIZED VIEW public.monthly_totals;` in the db
 
 
 # Ingestion Process Steps
