@@ -17,7 +17,6 @@ const WalkthroughCarousel: React.FC = () => {
     setIsMobile(isMobileDevice());
   }, []);
 
-  const imagePrefix = isMobile ? "mobile" : "desktop";
   const totalSlides = 5;
 
   const nextSlide = () => {
@@ -40,7 +39,7 @@ const WalkthroughCarousel: React.FC = () => {
             {Array.from({ length: totalSlides }, (_, i) => (
               <div key={i} className="w-full flex-shrink-0">
                 <Image
-                  src={`/walkthrough/${imagePrefix}_${i}.jpg`}
+                  src={`/walkthrough/desktop_${i}.jpg`}
                   alt={`Walkthrough step ${i + 1}`}
                   width={600}
                   height={450}
@@ -144,7 +143,6 @@ export const IntroModal: React.FC = () => {
             >
               {"Let's go!"}
             </button>
-            
 
             {/* Contact and Copyright */}
             <div className="flex w-full flex-col items-center justify-center space-x-1 border-t border-gray-200 pt-4">
