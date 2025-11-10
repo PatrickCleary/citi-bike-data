@@ -15,6 +15,7 @@ import type { ChartData, ChartOptions } from "chart.js";
 
 import { formatter } from "@/utils/utils";
 import { ChartLineData } from "./chart-types";
+import dayjs from "dayjs";
 
 ChartJS.register(
   CategoryScale,
@@ -95,17 +96,12 @@ export const BasicChart: React.FC<BasicChartProps> = ({
           },
           callbacks: {
             title: (context) => {
-              const date = new Date(context[0].label);
-              console.log(date, context[0].label);
-              return date.toLocaleDateString("en-US", {
-                month: "short",
-                year: "numeric",
-              });
+              return context[0].label;
             },
             label: (context) => {
               const dataset = context.dataset;
               const label = dataset.label;
-              console.log(dataset);
+
               // Show value for "Current" dataset
               if (label === "Current") {
                 const value = context.parsed.y ?? 0;
