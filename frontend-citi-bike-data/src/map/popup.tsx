@@ -646,7 +646,7 @@ const CloseButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
 };
 const AddOriginButton: React.FC<{
   onClick: () => void;
-  selected: boolean | undefiend;
+  selected: boolean | undefined;
 }> = ({ onClick, selected }) => {
   return (
     <button

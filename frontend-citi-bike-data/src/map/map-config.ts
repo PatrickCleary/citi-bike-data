@@ -892,6 +892,7 @@ const updateMapStyleComparison = (
 export const useUpdateMapStyleOnDataChange = (
   map: MutableRefObject<Map | null>,
   mapLoaded: boolean,
+  hasConfig: boolean | undefined,
 ) => {
   const query = useTripCountData();
   const previousQuery = useComparisonData();
@@ -942,7 +943,7 @@ export const useUpdateMapStyleOnDataChange = (
   }
 
   // Only trigger animation if layers are fully added
-  if (layersAdded && !initialLoad && !isOpen) {
+  if (layersAdded && !initialLoad && !isOpen && hasConfig === false) {
     animateCellsByTripCount(map, departureCountMap);
     setInitialLoad(true);
   }
@@ -1252,7 +1253,7 @@ export const useUpdateDestinationShape = (
   }, [destinationCells, map, mapLoaded]);
 };
 
-const DIMMED_OPACITY = 0.2;
+const DIMMED_OPACITY = 0.3;
 
 export const useDimNonSelectedCells = (
   map: MutableRefObject<Map | null>,
@@ -1263,9 +1264,10 @@ export const useDimNonSelectedCells = (
 
   useEffect(() => {
     if (!mapLoaded || !map.current) return;
-
+    console.log("ue");
     const departureCountMap = query.data?.data.trip_counts;
     if (!departureCountMap) return;
+    console.log("in", departureCountMap);
 
     // Only dim cells when BOTH origin AND destination are selected
     const shouldDim = originCells.length > 0 && destinationCells.length > 0;

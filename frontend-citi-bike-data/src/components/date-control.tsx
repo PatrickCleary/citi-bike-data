@@ -1,6 +1,5 @@
 import ChevronLeftSharpIcon from "@mui/icons-material/ChevronLeftSharp";
 import ChevronRightSharpIcon from "@mui/icons-material/ChevronRightSharp";
-import { MapButton } from "@/map/map-button";
 import { useMapConfigStore } from "@/store/store";
 import dayjs, { Dayjs } from "dayjs";
 import { CalendarInput, isMonthYearValid } from "./calendar-input";
@@ -13,6 +12,8 @@ export const getMonthDisplayText = (date: string | undefined) => {
   const month = dateObj.format("MMM YYYY");
   return month.toUpperCase();
 };
+const dateButtonStyle =
+  "flex h-12 w-12 items-center active:scale-95 disabled:text-gray-500 disabled:bg-cb-lighterGray justify-center bg-cb-white hover:bg-white transition border-cb-lightGray text-gray-900";
 export const DateControl: React.FC = () => {
   const { selectedMonth, setSelectedMonth } = useMapConfigStore();
   const monthObj = dayjs(selectedMonth);
@@ -27,8 +28,9 @@ export const DateControl: React.FC = () => {
 
   return (
     <div className="pointer-events-auto font-sans">
-      <div className="flex flex-row gap-1">
-        <MapButton
+      <div className="flex flex-row bg-cb-lighterGray rounded-md overflow-hidden">
+        <button
+          className={dateButtonStyle}
           disabled={
             !isMonthYearValid(
               query,
@@ -44,8 +46,9 @@ export const DateControl: React.FC = () => {
             <ChevronLeftSharpIcon fontSize="small" />
             <ChevronLeftSharpIcon className="-ml-4" fontSize="small" />
           </div>
-        </MapButton>
-        <MapButton
+        </button>
+        <button
+          className={dateButtonStyle}
           disabled={
             !isMonthYearValid(
               query,
@@ -58,9 +61,10 @@ export const DateControl: React.FC = () => {
           }}
         >
           <ChevronLeftSharpIcon fontSize="small" />
-        </MapButton>
+        </button>
         <CalendarInput />
-        <MapButton
+        <button
+          className={dateButtonStyle}
           disabled={
             !isMonthYearValid(
               query,
@@ -73,8 +77,9 @@ export const DateControl: React.FC = () => {
           }}
         >
           <ChevronRightSharpIcon fontSize="small" />
-        </MapButton>
-        <MapButton
+        </button>
+        <button
+          className={dateButtonStyle}
           disabled={
             !isMonthYearValid(
               query,
@@ -90,7 +95,7 @@ export const DateControl: React.FC = () => {
             <ChevronRightSharpIcon fontSize="small" />
             <ChevronRightSharpIcon className="-ml-4" fontSize="small" />
           </div>
-        </MapButton>
+        </button>
       </div>
     </div>
   );

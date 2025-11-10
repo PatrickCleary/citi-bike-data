@@ -38,9 +38,7 @@ export const ZoomLevelOverlay: React.FC<ZoomLevelOverlayProps> = ({
     return null;
   }
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      console.log("Copied to clipboard:", text);
-    });
+    navigator.clipboard.writeText(text);
   };
 
   return (

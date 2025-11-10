@@ -50,7 +50,7 @@ export const MobileMetricsContainer: React.FC = () => {
   }, [data]);
 
   return (
-    <div className="pointer-events-auto z-10 flex w-full flex-col items-center rounded-t-md bg-white lg:hidden">
+    <div className="pointer-events-auto z-10 flex w-full flex-col items-center   bg-white lg:hidden">
       {/* Render the visible metrics */}
       <MobileMetricWrapper
         key={selectedMobileMetric}

@@ -34,6 +34,7 @@ export default {
         cb: {
           white: "#F5F8FA",
           lightGray: "#C3C9CC",
+          lighterGray: "#E1E6E8",
           darkPurple: "#440154",
           purple: "#482878",
           bluePurple: "#3e4989",
