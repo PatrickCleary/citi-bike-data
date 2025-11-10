@@ -71,7 +71,7 @@ export const ShareButton: React.FC = () => {
 
       <div
         className={classNames(
-          "absolute top-0 pb-2 text-gray-200 transition duration-200",
+          "absolute top-0 -translate-x-14 pb-2 text-gray-200 transition duration-200 md:translate-x-0",
           copied
             ? "-translate-y-full opacity-100"
             : "pointer-events-none -translate-y-8 opacity-0",
@@ -79,7 +79,9 @@ export const ShareButton: React.FC = () => {
       >
         <div className="flex w-fit flex-row items-center gap-1 rounded-md bg-gray-800 px-2 py-1 text-sm font-medium">
           <ContentPasteRoundedIcon fontSize="small" className="inline-block" />
-          <p className="text-nowrap font-light tracking-wide">Copied to clipboard</p>
+          <p className="text-nowrap font-light tracking-wide">
+            Copied to clipboard
+          </p>
         </div>
       </div>
     </button>
