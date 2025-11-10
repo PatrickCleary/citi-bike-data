@@ -76,9 +76,11 @@ import {
   ORIGIN_LABEL_LAYER,
   DESTINATION_LAYER_LINE,
   DESTINATION_LAYER_LINE_INSET,
+  DESTINATION_LAYER_FILL,
   PATH_LINE_LAYER,
   PATH_STATION_LAYER,
   DESTINATION_LABEL_LAYER,
+  ORIGIN_LAYER_FILL,
 } from "./layers";
 import { useChartWindow, useMapConfigStore } from "@/store/store";
 import { useLayerVisibilityStore } from "@/store/layer-visibility-store";
@@ -196,7 +198,9 @@ const addHexLayer = (
     HEX_LAYER,
     HEX_LAYER_GLOW,
     HEX_LAYER_LINE,
+    ORIGIN_LAYER_FILL,
     ORIGIN_LAYER_LINE,
+    DESTINATION_LAYER_FILL,
     DESTINATION_LAYER_LINE,
     DESTINATION_LAYER_LINE_INSET,
     ORIGIN_LABEL_LAYER,
@@ -1462,4 +1466,23 @@ export const useUpdateMapBounds = (
     // Clear the targetBounds after applying to prevent re-triggering
     setTargetBounds(null);
   }, [targetBounds, map, mapLoaded, setTargetBounds]);
+};
+
+// Hook to control destination fill layer visibility based on origin cells
+export const useUpdateDestinationFillVisibility = (
+  map: MutableRefObject<Map | null>,
+  mapLoaded: boolean,
+) => {
+  const { originCells } = useMapConfigStore();
+
+  useEffect(() => {
+    if (!mapLoaded || !map.current) return;
+
+    const layer = map.current.getLayer(DESTINATION_LAYER_FILL.id);
+    if (!layer) return;
+
+    // Show destination fill only when origin cells are empty
+    const visibility = originCells.length === 0 ? "visible" : "none";
+    map.current.setLayoutProperty(DESTINATION_LAYER_FILL.id, "visibility", visibility);
+  }, [originCells, map, mapLoaded]);
 };

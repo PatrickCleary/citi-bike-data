@@ -90,6 +90,21 @@ export const ORIGIN_LAYER_LINE: LayerSpecification = {
   },
 };
 
+export const ORIGIN_LAYER_FILL_ID = "origin_hex_tiles_fill_layer";
+
+export const ORIGIN_LAYER_FILL: LayerSpecification = {
+  id: ORIGIN_LAYER_FILL_ID,
+  source: ORIGIN_SOURCE_ID,
+  type: "fill",
+  paint: {
+    "fill-color": "#000000",
+    "fill-opacity": 0.3,
+
+  },
+};
+
+
+
 export const ORIGIN_LABEL_LAYER_ID = "origin_label_layer";
 export const ORIGIN_LABEL_LAYER: LayerSpecification = {
   id: ORIGIN_LABEL_LAYER_ID,
@@ -100,6 +115,18 @@ export const ORIGIN_LABEL_LAYER: LayerSpecification = {
     "icon-size": 0.8,
     "icon-image": "origin_label",
     "icon-allow-overlap": true,
+  },
+};
+
+export const DESTINATION_LAYER_FILL_ID = "destination_hex_tiles_fill_layer";
+
+export const DESTINATION_LAYER_FILL: LayerSpecification = {
+  id: DESTINATION_LAYER_FILL_ID,
+  source: DESTINATION_SOURCE_ID,
+  type: "fill",
+  paint: {
+    "fill-color": "#a0a0a0",
+    "fill-opacity": 0.5,
   },
 };
 

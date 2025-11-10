@@ -16,6 +16,7 @@ import {
   usePrefetchTripCountData,
   useUpdateBikeLaneFilter,
   useUpdateMapBounds,
+  useUpdateDestinationFillVisibility,
 } from "@/map/map-config";
 import { useLocationMarker } from "@/map/use-location-marker";
 
@@ -63,6 +64,7 @@ export const MapPage: React.FC = () => {
   useLocationMarker(map, mapLoaded);
   useUpdateBikeLaneFilter(map, mapLoaded);
   useUpdateMapBounds(map, mapLoaded);
+  useUpdateDestinationFillVisibility(map, mapLoaded);
   const handleIdle = useCallback(() => {
     if (loading) {
       setLoading(false);

@@ -79,7 +79,7 @@ export const ShareButton: React.FC = () => {
       >
         <div className="flex w-fit flex-row items-center gap-1 rounded-md bg-gray-800 px-2 py-1 text-sm font-medium">
           <ContentPasteRoundedIcon fontSize="small" className="inline-block" />
-          <p className="text-nowrap">Copied to clipboard</p>
+          <p className="text-nowrap font-light tracking-wide">Copied to clipboard</p>
         </div>
       </div>
     </button>
