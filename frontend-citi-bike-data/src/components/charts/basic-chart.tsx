@@ -15,8 +15,6 @@ import type { ChartData, ChartOptions } from "chart.js";
 
 import { formatter } from "@/utils/utils";
 import { ChartLineData } from "./chart-types";
-import dayjs from "dayjs";
-
 ChartJS.register(
   CategoryScale,
   LinearScale,
