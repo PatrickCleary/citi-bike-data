@@ -1,21 +1,15 @@
 "use client";
 import { useIntroModalStore } from "@/store/intro-modal-store";
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import Image from "next/image";
 import IconLogo from "@/icons/icon";
-import { isMobileDevice } from "@/utils/mobile-detection";
 
 const WalkthroughCarousel: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    setIsMobile(isMobileDevice());
-  }, []);
 
   const totalSlides = 5;
 
