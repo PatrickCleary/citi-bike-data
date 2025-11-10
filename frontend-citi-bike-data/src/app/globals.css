@@ -30,12 +30,19 @@ body {
   overflow-x: hidden !important;
 }
 
-
-.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
-  /* display: none !important; */    
-    align-self: center !important;
-    border-bottom: none !important;
-    border-top-color: #ffffff40 !important;
-
-
-}
+.maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+    border-bottom-color: #ffffff80  !important;
+    }
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+    border-top-color: #ffffff80 !important;
+    }
+.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+    border-right-color: #ffffff80 !important;
+    }
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+    border-left-color: #ffffff80 !important;
+    }
