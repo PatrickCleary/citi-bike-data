@@ -28,16 +28,16 @@ export const DesktopMetricsContainer: React.FC = () => {
           <ChartWindowTabs />
           <ChartDatasetToggles />
         </div>
-        <div className="flex hidden w-full cursor-default flex-row items-center gap-2 overflow-hidden px-4 py-2 tracking-wide lg:flex">
+        <div className="flex hidden w-full cursor-default flex-row h-full items-center gap-2 overflow-hidden px-4 py-2 tracking-wide lg:flex">
           <div className="flex w-full max-w-lg">
             <SparklineMetric />
           </div>
-          <div className="flex w-full max-w-lg">
+          <div className="flex h-full w-full max-w-lg">
             <PercentageMetric />
           </div>
-          <div className="flex flex-col text-sm text-gray-700  hidden xl:flex">
+          <div className="flex hidden flex-col text-sm text-gray-700 xl:flex">
             <p className="font-light uppercase text-gray-500">Presets</p>
-            <div className="flex flex-wrap gap-1 flex-col">
+            <div className="flex flex-col flex-wrap gap-1">
               {Object.values(PRESETS).map((preset) => (
                 <button
                   className="rounded bg-cb-blue px-3 py-1 text-sm font-medium text-cb-white"

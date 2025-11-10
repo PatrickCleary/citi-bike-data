@@ -67,14 +67,13 @@ export const PercentageMetric: React.FC = () => {
   // Show when at least origin OR destination is selected
   const shouldDisplay = hasOrigin || hasDestination;
 
-  if (!shouldDisplay) {
-    return (
-      <div className="flex h-16 items-center justify-center text-gray-500"></div>
-    );
-  }
-
   return (
-    <div className="flex w-full flex-col items-center">
+    <div className="relative flex w-full flex-col items-center">
+      {!shouldDisplay && (
+        <div className="absolute flex h-full text-center font-light w-full items-center justify-center bg-white/10 backdrop-blur-sm z-10 text-gray-400">
+          <p>Select origin/destination for trip percentage chart</p>
+        </div>
+      )}
       <div className="w-full">
         <BasicChartWrapper
           title={percentageTitle}
