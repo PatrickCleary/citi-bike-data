@@ -19,8 +19,7 @@ import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 
 import dayjs from "dayjs";
 import classNames from "classnames";
-import AddHexIcon from "@/icons/add-hex";
-import MinusHexIcon from "@/icons/minus-hex";
+import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 interface PopupProps {
   map: MutableRefObject<Map | null>;
 }
@@ -254,7 +253,7 @@ export const PopupContent: React.FC<{
 
 const PopupDiv: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="rounded-2 flex min-w-[160px] flex-col items-center rounded-md border-[.5px] border-cb-white/50 bg-white/30 px-2 px-4 py-1 py-2 text-center font-sans text-lg tabular-nums text-black text-neutral-800 drop-shadow-md backdrop-blur-md">
+    <div className="rounded-2 flex min-w-[180px] flex-col items-center rounded-md border-[.5px] border-cb-white/50 bg-white/30 px-2 px-4 py-1 py-2 text-center font-sans text-lg tabular-nums text-black text-neutral-800 drop-shadow-md backdrop-blur-md">
       {children}
     </div>
   );
@@ -483,7 +482,7 @@ export const RemovalButtons: React.FC<{
         </button>
         <button
           onClick={handleRemove}
-          className="pointer-events-auto flex h-11 w-24 flex-col items-center justify-center gap-[2px] rounded-md bg-black px-3 py-1 text-xs uppercase tracking-wider text-white shadow-[inset_0_0_0_2px_black,inset_0_0_0_3px_rgb(255,255,255)] transition active:scale-95 lg:h-fit"
+          className="pointer-events-auto flex h-11 w-24 flex-col items-center justify-center gap-[2px] rounded-md bg-black px-3 py-1 text-xs uppercase tracking-wider text-white opacity-20 transition active:scale-95 lg:h-fit"
         >
           <span className="material-symbols-outlined h-[20px] w-[20px]">
             bike_dock
@@ -541,53 +540,24 @@ export const SelectionButtons: React.FC<{
   return (
     <div className="mt-2 flex w-full flex-col gap-1 font-light uppercase">
       <div className="flex w-full flex-row justify-center gap-1">
-        <button
-          onClick={handleOriginSelect}
-          className={classNames(
-            "pointer-events-auto flex h-11 w-24 flex-col items-center justify-center gap-[2px] rounded-md border-[0.5px] border-cb-lightGray px-3 py-1 text-xs uppercase tracking-wider transition active:scale-95 lg:h-fit",
-            clickedFeature?.isOrigin
-              ? "bg-cb-white text-cb-blue hover:bg-cb-blue hover:text-cb-white"
-              : "bg-cb-blue text-cb-white hover:bg-cb-white hover:text-cb-blue",
-            {
-              hidden: clickedFeature?.isDestination,
-            },
-          )}
-        >
-          {clickedFeature?.isOrigin ? (
-            <MinusHexIcon width={24} height={24} />
-          ) : (
-            <AddHexIcon width={24} height={24} />
-          )}
-          origin
-        </button>
-        <button
-          onClick={handleDestinationSelect}
-          className={classNames(
-            "pointer-events-auto flex h-11 w-24 flex-col items-center justify-center gap-[2px] rounded-md border-[0.5px] border-cb-lightGray px-3 py-1 text-xs uppercase tracking-wider text-cb-blue transition hover:text-cb-white active:scale-95 lg:h-fit",
-            clickedFeature?.isDestination
-              ? "bg-cb-blue/80 text-cb-white hover:bg-cb-blue"
-              : "bg-cb-blue text-cb-white hover:bg-cb-white hover:text-cb-blue",
-
-            {
-              hidden: clickedFeature?.isOrigin,
-            },
-          )}
-        >
-          {clickedFeature?.isDestination ? (
-            <MinusHexIcon width={24} height={24} />
-          ) : (
-            <AddHexIcon width={24} height={24} />
-          )}
-          DEST
-        </button>
+        {!clickedFeature?.isDestination && (
+          <AddOriginButton
+            onClick={handleOriginSelect}
+            selected={clickedFeature?.isOrigin}
+          />
+        )}
+        {!clickedFeature?.isOrigin && (
+          <AddDestinationButton
+            onClick={handleDestinationSelect}
+            selected={clickedFeature?.isDestination}
+          />
+        )}
       </div>
       {isSelected && (
-        <button
-          onClick={() => handleClear()}
-          className="pointer-events-auto h-11 rounded-md px-3 py-1 text-xs text-cb-blue transition hover:bg-cb-white/20 active:scale-95 lg:h-fit"
-        >
-          Clear {clickedFeature?.isOrigin ? "origin" : "destination"}
-        </button>
+        <ClearAllButton
+          onClick={handleClear}
+          label={clickedFeature?.isDestination ? "Destination" : "Origin"}
+        />
       )}
     </div>
   );
@@ -671,6 +641,80 @@ const CloseButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
       className="pointer-events-auto absolute right-0 top-0 h-8 w-8 rounded-full text-gray-500 hover:bg-white/30"
     >
       <CloseRoundedIcon fontSize="small" />
+    </button>
+  );
+};
+const AddOriginButton: React.FC<{
+  onClick: () => void;
+  selected: boolean | undefiend;
+}> = ({ onClick, selected }) => {
+  return (
+    <button
+      onClick={onClick}
+      className={classNames(
+        "group pointer-events-auto h-16 w-28 rounded-md border-[0.5px] transition active:scale-95",
+        selected
+          ? "border-cb-blue bg-cb-blue/10 text-cb-blue shadow-sm"
+          : "border-cb-blue bg-cb-white/30 text-cb-blue shadow-sm",
+      )}
+    >
+      <div className="relative flex h-full w-full items-center justify-center">
+        <div className="absolute translate-y-0 text-cb-blue transition-all duration-200 group-hover:-translate-y-2 group-hover:opacity-0">
+          <PedalBikeRoundedIcon fontSize="small" />
+        </div>
+        <span className="absolute translate-y-2 text-sm font-medium text-cb-blue opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+          {selected ? "Remove cell" : "Add as origin"}
+        </span>
+      </div>
+    </button>
+  );
+};
+const AddDestinationButton: React.FC<{
+  onClick: () => void;
+  selected: boolean | undefined;
+}> = ({ onClick, selected }) => {
+  return (
+    <button
+      onClick={onClick}
+      className={classNames(
+        "group pointer-events-auto h-16 w-28 rounded-md border-[0.5px] transition active:scale-95",
+        selected
+          ? "border-cb-blue bg-cb-blue/10 text-cb-blue shadow-sm"
+          : "border-cb-blue bg-cb-white/30 text-cb-blue shadow-sm",
+      )}
+    >
+      <div className="relative flex h-full w-full items-center justify-center">
+        <div className="absolute translate-y-0 transition-all duration-200 group-hover:-translate-y-2 group-hover:opacity-0">
+          <span className="material-symbols-outlined h-[20px] w-[20px]">
+            bike_dock
+          </span>
+        </div>
+        <span className="absolute translate-y-2 text-sm font-medium opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+          {selected ? "Remove cell" : "Add as destination"}
+        </span>
+      </div>
+    </button>
+  );
+};
+
+const ClearAllButton: React.FC<{
+  onClick: () => void;
+  label: string;
+}> = ({ onClick, label }) => {
+  return (
+    <button
+      onClick={onClick}
+      className={classNames(
+        "group pointer-events-auto h-11 w-full rounded-md transition active:scale-95 md:h-fit",
+        "text-gray-600 hover:text-gray-800",
+      )}
+    >
+      <div className="relative flex h-full w-full items-center justify-center rounded-full py-1 hover:bg-cb-lightGray/30">
+        <div className="flex flex-row items-center text-sm">
+          <DeleteRoundedIcon fontSize="small" />
+          {label}
+        </div>
+      </div>
     </button>
   );
 };
