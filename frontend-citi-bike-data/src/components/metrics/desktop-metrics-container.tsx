@@ -35,18 +35,21 @@ export const DesktopMetricsContainer: React.FC = () => {
           <div className="flex w-full max-w-lg">
             <PercentageMetric />
           </div>
-          <div className="flex flex-wrap">
-            {Object.values(PRESETS).map((preset) => (
-              <button
-                className="m-1 rounded bg-cb-blue px-3 py-1 text-sm font-medium text-cb-white"
-                key={preset.name}
-                onClick={() => {
-                  setPreset(preset);
-                }}
-              >
-                {preset.name}
-              </button>
-            ))}
+          <div className="flex flex-col text-sm text-gray-700  hidden xl:flex">
+            <p className="font-light uppercase text-gray-500">Presets</p>
+            <div className="flex flex-wrap gap-1 flex-col">
+              {Object.values(PRESETS).map((preset) => (
+                <button
+                  className="rounded bg-cb-blue px-3 py-1 text-sm font-medium text-cb-white"
+                  key={preset.name}
+                  onClick={() => {
+                    setPreset(preset);
+                  }}
+                >
+                  {preset.name}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

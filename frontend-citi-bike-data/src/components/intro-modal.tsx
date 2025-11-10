@@ -144,6 +144,7 @@ export const IntroModal: React.FC = () => {
             >
               {"Let's go!"}
             </button>
+            
 
             {/* Contact and Copyright */}
             <div className="flex w-full flex-col items-center justify-center space-x-1 border-t border-gray-200 pt-4">

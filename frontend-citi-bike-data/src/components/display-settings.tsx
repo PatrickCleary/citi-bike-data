@@ -78,9 +78,6 @@ export const DisplaySettings: React.FC = () => {
           <p className="cursor-default text-xs uppercase tracking-wide text-gray-400">
             Mode
           </p>
-          <InfoModal>
-            <DisplayInfo />
-          </InfoModal>
         </div>
         <TabGroup
           selectedIndex={selectedDisplayTypeIndex}
@@ -138,7 +135,7 @@ export const DisplaySettings: React.FC = () => {
                 </Switch>
               </div>
             </div>
-            <p className="max-w-sm text-sm text-gray-700">
+            <p className="max-w-sm text-sm text-gray-500 bg-gray-200 px-2 rounded-md py-1">
               Comparison mode shows the change in traffic between the currently
               selected month and the same month of the past year. Normalization
               adjusts the value so that overall ridership changes are accounted

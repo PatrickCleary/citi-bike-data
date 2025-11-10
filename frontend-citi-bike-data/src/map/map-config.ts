@@ -1268,10 +1268,9 @@ export const useDimNonSelectedCells = (
 
   useEffect(() => {
     if (!mapLoaded || !map.current) return;
-    console.log("ue");
+
     const departureCountMap = query.data?.data.trip_counts;
     if (!departureCountMap) return;
-    console.log("in", departureCountMap);
 
     // Only dim cells when BOTH origin AND destination are selected
     const shouldDim = originCells.length > 0 && destinationCells.length > 0;
@@ -1483,6 +1482,10 @@ export const useUpdateDestinationFillVisibility = (
 
     // Show destination fill only when origin cells are empty
     const visibility = originCells.length === 0 ? "visible" : "none";
-    map.current.setLayoutProperty(DESTINATION_LAYER_FILL.id, "visibility", visibility);
+    map.current.setLayoutProperty(
+      DESTINATION_LAYER_FILL.id,
+      "visibility",
+      visibility,
+    );
   }, [originCells, map, mapLoaded]);
 };
