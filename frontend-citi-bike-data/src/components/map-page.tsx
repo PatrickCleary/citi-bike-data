@@ -38,6 +38,7 @@ import { MobileMetricsContainer } from "./metrics/mobile-metrics-container";
 import { DesktopMetricsContainer } from "./metrics/desktop-metrics-container";
 import { ShareButton } from "./share-button";
 import { useUrlConfig } from "@/hooks/use-url-config";
+import { SnackBar } from "./snack-bar";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -109,6 +110,7 @@ export const MapPage: React.FC = () => {
 
   return (
     <div className="flex h-[100svh] w-[100svw] flex-col font-sans">
+      <SnackBar />
       <div className="h-full w-full" ref={mapContainer}>
         <Logo />
         <ZoomLevelOverlay map={map} mapLoaded={mapLoaded} />
@@ -118,7 +120,7 @@ export const MapPage: React.FC = () => {
             <LayerControl map={map} mapLoaded={mapLoaded} />
             <DisplaySettings />
             <LocationSearchControl />
-            <div className="pointer-events-auto flex flex-row w-full justify-between md:justify-start md:gap-2">
+            <div className="pointer-events-auto flex w-full flex-row justify-between md:justify-start md:gap-2">
               <DateControl />
               <ShareButton />
             </div>

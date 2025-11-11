@@ -21,6 +21,7 @@ import dayjs from "dayjs";
 import classNames from "classnames";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import BikeDockIcon from "@/icons/bike-dock";
+import { showSnackBar } from "@/components/snack-bar";
 interface PopupProps {
   map: MutableRefObject<Map | null>;
 }
@@ -492,7 +493,7 @@ export const RemovalButtons: React.FC<{
       {multipleCells && (
         <button
           onClick={handleClear}
-          className="pointer-events-auto h-11 rounded-md px-3 py-1 text-xs text-red-600 transition hover:bg-cb-white active:scale-95 lg:h-fit"
+          className="pointer-events-auto h-11 rounded-md px-3 py-1 text-xs text-red-600 transition active:scale-95 md:hover:bg-cb-white lg:h-fit"
         >
           Clear {clickedFeature?.isOrigin ? "origin" : "destination"}
         </button>
@@ -516,6 +517,9 @@ export const SelectionButtons: React.FC<{
   const handleClear = () => {
     if (clickedFeature?.isDestination) setDestinationCells([]);
     if (clickedFeature?.isOrigin) setOriginCells([]);
+    showSnackBar(
+      `Deleted ${clickedFeature?.isOrigin ? "origin" : "destination"}`,
+    );
     setClickedFeature(null);
   };
   const { setClickedFeature } = usePopupStateStore();
@@ -525,6 +529,9 @@ export const SelectionButtons: React.FC<{
       addOrRemoveDestinationCell(cellId);
     }
 
+    showSnackBar(
+      `${clickedFeature?.isOrigin ? "Removed" : "Added"} cell as origin`,
+    );
     addOrRemoveOriginCell(cellId);
     setClickedFeature(null);
   };
@@ -532,6 +539,10 @@ export const SelectionButtons: React.FC<{
     if (clickedFeature?.isOrigin) {
       addOrRemoveOriginCell(cellId);
     }
+    showSnackBar(
+      `${clickedFeature?.isDestination ? "Removed" : "Added"} cell as destination`,
+    );
+
     addOrRemoveDestinationCell(cellId);
     setClickedFeature(null);
   };
@@ -637,7 +648,7 @@ const CloseButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="pointer-events-auto absolute right-0 top-0 h-8 w-8 rounded-full text-gray-500 hover:bg-white/30"
+      className="pointer-events-auto absolute right-0 top-0 h-8 w-8 rounded-full text-gray-500 md:hover:bg-white/30"
     >
       <CloseRoundedIcon fontSize="small" />
     </button>
@@ -658,10 +669,10 @@ const AddOriginButton: React.FC<{
       )}
     >
       <div className="relative flex h-full w-full items-center justify-center">
-        <div className="absolute translate-y-0 text-cb-blue transition-all duration-200 group-hover:-translate-y-2 group-hover:opacity-0">
+        <div className="absolute translate-y-0 text-cb-blue transition-all duration-200 md:group-hover:-translate-y-2 md:group-hover:opacity-0">
           <PedalBikeRoundedIcon />
         </div>
-        <span className="absolute translate-y-2 text-sm font-medium text-cb-blue opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+        <span className="absolute translate-y-2 text-sm font-medium text-cb-blue opacity-0 transition-all duration-200 md:group-hover:translate-y-0 md:group-hover:opacity-100">
           {selected ? "Remove cell" : "Add as origin"}
         </span>
       </div>
@@ -683,10 +694,10 @@ const AddDestinationButton: React.FC<{
       )}
     >
       <div className="relative flex h-full w-full items-center justify-center">
-        <div className="absolute translate-y-0 transition-all duration-200 group-hover:-translate-y-2 group-hover:opacity-0">
+        <div className="absolute translate-y-0 transition-all duration-200 md:group-hover:-translate-y-2 md:group-hover:opacity-0">
           <BikeDockIcon />
         </div>
-        <span className="absolute translate-y-2 text-sm font-medium opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+        <span className="absolute translate-y-2 text-sm font-medium opacity-0 transition-all duration-200 md:group-hover:translate-y-0 md:group-hover:opacity-100">
           {selected ? "Remove cell" : "Add as destination"}
         </span>
       </div>
@@ -703,10 +714,10 @@ const ClearAllButton: React.FC<{
       onClick={onClick}
       className={classNames(
         "group pointer-events-auto h-11 w-full rounded-md transition active:scale-95 md:h-fit",
-        "text-gray-600 hover:text-gray-800",
+        "text-gray-600 md:hover:text-gray-800",
       )}
     >
-      <div className="relative flex h-full w-full items-center justify-center rounded-full py-1 hover:bg-cb-lightGray/30">
+      <div className="relative flex h-full w-full items-center justify-center rounded-full py-1 md:hover:bg-cb-lightGray/30">
         <div className="flex flex-row items-center text-sm">
           <DeleteRoundedIcon fontSize="small" />
           {label}
