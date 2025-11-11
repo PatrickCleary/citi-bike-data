@@ -8,6 +8,9 @@ import {
   NYC_LINES_SOURCE_ID,
   NYC_STATIONS_SOURCE_ID,
   ORIGIN_SOURCE_ID,
+  ORIGIN_LABEL_SOURCE_ID,
+  DESTINATION_SOURCE_ID,
+  DESTINATION_LABEL_SOURCE_ID,
   PATH_LINES_SOURCE_ID,
   PATH_STATIONS_SOURCE_ID,
   SUBWAY_LINES_SOURCE_ID,
@@ -87,15 +90,110 @@ export const ORIGIN_LAYER_LINE: LayerSpecification = {
   },
 };
 
-export const INFO_MODE_SELECTED_LAYER_ID = "info_mode_selected_hex_layer";
+export const ORIGIN_LAYER_FILL_ID = "origin_hex_tiles_fill_layer";
 
-export const INFO_MODE_SELECTED_LAYER: LayerSpecification = {
-  id: INFO_MODE_SELECTED_LAYER_ID,
-  source: "info_mode_selected_hex",
+export const ORIGIN_LAYER_FILL: LayerSpecification = {
+  id: ORIGIN_LAYER_FILL_ID,
+  source: ORIGIN_SOURCE_ID,
+  type: "fill",
+  paint: {
+    "fill-color": "#000000",
+    "fill-opacity": 0.3,
+  },
+};
+
+export const ORIGIN_LABEL_LAYER_ID = "origin_label_layer";
+export const ORIGIN_LABEL_LAYER: LayerSpecification = {
+  id: ORIGIN_LABEL_LAYER_ID,
+  source: ORIGIN_LABEL_SOURCE_ID,
+  type: "symbol",
+  layout: {
+    "icon-size": [
+      "step",
+      ["zoom"],
+      0.5,
+      10,
+      0.7, // Size below zoom level 10
+      12,
+      0.8, // Size below zoom level 14
+      14,
+      0.8, // Size for zoom level 14 and above
+    ],
+    "icon-image": [
+      "step",
+      ["zoom"],
+      "origin_label_small", // Default image
+      14,
+      "origin_label", // Image for zoom level 14 and above
+    ],
+    "icon-allow-overlap": true,
+  },
+};
+
+export const DESTINATION_LAYER_FILL_ID = "destination_hex_tiles_fill_layer";
+
+export const DESTINATION_LAYER_FILL: LayerSpecification = {
+  id: DESTINATION_LAYER_FILL_ID,
+  source: DESTINATION_SOURCE_ID,
+  type: "fill",
+  paint: {
+    "fill-color": "#a0a0a0",
+    "fill-opacity": 0.5,
+  },
+};
+
+export const DESTINATION_LAYER_LINE_ID = "destination_hex_tiles_line_layer";
+
+export const DESTINATION_LAYER_LINE: LayerSpecification = {
+  id: DESTINATION_LAYER_LINE_ID,
+  source: DESTINATION_SOURCE_ID,
   type: "line",
   paint: {
-    "line-width": 3,
+    "line-width": 6,
+    "line-color": "#000000",
+  },
+};
+
+export const DESTINATION_LAYER_LINE_INSET_ID =
+  "destination_hex_tiles_line_inset_layer";
+
+export const DESTINATION_LAYER_LINE_INSET: LayerSpecification = {
+  id: DESTINATION_LAYER_LINE_INSET_ID,
+  source: DESTINATION_SOURCE_ID,
+  type: "line",
+  paint: {
+    "line-width": 2,
     "line-color": "#ffffff",
+  },
+};
+
+export const DESTINATION_LABEL_LAYER_ID = "destination_label_layer";
+
+export const DESTINATION_LABEL_LAYER: LayerSpecification = {
+  id: DESTINATION_LABEL_LAYER_ID,
+  source: DESTINATION_LABEL_SOURCE_ID,
+
+  type: "symbol",
+  layout: {
+    "icon-size": [
+      "step",
+      ["zoom"],
+      0.5,
+      10,
+      0.7, // Size below zoom level 10
+      12,
+      0.8, // Size below zoom level 14
+      14,
+      0.8, // Size for zoom level 14 and above
+    ],
+    "icon-image": [
+      "step",
+      ["zoom"],
+      "destination_label_small", // Default image
+      14,
+      "destination_label", // Image for zoom level 14 and above
+    ],
+    "icon-allow-overlap": true,
   },
 };
 
@@ -208,12 +306,12 @@ export const NYC_BIKE_LANE_LAYER: LayerSpecification = {
       "I",
       1.5,
       "II",
-      .75,
+      0.75,
       "III",
       0.25,
       "L",
-      .5,
-      .25, //fallback
+      0.5,
+      0.25, //fallback
     ],
   }, // You can change the color as needed
   filter: ["all"], // Will be updated dynamically based on selectedMonth

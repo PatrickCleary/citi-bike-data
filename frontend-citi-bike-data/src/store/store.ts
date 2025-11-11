@@ -1,54 +1,117 @@
-import { useTripCountData } from "@/map/map-config";
+import { useMaxDate, useTripCountData } from "@/map/map-config";
 import { getMaxDate } from "@/utils/api";
 import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { useEffect } from "react";
 import { create } from "zustand";
+import duration from "dayjs/plugin/duration";
+import { LngLatBoundsLike } from "maplibre-gl";
+
+dayjs.extend(duration);
+
+export type ChartDatasetView = "rolling_avg" | "main";
 
 interface Store {
-  departureCells: string[];
+  cellsToFetch: string[];
+  originCells: string[];
+  destinationCells: string[];
   departureCountMap: Record<string, number> | null;
+  comparisonDelta: duration.Duration;
   selectedMonth: string | undefined;
   analysisType: "departures" | "arrivals";
   scaleType: "dynamic" | "custom";
   scale: [number, number];
+  displayType: "absolute" | "comparison";
+  normalizeComparison: boolean;
+  selectionMode: "origin" | "destination";
+  chartWindow: duration.Duration;
+  chartDatasetView: ChartDatasetView;
+  showBaseline: boolean;
+  targetBounds: LngLatBoundsLike | null;
+  setChartWindow: (window: duration.Duration) => void;
+  setChartDatasetView: (view: ChartDatasetView) => void;
+  setShowBaseline: (show: boolean) => void;
+  setCellsToFetch: (cells: string[]) => void;
+  clearSelection: () => void;
+  setDisplayType: (type: "absolute" | "comparison") => void;
   setScaleType: (type: "dynamic" | "custom") => void;
   setScale: (max: [number, number]) => void;
-  swapAnalysisType: () => void;
+  setNormalizeComparison: (normalize: boolean) => void;
+  setSelectionMode: (mode: "origin" | "destination") => void;
+  setAnalysisType: (type: "departures" | "arrivals") => void;
   setSelectedMonth: (month: string | undefined) => void;
   setDepartureCountMap: (map: Record<string, number>) => void;
-  setDepartureCells: (departureCells: string[]) => void;
-  addOrRemoveDepartureCell: (cell: string) => void;
+  setOriginCells: (originCells: string[]) => void;
+  setDestinationCells: (destinationCells: string[]) => void;
+  addOrRemoveOriginCell: (cell: string) => void;
+  addOrRemoveDestinationCell: (cell: string) => void;
+  setTargetBounds: (bounds: LngLatBoundsLike | null) => void;
 }
 
-export const useMapConfigStore = create<Store>((set) => ({
-  departureCells: [],
+export const useMapConfigStore = create<Store>((set, get) => ({
+  cellsToFetch: [],
+  originCells: [],
+  destinationCells: [],
+  comparisonDelta: dayjs.duration(-1, "year"),
   departureCountMap: null,
   selectedMonth: undefined,
   analysisType: "arrivals",
   scaleType: "dynamic",
   scale: [1, 100],
+  displayType: "absolute",
+  normalizeComparison: true,
+  selectionMode: "origin",
+  chartWindow: dayjs.duration(6, "months"),
+  chartDatasetView: "main",
+  showBaseline: true,
+  targetBounds: null,
+  setChartWindow: (window) => set({ chartWindow: window }),
+  setChartDatasetView: (view) => set({ chartDatasetView: view }),
+  setShowBaseline: (show) => set({ showBaseline: show }),
+  setCellsToFetch: (cells) => set({ cellsToFetch: cells }),
+  clearSelection: () => {
+    const selectionMode = get().selectionMode;
+    if (selectionMode === "origin") {
+      set({ originCells: [] });
+    } else {
+      set({ destinationCells: [] });
+    }
+  },
+  setDisplayType: (type) => set({ displayType: type }),
   setScaleType: (type) => set({ scaleType: type }),
   setScale: (max) => set({ scale: max }),
-  swapAnalysisType: () =>
-    set((state) => ({
-      analysisType:
-        state.analysisType === "departures" ? "arrivals" : "departures",
-    })),
+  setNormalizeComparison: (normalize) =>
+    set({ normalizeComparison: normalize }),
+  setSelectionMode: (mode) => set({ selectionMode: mode }),
+  setAnalysisType: (type) => set({ analysisType: type }),
   setSelectedMonth: (month) => set({ selectedMonth: month }),
   setDepartureCountMap: (map) => set({ departureCountMap: map }),
-  setDepartureCells: (departureCells) =>
-    set({ departureCells: departureCells }),
-  addOrRemoveDepartureCell: (cell) =>
+  setOriginCells: (originCells) => set({ originCells: originCells }),
+  setDestinationCells: (destinationCells) =>
+    set({ destinationCells: destinationCells }),
+  addOrRemoveOriginCell: (cell) =>
     set((state) => {
-      const isCellPresent = state.departureCells.includes(cell);
+      const isCellPresent = state.originCells.includes(cell);
       if (isCellPresent) {
         return {
-          departureCells: state.departureCells.filter((c) => c !== cell),
+          originCells: state.originCells.filter((c) => c !== cell),
         };
       } else {
-        return { departureCells: [...state.departureCells, cell] };
+        return { originCells: [...state.originCells, cell] };
       }
     }),
+  addOrRemoveDestinationCell: (cell) =>
+    set((state) => {
+      const isCellPresent = state.destinationCells.includes(cell);
+      if (isCellPresent) {
+        return {
+          destinationCells: state.destinationCells.filter((c) => c !== cell),
+        };
+      } else {
+        return { destinationCells: [...state.destinationCells, cell] };
+      }
+    }),
+  setTargetBounds: (bounds) => set({ targetBounds: bounds }),
 }));
 
 export const useUpdateScaleMax = () => {
@@ -70,8 +133,97 @@ export const useFetchLatestDate = () => {
     queryFn: getMaxDate,
   });
   useEffect(() => {
-    if (query.isLoading) setSelectedMonth(undefined);
-    if (query.isError) setSelectedMonth(undefined);
     if (query.data) setSelectedMonth(query.data);
+    else setSelectedMonth(undefined);
   }, [query.data, setSelectedMonth]);
+};
+
+// Separate hook to manage analysisType logic
+export const useSyncAnalysisType = () => {
+  const { setAnalysisType, originCells, destinationCells } =
+    useMapConfigStore();
+  useEffect(() => {
+    if (originCells.length === 0 && destinationCells.length > 0)
+      setAnalysisType("departures");
+    else setAnalysisType("arrivals"); // default or when origins exist
+  }, [originCells, destinationCells, setAnalysisType]);
+};
+
+export const useSyncTripsToFetchData = () => {
+  const {
+    originCells,
+    destinationCells,
+    selectedMonth,
+    analysisType,
+    setCellsToFetch,
+  } = useMapConfigStore();
+
+  useEffect(() => {
+    let cells: string[] = [];
+    if (originCells.length > 0) cells = originCells;
+    else if (destinationCells.length > 0) {
+      cells = destinationCells;
+    }
+    setCellsToFetch(cells);
+  }, [
+    setCellsToFetch,
+    originCells,
+    destinationCells,
+    analysisType,
+    selectedMonth,
+  ]);
+};
+
+export const useSync = () => {
+  useSyncAnalysisType();
+  useSyncTripsToFetchData();
+};
+
+export const useChartWindow = () => {
+  const { chartWindow, selectedMonth } = useMapConfigStore();
+  const maxDateQuery = useMaxDate();
+  const maxDate = maxDateQuery.data;
+  const dayjsDate = selectedMonth ? dayjs(selectedMonth) : null;
+  if (!maxDate || !dayjsDate) return { windowStart: null, windowEnd: null };
+  const maxDateDayjs = dayjs(maxDate);
+
+  // Try to center on selected date (2 years before, 2 years after)
+  let windowStart = dayjsDate.subtract(chartWindow).startOf("month");
+  let windowEnd = dayjsDate.add(chartWindow).endOf("month");
+
+  // If the selected date + 2 years exceeds max date, shift window back
+  // to ensure we always show 48 months ending at max date
+  if (windowEnd.isAfter(maxDate)) {
+    windowEnd = maxDateDayjs.endOf("month");
+    windowStart = maxDateDayjs
+      .subtract(chartWindow)
+      .subtract(chartWindow)
+      .startOf("month");
+  }
+  return { windowStart, windowEnd };
+};
+
+export const usePreset = () => {
+  const {
+    setOriginCells,
+    setDestinationCells,
+    setSelectedMonth,
+    setTargetBounds,
+  } = useMapConfigStore();
+
+  return (config: {
+    originCells: string[];
+    destinationCells: string[];
+    bounds: LngLatBoundsLike | null;
+    date: string | null;
+  }) => {
+    setOriginCells(config.originCells);
+    setDestinationCells(config.destinationCells);
+    if (config.date) {
+      setSelectedMonth(config.date);
+    }
+    if (config.bounds) {
+      setTargetBounds(config.bounds);
+    }
+  };
 };

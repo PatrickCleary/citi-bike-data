@@ -11,27 +11,34 @@ import {
   useApplyLayers,
   useUpdateMapStyleOnDataChange,
   useUpdateOriginShape,
-  useUpdateInfoModeSelectedCell,
+  useUpdateDestinationShape,
+  useDimNonSelectedCells,
   usePrefetchTripCountData,
   useUpdateBikeLaneFilter,
+  useUpdateMapBounds,
+  useUpdateDestinationFillVisibility,
 } from "@/map/map-config";
 import { useLocationMarker } from "@/map/use-location-marker";
 
-import { TotalDisplay } from "./total-display";
 import Popup from "@/map/popup";
 import { addImages } from "@/map/utils";
 import { LayerControl } from "./layer-control";
 
 import { DateControl } from "./date-control";
 import { DisplaySettings } from "./display-settings";
-import { DeleteButton, InteractionModeToggle } from "./interaction-mode-toggle";
 import { Legend } from "./legend";
-import { useFetchLatestDate } from "@/store/store";
+import { useFetchLatestDate, useSync } from "@/store/store";
 import IconLogo from "@/icons/icon";
 import { LocationSearchModal } from "./location-search-modal";
 import { LocationSearchControl } from "./location-search-control";
 import { IntroModal } from "./intro-modal";
 import { useIntroModalStore } from "@/store/intro-modal-store";
+import { ZoomLevelOverlay } from "./zoom-level-overlay";
+import { MobileMetricsContainer } from "./metrics/mobile-metrics-container";
+import { DesktopMetricsContainer } from "./metrics/desktop-metrics-container";
+import { ShareButton } from "./share-button";
+import { useUrlConfig } from "@/hooks/use-url-config";
+import { SnackBar } from "./snack-bar";
 
 export const MapPage: React.FC = () => {
   const map: MutableRefObject<Map | null> = useRef(null);
@@ -44,15 +51,21 @@ export const MapPage: React.FC = () => {
     setIsMobile(isMobileDevice());
   }, []);
 
-  useUpdateMapStyleOnDataChange(map, mapLoaded);
+  const hasConfig = useUrlConfig();
+  useUpdateMapStyleOnDataChange(map, mapLoaded, hasConfig);
   useApplyLayers(map, mapLoaded);
   useFetchLatestDate();
   useUpdateOriginShape(map, mapLoaded);
-  useUpdateInfoModeSelectedCell(map, mapLoaded);
+  useUpdateDestinationShape(map, mapLoaded);
+  useDimNonSelectedCells(map, mapLoaded);
+  useSync();
+
   useAddPMTilesProtocol();
   usePrefetchTripCountData();
   useLocationMarker(map, mapLoaded);
   useUpdateBikeLaneFilter(map, mapLoaded);
+  useUpdateMapBounds(map, mapLoaded);
+  useUpdateDestinationFillVisibility(map, mapLoaded);
   const handleIdle = useCallback(() => {
     if (loading) {
       setLoading(false);
@@ -96,29 +109,26 @@ export const MapPage: React.FC = () => {
   }, [mapLoaded, handleIdle, handleLoading]);
 
   return (
-    <div className="flex h-[100svh] w-[100svw] flex-row font-sans">
+    <div className="flex h-[100svh] w-[100svw] flex-col font-sans">
+      <SnackBar />
       <div className="h-full w-full" ref={mapContainer}>
         <Logo />
-        <div className="pointer-events-none fixed top-4 z-10 flex w-full flex-col items-center gap-4 md:left-1/2 md:top-4 md:-translate-x-1/2 md:flex-row md:justify-center">
-          <div className="pointer-events-auto w-fit">
-            <TotalDisplay />
-          </div>
-        </div>
-        <div className="pointer-events-none fixed bottom-4 left-4 z-10 flex flex-col gap-2">
-          <Legend />
-          <LayerControl map={map} mapLoaded={mapLoaded} />
-          <DisplaySettings />
-          <LocationSearchControl />
-
-          <div className="w-fit md:hidden">
-            <InteractionModeToggle />
-          </div>
-          <div className="pointer-events-auto flex flex-row gap-2">
-            <DateControl />
+        <ZoomLevelOverlay map={map} mapLoaded={mapLoaded} />
+        <div className="pointer-events-none absolute bottom-2 z-10 flex w-full flex-col gap-2">
+          <div className="flex flex-col gap-1 px-4">
+            <Legend />
+            <LayerControl map={map} mapLoaded={mapLoaded} />
+            <DisplaySettings />
+            <LocationSearchControl />
+            <div className="pointer-events-auto flex w-full flex-row justify-between md:justify-start md:gap-2">
+              <DateControl />
+              <ShareButton />
+            </div>
           </div>
         </div>
       </div>
-      {!isMobile && <DeleteButton />}
+      <MobileMetricsContainer />
+      <DesktopMetricsContainer />
 
       <Popup map={map} />
       <LocationSearchModal />
@@ -133,7 +143,7 @@ export const Logo: React.FC = () => {
   return (
     <button
       onClick={() => setIsOpen(true)}
-      className="fixed left-4 top-4 z-10 flex flex-row items-center overflow-hidden rounded-md drop-shadow-md backdrop-blur-sm transition hover:bg-cb-white/70 active:scale-95 md:bg-cb-white/50"
+      className="fixed left-4 top-4 z-10 flex flex-row items-center overflow-hidden rounded-md drop-shadow-md backdrop-blur-sm transition hover:bg-white active:scale-95 md:bg-cb-white"
       aria-label="Open introduction modal"
     >
       <IconLogo className="md:hidden" width={32} />

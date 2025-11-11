@@ -10,15 +10,18 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        outfit: ["Outfit", "sans-serif"],
+      },
       keyframes: {
         slideDown: {
-          '0%': {
-            opacity: '0',
-            transform: 'translateY(-20px)',
+          "0%": {
+            opacity: "0",
+            transform: "translateY(-20px)",
           },
-          '100%': {
-            opacity: '1',
-            transform: 'translateY(0)',
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0)",
           },
         },
       },
@@ -29,8 +32,9 @@ export default {
 
       colors: {
         cb: {
-          white: "#F2F3F0",
+          white: "#F5F8FA",
           lightGray: "#C3C9CC",
+          lighterGray: "#E1E6E8",
           darkPurple: "#440154",
           purple: "#482878",
           bluePurple: "#3e4989",
@@ -39,6 +43,11 @@ export default {
           green: "#35b779",
           lightGreen: "#6ece58",
           yellow: "#fde725",
+          // Comparison/trend colors
+          increase: "#01665e", // Dark blue-green for increases
+          "increase-pastel": "#BEE8E5",
+          decrease: "#8c510a", // Brown for decreases
+          "decrease-pastel": "#EBDAC5",
         },
         background: "var(--background)",
         foreground: "var(--foreground)",

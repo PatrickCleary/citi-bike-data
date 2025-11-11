@@ -10,3 +10,4 @@ export const isMobileDevice = (): boolean => {
 
   return hasTouchScreen && isSmallScreen;
 };
+

@@ -69,7 +69,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                 >
                   <div
                     className={classNames(
-                      "relative h-16 w-full cursor-pointer overflow-hidden rounded outline-cb-green",
+                      "relative h-16 w-full cursor-pointer overflow-hidden rounded outline-cb-blue",
                       group.visible ? "outline" : "outline-hidden",
                     )}
                     style={{
@@ -82,10 +82,10 @@ export const LayerControl: React.FC<LayerControlProps> = ({
                   {/* Label below the image */}
                   <span
                     className={classNames(
-                      "mt-1 rounded-full px-2 text-xs uppercase text-gray-700 transition duration-100 ease-out group-hover:bg-cb-green/20",
+                      "mt-1 rounded-full px-2 text-xs uppercase text-gray-700 transition duration-100 ease-out group-hover:bg-cb-blue/20",
                       group.id === "bike" ? "tracking-wider" : "tracking-wide",
                       group.visible
-                        ? "bg-cb-green/30 group-hover:bg-cb-green/30"
+                        ? "bg-cb-blue/30 group-hover:bg-cb-blue/30"
                         : "",
                     )}
                   >

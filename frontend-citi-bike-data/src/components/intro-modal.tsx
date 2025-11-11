@@ -1,23 +1,16 @@
 "use client";
 import { useIntroModalStore } from "@/store/intro-modal-store";
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import Image from "next/image";
 import IconLogo from "@/icons/icon";
-import { isMobileDevice } from "@/utils/mobile-detection";
 
 const WalkthroughCarousel: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    setIsMobile(isMobileDevice());
-  }, []);
-
-  const imagePrefix = isMobile ? "mobile" : "desktop";
   const totalSlides = 5;
 
   const nextSlide = () => {
@@ -40,7 +33,7 @@ const WalkthroughCarousel: React.FC = () => {
             {Array.from({ length: totalSlides }, (_, i) => (
               <div key={i} className="w-full flex-shrink-0">
                 <Image
-                  src={`/walkthrough/${imagePrefix}_${i}.jpg`}
+                  src={`/walkthrough/desktop_${i}.jpg`}
                   alt={`Walkthrough step ${i + 1}`}
                   width={600}
                   height={450}
@@ -115,13 +108,13 @@ export const IntroModal: React.FC = () => {
           <div className="space-y-5 px-6 py-8 sm:p-8 sm:px-8">
             {/* Title and Subtitle */}
             <div className="space-y-2 text-center">
-              <h1 className="flex flex-row items-center justify-center gap-2 text-2xl font-light tracking-wide text-cb-blue">
+              <h2 className="flex flex-row items-center justify-center gap-2 text-2xl font-light tracking-wide text-cb-blue">
                 <IconLogo width={32} />
                 Citi Bike Data
-              </h1>
-              <h2 className="text-sm font-light italic text-cb-blue/80">
-                Visualizing Bike Share Journeys in the City
               </h2>
+              <h3 className="text-sm font-light italic text-cb-blue/80">
+                Visualizing Bike Share Journeys in the City
+              </h3>
             </div>
 
             {/* Explanation */}
