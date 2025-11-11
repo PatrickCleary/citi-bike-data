@@ -99,11 +99,8 @@ export const ORIGIN_LAYER_FILL: LayerSpecification = {
   paint: {
     "fill-color": "#000000",
     "fill-opacity": 0.3,
-
   },
 };
-
-
 
 export const ORIGIN_LABEL_LAYER_ID = "origin_label_layer";
 export const ORIGIN_LABEL_LAYER: LayerSpecification = {
@@ -111,9 +108,24 @@ export const ORIGIN_LABEL_LAYER: LayerSpecification = {
   source: ORIGIN_LABEL_SOURCE_ID,
   type: "symbol",
   layout: {
-    // "icon-offset": [0, 25],
-    "icon-size": 0.8,
-    "icon-image": "origin_label",
+    "icon-size": [
+      "step",
+      ["zoom"],
+      0.5,
+      10,
+      0.7, // Size below zoom level 10
+      12,
+      0.8, // Size below zoom level 14
+      14,
+      0.8, // Size for zoom level 14 and above
+    ],
+    "icon-image": [
+      "step",
+      ["zoom"],
+      "origin_label_small", // Default image
+      14,
+      "origin_label", // Image for zoom level 14 and above
+    ],
     "icon-allow-overlap": true,
   },
 };
@@ -160,11 +172,27 @@ export const DESTINATION_LABEL_LAYER_ID = "destination_label_layer";
 export const DESTINATION_LABEL_LAYER: LayerSpecification = {
   id: DESTINATION_LABEL_LAYER_ID,
   source: DESTINATION_LABEL_SOURCE_ID,
+
   type: "symbol",
   layout: {
-    // "icon-offset": [0, 25],
-    "icon-size": 0.8,
-    "icon-image": "destination_label",
+    "icon-size": [
+      "step",
+      ["zoom"],
+      0.5,
+      10,
+      0.7, // Size below zoom level 10
+      12,
+      0.8, // Size below zoom level 14
+      14,
+      0.8, // Size for zoom level 14 and above
+    ],
+    "icon-image": [
+      "step",
+      ["zoom"],
+      "destination_label_small", // Default image
+      14,
+      "destination_label", // Image for zoom level 14 and above
+    ],
     "icon-allow-overlap": true,
   },
 };

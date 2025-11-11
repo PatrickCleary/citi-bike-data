@@ -1312,21 +1312,45 @@ const convertCellsToGeoJSON = (
     features: features,
   };
 };
-// Helper function to calculate the centroid (center) of a polygon
+// Helper function to calculate the geometric centroid (center of mass) of a polygon
+// Uses the shoelace formula for proper area-weighted centroid calculation
 const findCentroid = (polygon: number[][][]): [number, number] => {
   // polygon is an array of rings, we only need the outer ring (first element)
   const ring = polygon[0];
 
-  let sumX = 0;
-  let sumY = 0;
-  const numPoints = ring.length;
+  let area = 0;
+  let cx = 0;
+  let cy = 0;
 
-  for (const [x, y] of ring) {
-    sumX += x;
-    sumY += y;
+  // Apply the shoelace formula
+  for (let i = 0; i < ring.length - 1; i++) {
+    const [x0, y0] = ring[i];
+    const [x1, y1] = ring[i + 1];
+
+    const crossProduct = x0 * y1 - x1 * y0;
+    area += crossProduct;
+    cx += (x0 + x1) * crossProduct;
+    cy += (y0 + y1) * crossProduct;
   }
 
-  return [sumX / numPoints, sumY / numPoints];
+  area = area / 2;
+
+  // Handle degenerate case where area is zero
+  if (Math.abs(area) < 0.000001) {
+    // Fall back to arithmetic mean
+    let sumX = 0;
+    let sumY = 0;
+    for (const [x, y] of ring) {
+      sumX += x;
+      sumY += y;
+    }
+    return [sumX / ring.length, sumY / ring.length];
+  }
+
+  cx = cx / (6 * area);
+  cy = cy / (6 * area);
+
+  return [cx, cy];
 };
 
 // Helper function to calculate the centroid of origin/destination cells for label placement
