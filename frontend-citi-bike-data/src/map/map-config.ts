@@ -1484,6 +1484,7 @@ export const useUpdateMapBounds = (
     map.current.fitBounds(targetBounds, {
       padding: 50,
       duration: 1000, // Smooth animation over 1 second
+      maxZoom: 13.5,
     });
 
     // Clear the targetBounds after applying to prevent re-triggering
