@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useMapConfigStore } from "@/store/store";
+import { useFetchLatestDate, useMapConfigStore } from "@/store/store";
 import { useLayerVisibilityStore } from "@/store/layer-visibility-store";
 import { readConfigFromUrl, type ShareableConfig } from "@/utils/share-config";
 import { LngLatBoundsLike } from "maplibre-gl";
@@ -8,9 +8,12 @@ import { LngLatBoundsLike } from "maplibre-gl";
  * Hook that reads configuration from URL on mount and applies it to stores
  * This should be called once at the app root level
  */
-export function useUrlConfig() {
+export const useUrlConfig = () => {
   const hasInitialized = useRef(false);
   const [hasConfig, setHasConfig] = useState<boolean | undefined>(undefined);
+  const [hasConfigDate, setHasConfigDate] = useState<boolean | undefined>(
+    undefined,
+  );
 
   const {
     setSelectedMonth,
@@ -33,7 +36,13 @@ export function useUrlConfig() {
     const config = readConfigFromUrl();
     if (!config) {
       setHasConfig(false);
+      setHasConfigDate(false);
       return;
+    }
+    if (config.selectedMonth) {
+      setHasConfigDate(true);
+    } else {
+      setHasConfigDate(false);
     }
     setHasConfig(true);
     // Apply configuration to stores
@@ -56,8 +65,8 @@ export function useUrlConfig() {
     window.history.replaceState({}, "", url.toString());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty deps - only run once on mount
-  return hasConfig;
-}
+  return { hasConfig, hasConfigDate };
+};
 
 interface StoreActions {
   setSelectedMonth: (month: string | undefined) => void;
@@ -74,10 +83,7 @@ interface StoreActions {
 
 function applyConfig(config: ShareableConfig, actions: StoreActions) {
   // Apply date
-  if (config.selectedMonth) {
-    actions.setSelectedMonth(config.selectedMonth);
-  }
-
+  actions.setSelectedMonth(config.selectedMonth);
   // Apply cell selections
   if (config.originCells.length > 0) {
     actions.setOriginCells(config.originCells);
@@ -114,3 +120,9 @@ function applyConfig(config: ShareableConfig, actions: StoreActions) {
     actions.setTargetBounds(config.bounds);
   }
 }
+
+export const useInitializeConfig = () => {
+  const { hasConfig, hasConfigDate } = useUrlConfig();
+  useFetchLatestDate(hasConfigDate);
+  return hasConfig;
+};

@@ -30,10 +30,7 @@ export interface ShareableConfig {
 export function serializeConfig(config: ShareableConfig): string {
   const json = JSON.stringify(config);
   // Use URL-safe base64 encoding
-  return btoa(json)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+  return btoa(json).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 /**

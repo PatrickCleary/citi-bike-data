@@ -27,7 +27,7 @@ import { LayerControl } from "./layer-control";
 import { DateControl } from "./date-control";
 import { DisplaySettings } from "./display-settings";
 import { Legend } from "./legend";
-import { useFetchLatestDate, useSync } from "@/store/store";
+import {  useSync } from "@/store/store";
 import IconLogo from "@/icons/icon";
 import { LocationSearchModal } from "./location-search-modal";
 import { LocationSearchControl } from "./location-search-control";
@@ -37,7 +37,7 @@ import { ZoomLevelOverlay } from "./zoom-level-overlay";
 import { MobileMetricsContainer } from "./metrics/mobile-metrics-container";
 import { DesktopMetricsContainer } from "./metrics/desktop-metrics-container";
 import { ShareButton } from "./share-button";
-import { useUrlConfig } from "@/hooks/use-url-config";
+import { useInitializeConfig } from "@/hooks/use-url-config";
 import { SnackBar } from "./snack-bar";
 
 export const MapPage: React.FC = () => {
@@ -51,10 +51,9 @@ export const MapPage: React.FC = () => {
     setIsMobile(isMobileDevice());
   }, []);
 
-  const hasConfig = useUrlConfig();
+  const hasConfig = useInitializeConfig();
   useUpdateMapStyleOnDataChange(map, mapLoaded, hasConfig);
   useApplyLayers(map, mapLoaded);
-  useFetchLatestDate();
   useUpdateOriginShape(map, mapLoaded);
   useUpdateDestinationShape(map, mapLoaded);
   useDimNonSelectedCells(map, mapLoaded);

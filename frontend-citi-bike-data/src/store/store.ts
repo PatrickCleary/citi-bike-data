@@ -125,7 +125,7 @@ export const useUpdateScaleMax = () => {
   }, [query.data, scaleType, setScale]);
 };
 
-export const useFetchLatestDate = () => {
+export const useFetchLatestDate = (hasConfigDate: boolean | undefined) => {
   const { setSelectedMonth } = useMapConfigStore();
 
   const query = useQuery({
@@ -133,9 +133,10 @@ export const useFetchLatestDate = () => {
     queryFn: getMaxDate,
   });
   useEffect(() => {
+    if (hasConfigDate === true || hasConfigDate === undefined) return;
     if (query.data) setSelectedMonth(query.data);
     else setSelectedMonth(undefined);
-  }, [query.data, setSelectedMonth]);
+  }, [query.data, setSelectedMonth, hasConfigDate]);
 };
 
 // Separate hook to manage analysisType logic
