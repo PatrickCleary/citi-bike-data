@@ -14,7 +14,7 @@ export const DesktopMetricsContainer: React.FC = () => {
   const setPreset = usePreset();
 
   return (
-    <div className="pointer-events-auto z-10 flex hidden w-full flex-row items-start rounded-t-md bg-white drop-shadow-lg lg:flex">
+    <div className="pointer-events-auto z-10 flex hidden w-full flex-row items-start bg-white drop-shadow-lg lg:flex">
       <div className="grow-1 flex w-80 min-w-80 max-w-80 flex-grow items-start p-4">
         <div className="flex flex-col gap-2">
           <MetricHeader />
