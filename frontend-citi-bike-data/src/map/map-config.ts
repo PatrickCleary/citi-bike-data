@@ -435,110 +435,31 @@ export const useMaxDate = () => {
 // If destination cells are selected, uses traffic from origin cells as baseline
 // Otherwise shows 4-year window of total traffic (no cell filters)
 export const useBaselineMonthlySumData = () => {
-  const { selectedMonth, originCells, destinationCells, chartWindow } =
-    useMapConfigStore();
+  const { selectedMonth, chartWindow } = useMapConfigStore();
   const maxDateQuery = useMaxDate();
   const dayjsDate = selectedMonth ? dayjs(selectedMonth) : null;
 
-  // Determine if we should use origin cells as baseline (when destination cells are selected)
-  const useOriginAsBaseline =
-    destinationCells.length > 0 && originCells.length > 0;
-
-  // Calculate which years we need for the 48-month window (when using origin as baseline)
-  const yearsToFetch = useMemo(() => {
-    if (!useOriginAsBaseline || !dayjsDate || !maxDateQuery.data) return [];
-
-    const maxDate = dayjs(maxDateQuery.data);
-
-    // Try to center on selected date (2 years before, 2 years after)
-    let windowStart = dayjsDate.subtract(chartWindow);
-    let windowEnd = dayjsDate.add(chartWindow);
-
-    // If the selected date + 2 years exceeds max date, shift window back
-    // to ensure we always show 48 months ending at max date
-    if (windowEnd.isAfter(maxDate)) {
-      windowEnd = maxDate;
-      windowStart = maxDate.subtract(chartWindow).subtract(chartWindow);
-    }
-
-    const years: string[] = [];
-    let currentYear = parseInt(windowStart.format("YYYY"));
-    const endYear = parseInt(windowEnd.format("YYYY"));
-
-    while (currentYear <= endYear) {
-      years.push(currentYear.toString());
-      currentYear++;
-    }
-
-    return years;
-  }, [useOriginAsBaseline, dayjsDate, maxDateQuery.data]);
-
-  // Fetch origin cell data when destination cells are selected
-  const originQuery = useQuery({
-    queryKey: ["tripMonthlySumOriginBaseline", yearsToFetch, originCells],
-    queryFn: async () => {
-      if (!useOriginAsBaseline || yearsToFetch.length === 0) {
-        return [];
-      }
-
-      // Fetch all years in parallel
-      const yearDataPromises = yearsToFetch.map((year) =>
-        getMonthlySum(originCells, [], year),
-      );
-
-      const results = await Promise.all(yearDataPromises);
-
-      // Combine all year data into a single array
-      const combinedData: Array<{ date_month: string; total_count: number }> =
-        [];
-
-      results.forEach((result) => {
-        if (result?.data) {
-          const yearData = Array.isArray(result.data) ? result.data : [];
-          combinedData.push(...yearData);
-        }
-      });
-
-      // Sort by date
-      combinedData.sort(
-        (a, b) => dayjs(a.date_month).unix() - dayjs(b.date_month).unix(),
-      );
-
-      return combinedData;
-    },
-    enabled:
-      useOriginAsBaseline &&
-      !!selectedMonth &&
-      yearsToFetch.length > 0 &&
-      !!maxDateQuery.data,
-    staleTime: 1000 * 60 * 5,
-  });
-
-  // Fetch all data once from start to max available date (when not using origin as baseline)
+  // Fetch all data once from start to max available date
   // This way we have all data cached for any month navigation
-  const totalQuery = useQuery({
+  const query = useQuery({
     queryKey: ["tripMonthlySumBaselineAll"],
     queryFn: () => getMonthlyTotals(),
-    enabled: !useOriginAsBaseline && !!maxDateQuery.data,
+    enabled: !!maxDateQuery.data,
     staleTime: 1000 * 60 * 60, // Consider data fresh for 60 minutes
   });
-
-  // Select the appropriate query based on whether we're using origin as baseline
-  const query = useOriginAsBaseline ? originQuery : totalQuery;
-
-  // Window data to show exactly 48 months
-  // If selected date is near the end, shift window back to show full 48 months
+  // Window data to show chartWindow
+  // If selected date is near the end, shift window back to show full chartWindow (maybe want to not do this)
   const windowedData = useMemo(() => {
     if (!query.data || !selectedMonth || !maxDateQuery.data) return undefined;
 
     const maxDate = dayjs(maxDateQuery.data);
 
-    // Try to center on selected date (2 years before, 2 years after)
+    // Try to center on selected date
     let windowStart = dayjsDate!.subtract(chartWindow).startOf("month");
     let windowEnd = dayjsDate!.add(chartWindow).endOf("month");
 
-    // If the selected date + 2 years exceeds max date, shift window back
-    // to ensure we always show 48 months ending at max date
+    // If the selected date + chartWindow exceeds max date, shift window back
+    // to ensure we always show chartWindow * 2 months ending at max date
     if (windowEnd.isAfter(maxDate)) {
       windowEnd = maxDate.endOf("month");
       windowStart = maxDate
@@ -556,7 +477,7 @@ export const useBaselineMonthlySumData = () => {
     });
 
     return filtered;
-  }, [query.data, selectedMonth, dayjsDate, maxDateQuery.data]);
+  }, [query.data, selectedMonth, maxDateQuery.data, dayjsDate, chartWindow]);
 
   return {
     ...query,
@@ -664,31 +585,16 @@ export const useComparison = (filter = true) => {
   // Calculate baseline comparison
   // - When destinations are selected: use origin traffic as baseline
   // - Otherwise: use system-wide traffic as baseline
-  let baselineAbsoluteChange = 0;
-  let baselinePercentageChange = 0;
-  let baselineLabel = "system";
+  const baselineLabel = "system";
 
-  if (hasDestinations && hasOrigins) {
-    // Use origin traffic as baseline (unfiltered by destination)
-    const baselineCurrent = query.data?.data.sum_all_values || 0;
-    const baselinePrevious = previousQuery.data?.data.sum_all_values || 0;
-    baselineAbsoluteChange = baselineCurrent - baselinePrevious;
-    baselinePercentageChange =
-      baselinePrevious > 0
-        ? ((baselineCurrent - baselinePrevious) / baselinePrevious) * 100
-        : 0;
-    baselineLabel = "origin";
-  } else {
-    // Use system-wide traffic as baseline
-    const systemCurrent = systemQuery.data?.data.sum_all_values || 0;
-    const systemPrevious = previousSystemQuery.data?.data.sum_all_values || 0;
-    baselineAbsoluteChange = systemCurrent - systemPrevious;
-    baselinePercentageChange =
-      systemPrevious > 0
-        ? ((systemCurrent - systemPrevious) / systemPrevious) * 100
-        : 0;
-    baselineLabel = "system";
-  }
+  // Use system-wide traffic as baseline
+  const systemCurrent = systemQuery.data?.data.sum_all_values || 0;
+  const systemPrevious = previousSystemQuery.data?.data.sum_all_values || 0;
+  const baselineAbsoluteChange = systemCurrent - systemPrevious;
+  const baselinePercentageChange =
+    systemPrevious > 0
+      ? ((systemCurrent - systemPrevious) / systemPrevious) * 100
+      : 0;
 
   const normalizedPercentageChange =
     percentageChange - baselinePercentageChange;
@@ -818,14 +724,8 @@ const updateMapStyleComparison = (
   currentTotal: number,
   previousTotal: number,
   normalize: boolean,
+  systemGrowth: number,
 ) => {
-  // Calculate overall growth rate from origin cells
-  // If total trips went from 500 to 1000, expectedGrowthRate = 1.0 (100% growth)
-  const expectedGrowthRate =
-    normalize && previousTotal > 0
-      ? (currentTotal - previousTotal) / previousTotal
-      : 0;
-
   // Calculate significance for each cell
   const smoothingConstant = 100; // Prevents division by very small numbers
   const significanceMap: { [cellId: string]: number } = {};
@@ -834,9 +734,9 @@ const updateMapStyleComparison = (
     const currentCount = departureCountMap[cellId] || 0;
     const previousCount = previousDepartureCountMap[cellId] || 0;
 
-    // Expected count based on overall origin traffic growth (if normalizing)
+    // Expected count based on overall traffic growth (if normalizing)
     const expectedCount = normalize
-      ? previousCount * (1 + expectedGrowthRate)
+      ? previousCount * (1 + systemGrowth)
       : previousCount;
 
     // Calculate significance based on deviation from expected
@@ -853,7 +753,7 @@ const updateMapStyleComparison = (
     if (!(cellId in departureCountMap)) {
       const previousCount = previousDepartureCountMap[cellId] || 0;
       const expectedCount = normalize
-        ? previousCount * (1 + expectedGrowthRate)
+        ? previousCount * (1 + systemGrowth)
         : previousCount;
       const significance =
         (0 - expectedCount) / Math.sqrt(previousCount + smoothingConstant);
@@ -902,6 +802,14 @@ export const useUpdateMapStyleOnDataChange = (
   const previousQuery = useComparisonData();
   const [initialLoad, setInitialLoad] = useState(false);
   const { isOpen } = useIntroModalStore();
+  const systemTotal = useSystemTotalTrips();
+  const previousSystemTotal = usePreviousYearSystemTotal();
+  const systemGrowth =
+    previousSystemTotal.data && systemTotal.data
+      ? (systemTotal.data.data.sum_all_values -
+          previousSystemTotal.data.data.sum_all_values) /
+        previousSystemTotal.data.data.sum_all_values
+      : 0;
   const { scale, displayType, normalizeComparison } = useMapConfigStore();
   const { layersAdded } = useLayerVisibilityStore();
   const mapObj = map.current;
@@ -943,6 +851,7 @@ export const useUpdateMapStyleOnDataChange = (
       currentTotal,
       previousTotal,
       normalizeComparison,
+      systemGrowth,
     );
   }
 

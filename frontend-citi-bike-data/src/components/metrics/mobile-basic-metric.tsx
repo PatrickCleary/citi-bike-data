@@ -117,13 +117,10 @@ const DeltaComparedToOriginBadge: React.FC = () => {
 };
 
 const ContextTextWrapper: React.FC<{
-  isPositive: boolean;
-  isNegative: boolean;
   children: React.ReactNode;
-}> = ({ isPositive, isNegative, children }) => (
-  <div className="flex flex-row items-center gap-2 rounded-md border-[0.5px] border-gray-300 bg-gray-200 px-2 py-1">
-    <ChangeIcon isNegative={isNegative} isPositive={isPositive} />
-    <p className="font-base text-xs text-gray-600">{children}</p>
+}> = ({ children }) => (
+  <div className="flex flex-col items-start gap-1 rounded-md border-[0.5px] border-gray-300 bg-gray-200 px-2 py-1">
+    {children}
   </div>
 );
 
@@ -158,47 +155,51 @@ export const ContextText: React.FC<{ compDate: dayjs.Dayjs }> = ({
 
   if (originCells.length > 0 && destinationCells.length === 0) {
     return (
-      <ContextTextWrapper isPositive={isPositive} isNegative={isNegative}>
-        Traffic from here is {isPositive ? "up" : "down"}{" "}
-        <PercentageChange
-          value={comparison.normalizedPercentageChange}
-          isPositive={isPositive}
-          isNegative={isNegative}
-        />{" "}
-        vs {compDate.format("MMM YYYY")}{" "}
-        <span className="font-bold">relative to system-wide traffic.</span>
+      <ContextTextWrapper>
+        <div className="flex flex-row items-center gap-2">
+          <ChangeIcon isNegative={isNegative} isPositive={isPositive} />
+
+          <p className="font-base text-xs text-gray-600">
+            Traffic from here is {isPositive ? "up" : "down"}{" "}
+            <PercentageChange
+              value={comparison.normalizedPercentageChange}
+              isPositive={isPositive}
+              isNegative={isNegative}
+            />{" "}
+            vs {compDate.format("MMM YYYY")}{" "}
+            <span className="font-bold">relative to system-wide traffic.</span>
+          </p>
+        </div>
+        <p className="flex w-full flex-row justify-center rounded-full bg-gray-300 text-center text-xs italic text-gray-500">
+          System-wide traffic{" "}
+          {comparison.baselinePercentageChange > 0 ? "up" : "down"}{" "}
+          {formatter.format(Math.abs(comparison.baselinePercentageChange))}%
+        </p>
       </ContextTextWrapper>
     );
   }
 
-  if (originCells.length === 0 && destinationCells.length > 0) {
+  if (originCells.length > 0 || destinationCells.length > 0) {
     return (
-      <ContextTextWrapper isPositive={isPositive} isNegative={isNegative}>
-        Traffic arriving here is {isPositive ? "up" : "down"}{" "}
-        <PercentageChange
-          value={comparison.normalizedPercentageChange}
-          isPositive={isPositive}
-          isNegative={isNegative}
-        />{" "}
-        vs {compDate.format("MMM YYYY")}{" "}
-        <span className="font-bold">relative to system-wide traffic.</span>
-      </ContextTextWrapper>
-    );
-  }
-
-  if (originCells.length > 0 && destinationCells.length > 0) {
-    return (
-      <ContextTextWrapper isPositive={isPositive} isNegative={isNegative}>
-        Traffic on this route is {isPositive ? "up" : "down"}{" "}
-        <PercentageChange
-          value={comparison.normalizedPercentageChange}
-          isPositive={isPositive}
-          isNegative={isNegative}
-        />{" "}
-        vs {compDate.format("MMM 'YY")}{" "}
-        <span className="font-bold">
-          relative to traffic leaving the origin.
-        </span>
+      <ContextTextWrapper>
+        <div className="flex flex-row items-center gap-2">
+          <ChangeIcon isNegative={isNegative} isPositive={isPositive} />
+          <p className="font-base text-xs text-gray-600">
+            Traffic arriving here is {isPositive ? "up" : "down"}{" "}
+            <PercentageChange
+              value={comparison.normalizedPercentageChange}
+              isPositive={isPositive}
+              isNegative={isNegative}
+            />{" "}
+            vs {compDate.format("MMM YYYY")}{" "}
+            <span className="font-bold">relative to system-wide traffic.</span>
+          </p>{" "}
+        </div>
+        <p className="flex w-full flex-row justify-center rounded-full bg-gray-300 text-center text-xs italic text-gray-500">
+          System-wide traffic{" "}
+          {comparison.baselinePercentageChange > 0 ? "up" : "down"}{" "}
+          {formatter.format(Math.abs(comparison.baselinePercentageChange))}%
+        </p>
       </ContextTextWrapper>
     );
   }
