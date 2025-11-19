@@ -126,9 +126,10 @@ const ContextTextWrapper: React.FC<{
 
 const PercentageChange: React.FC<{
   value: number;
+  isLoading: boolean;
   isPositive: boolean;
   isNegative: boolean;
-}> = ({ value, isPositive, isNegative }) => (
+}> = ({ value, isLoading, isPositive, isNegative }) => (
   <span
     className={classNames("font-semibold", {
       "text-cb-increase": isPositive,
@@ -136,7 +137,12 @@ const PercentageChange: React.FC<{
       "text-gray-700": !isPositive && !isNegative,
     })}
   >
-    {formatter.format(Math.abs(value))}%
+    <LoadingNumber
+      value={formatter.format(Math.abs(value))}
+      isLoading={isLoading}
+      className="tabular-nums"
+    />
+    %
   </span>
 );
 
@@ -145,7 +151,6 @@ export const ContextText: React.FC<{ compDate: dayjs.Dayjs }> = ({
 }) => {
   const { destinationCells, originCells } = useMapConfigStore();
   const comparison = useComparison();
-
   if (destinationCells.length === 0 && originCells.length === 0) {
     return null;
   }
@@ -153,15 +158,29 @@ export const ContextText: React.FC<{ compDate: dayjs.Dayjs }> = ({
   const isPositive = comparison.normalizedPercentageChange > 0;
   const isNegative = comparison.normalizedPercentageChange < 0;
 
-  if (originCells.length > 0 && destinationCells.length === 0) {
+  const getText = () => {
+    if (destinationCells.length > 0 && originCells.length > 0) {
+      return "Trips on this route are ";
+    }
+    if (originCells.length > 0 && destinationCells.length === 0) {
+      return "Trips from origin are ";
+    }
+    if (originCells.length === 0 && destinationCells.length > 0) {
+      return "Trips to destination are ";
+    }
+  };
+
+  if (originCells.length > 0 || destinationCells.length > 0) {
     return (
       <ContextTextWrapper>
         <div className="flex flex-row items-center gap-2">
           <ChangeIcon isNegative={isNegative} isPositive={isPositive} />
 
           <p className="font-base text-xs text-gray-600">
-            Traffic from here is {isPositive ? "up" : "down"}{" "}
+            {getText()}
+            {isPositive ? "up" : "down"}{" "}
             <PercentageChange
+              isLoading={comparison.isLoading}
               value={comparison.normalizedPercentageChange}
               isPositive={isPositive}
               isNegative={isNegative}
@@ -172,33 +191,15 @@ export const ContextText: React.FC<{ compDate: dayjs.Dayjs }> = ({
         </div>
         <p className="flex w-full flex-row justify-center rounded-full bg-gray-300 text-center text-xs italic text-gray-500">
           System-wide traffic{" "}
-          {comparison.baselinePercentageChange > 0 ? "up" : "down"}{" "}
-          {formatter.format(Math.abs(comparison.baselinePercentageChange))}%
-        </p>
-      </ContextTextWrapper>
-    );
-  }
-
-  if (originCells.length > 0 || destinationCells.length > 0) {
-    return (
-      <ContextTextWrapper>
-        <div className="flex flex-row items-center gap-2">
-          <ChangeIcon isNegative={isNegative} isPositive={isPositive} />
-          <p className="font-base text-xs text-gray-600">
-            Traffic arriving here is {isPositive ? "up" : "down"}{" "}
-            <PercentageChange
-              value={comparison.normalizedPercentageChange}
-              isPositive={isPositive}
-              isNegative={isNegative}
-            />{" "}
-            vs {compDate.format("MMM YYYY")}{" "}
-            <span className="font-bold">relative to system-wide traffic.</span>
-          </p>{" "}
-        </div>
-        <p className="flex w-full flex-row justify-center rounded-full bg-gray-300 text-center text-xs italic text-gray-500">
-          System-wide traffic{" "}
-          {comparison.baselinePercentageChange > 0 ? "up" : "down"}{" "}
-          {formatter.format(Math.abs(comparison.baselinePercentageChange))}%
+          {comparison.baselinePercentageChange > 0 ? "up" : "down"}
+          <LoadingNumber
+            value={formatter.format(
+              Math.abs(comparison.baselinePercentageChange),
+            )}
+            isLoading={comparison.isLoading}
+            className="ml-[3px] tabular-nums"
+          />
+          %
         </p>
       </ContextTextWrapper>
     );

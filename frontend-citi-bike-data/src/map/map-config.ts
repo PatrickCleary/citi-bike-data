@@ -552,6 +552,8 @@ export const useComparison = (filter = true) => {
   const previousQueryFiltered =
     useTripCountDataFilteredbyDestination(previousQuery);
 
+
+
   // Determine which data to use for the main comparison
   // If no origins and no destinations: use system-wide
   // If origins but no destinations: use origin data
@@ -642,8 +644,21 @@ export const useComparison = (filter = true) => {
   const baselineLoading =
     systemQuery.isLoading || previousSystemQuery.isLoading;
 
+  // Collect all errors from the queries
+  const errors = [
+    query.error,
+    previousQuery.error,
+    systemQuery.error,
+    previousSystemQuery.error,
+  ].filter(Boolean);
+
+  const hasError = errors.length > 0;
+  const error = hasError ? errors[0] : null;
+
   return {
     isLoading: isLoading || baselineLoading,
+    error,
+    hasError,
     currentTotal,
     previousTotal,
     absoluteChange,
