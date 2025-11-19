@@ -1,6 +1,6 @@
 "use client";
 import { useMapConfigStore, usePreset } from "@/store/store";
-import { BasicMetric } from "./mobile-basic-metric";
+import { BasicMetric } from "./basic-metric";
 import { useMemo } from "react";
 import { SparklineMetric } from "./sparkline-metric";
 import { useTripMonthlySumData } from "@/map/map-config";
