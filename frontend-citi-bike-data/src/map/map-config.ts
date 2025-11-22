@@ -431,10 +431,7 @@ export const useMaxDate = () => {
   });
 };
 
-// Hook to fetch baseline monthly sum data
-// If destination cells are selected, uses traffic from origin cells as baseline
-// Otherwise shows 4-year window of total traffic (no cell filters)
-export const useBaselineMonthlySumData = () => {
+export const useOriginBaselineMonthlySumData = () => {
   const { selectedMonth, originCells, destinationCells, chartWindow } =
     useMapConfigStore();
   const maxDateQuery = useMaxDate();
@@ -471,7 +468,7 @@ export const useBaselineMonthlySumData = () => {
     }
 
     return years;
-  }, [useOriginAsBaseline, dayjsDate, maxDateQuery.data]);
+  }, [useOriginAsBaseline, dayjsDate, maxDateQuery.data, chartWindow]);
 
   // Fetch origin cell data when destination cells are selected
   const originQuery = useQuery({
@@ -556,7 +553,62 @@ export const useBaselineMonthlySumData = () => {
     });
 
     return filtered;
-  }, [query.data, selectedMonth, dayjsDate, maxDateQuery.data]);
+  }, [query.data, selectedMonth, maxDateQuery.data, dayjsDate, chartWindow]);
+
+  return {
+    ...query,
+    data: windowedData,
+  };
+};
+
+
+// Hook to fetch baseline monthly sum data
+// If destination cells are selected, uses traffic from origin cells as baseline
+// Otherwise shows 4-year window of total traffic (no cell filters)
+export const useBaselineMonthlySumData = () => {
+  const { selectedMonth, chartWindow } = useMapConfigStore();
+  const maxDateQuery = useMaxDate();
+  const dayjsDate = selectedMonth ? dayjs(selectedMonth) : null;
+
+  // Fetch all data once from start to max available date
+  // This way we have all data cached for any month navigation
+  const query = useQuery({
+    queryKey: ["tripMonthlySumBaselineAll"],
+    queryFn: () => getMonthlyTotals(),
+    enabled: !!maxDateQuery.data,
+    staleTime: 1000 * 60 * 60, // Consider data fresh for 60 minutes
+  });
+  // Window data to show chartWindow
+  // If selected date is near the end, shift window back to show full chartWindow (maybe want to not do this)
+  const windowedData = useMemo(() => {
+    if (!query.data || !selectedMonth || !maxDateQuery.data) return undefined;
+
+    const maxDate = dayjs(maxDateQuery.data);
+
+    // Try to center on selected date
+    let windowStart = dayjsDate!.subtract(chartWindow).startOf("month");
+    let windowEnd = dayjsDate!.add(chartWindow).endOf("month");
+
+    // If the selected date + chartWindow exceeds max date, shift window back
+    // to ensure we always show chartWindow * 2 months ending at max date
+    if (windowEnd.isAfter(maxDate)) {
+      windowEnd = maxDate.endOf("month");
+      windowStart = maxDate
+        .subtract(chartWindow)
+        .subtract(chartWindow)
+        .startOf("month");
+    }
+
+    const filtered = query.data.filter((d) => {
+      const date = dayjs(d.date_month);
+      return (
+        (date.isAfter(windowStart) || date.isSame(windowStart)) &&
+        (date.isBefore(windowEnd) || date.isSame(windowEnd))
+      );
+    });
+
+    return filtered;
+  }, [query.data, selectedMonth, maxDateQuery.data, dayjsDate, chartWindow]);
 
   return {
     ...query,
@@ -631,6 +683,8 @@ export const useComparison = (filter = true) => {
   const previousQueryFiltered =
     useTripCountDataFilteredbyDestination(previousQuery);
 
+
+
   // Determine which data to use for the main comparison
   // If no origins and no destinations: use system-wide
   // If origins but no destinations: use origin data
@@ -664,31 +718,16 @@ export const useComparison = (filter = true) => {
   // Calculate baseline comparison
   // - When destinations are selected: use origin traffic as baseline
   // - Otherwise: use system-wide traffic as baseline
-  let baselineAbsoluteChange = 0;
-  let baselinePercentageChange = 0;
-  let baselineLabel = "system";
+  const baselineLabel = "system";
 
-  if (hasDestinations && hasOrigins) {
-    // Use origin traffic as baseline (unfiltered by destination)
-    const baselineCurrent = query.data?.data.sum_all_values || 0;
-    const baselinePrevious = previousQuery.data?.data.sum_all_values || 0;
-    baselineAbsoluteChange = baselineCurrent - baselinePrevious;
-    baselinePercentageChange =
-      baselinePrevious > 0
-        ? ((baselineCurrent - baselinePrevious) / baselinePrevious) * 100
-        : 0;
-    baselineLabel = "origin";
-  } else {
-    // Use system-wide traffic as baseline
-    const systemCurrent = systemQuery.data?.data.sum_all_values || 0;
-    const systemPrevious = previousSystemQuery.data?.data.sum_all_values || 0;
-    baselineAbsoluteChange = systemCurrent - systemPrevious;
-    baselinePercentageChange =
-      systemPrevious > 0
-        ? ((systemCurrent - systemPrevious) / systemPrevious) * 100
-        : 0;
-    baselineLabel = "system";
-  }
+  // Use system-wide traffic as baseline
+  const systemCurrent = systemQuery.data?.data.sum_all_values || 0;
+  const systemPrevious = previousSystemQuery.data?.data.sum_all_values || 0;
+  const baselineAbsoluteChange = systemCurrent - systemPrevious;
+  const baselinePercentageChange =
+    systemPrevious > 0
+      ? ((systemCurrent - systemPrevious) / systemPrevious) * 100
+      : 0;
 
   const normalizedPercentageChange =
     percentageChange - baselinePercentageChange;
@@ -736,8 +775,21 @@ export const useComparison = (filter = true) => {
   const baselineLoading =
     systemQuery.isLoading || previousSystemQuery.isLoading;
 
+  // Collect all errors from the queries
+  const errors = [
+    query.error,
+    previousQuery.error,
+    systemQuery.error,
+    previousSystemQuery.error,
+  ].filter(Boolean);
+
+  const hasError = errors.length > 0;
+  const error = hasError ? errors[0] : null;
+
   return {
     isLoading: isLoading || baselineLoading,
+    error,
+    hasError,
     currentTotal,
     previousTotal,
     absoluteChange,
@@ -818,14 +870,8 @@ const updateMapStyleComparison = (
   currentTotal: number,
   previousTotal: number,
   normalize: boolean,
+  systemGrowth: number,
 ) => {
-  // Calculate overall growth rate from origin cells
-  // If total trips went from 500 to 1000, expectedGrowthRate = 1.0 (100% growth)
-  const expectedGrowthRate =
-    normalize && previousTotal > 0
-      ? (currentTotal - previousTotal) / previousTotal
-      : 0;
-
   // Calculate significance for each cell
   const smoothingConstant = 100; // Prevents division by very small numbers
   const significanceMap: { [cellId: string]: number } = {};
@@ -834,9 +880,9 @@ const updateMapStyleComparison = (
     const currentCount = departureCountMap[cellId] || 0;
     const previousCount = previousDepartureCountMap[cellId] || 0;
 
-    // Expected count based on overall origin traffic growth (if normalizing)
+    // Expected count based on overall traffic growth (if normalizing)
     const expectedCount = normalize
-      ? previousCount * (1 + expectedGrowthRate)
+      ? previousCount * (1 + systemGrowth)
       : previousCount;
 
     // Calculate significance based on deviation from expected
@@ -853,7 +899,7 @@ const updateMapStyleComparison = (
     if (!(cellId in departureCountMap)) {
       const previousCount = previousDepartureCountMap[cellId] || 0;
       const expectedCount = normalize
-        ? previousCount * (1 + expectedGrowthRate)
+        ? previousCount * (1 + systemGrowth)
         : previousCount;
       const significance =
         (0 - expectedCount) / Math.sqrt(previousCount + smoothingConstant);
@@ -902,6 +948,14 @@ export const useUpdateMapStyleOnDataChange = (
   const previousQuery = useComparisonData();
   const [initialLoad, setInitialLoad] = useState(false);
   const { isOpen } = useIntroModalStore();
+  const systemTotal = useSystemTotalTrips();
+  const previousSystemTotal = usePreviousYearSystemTotal();
+  const systemGrowth =
+    previousSystemTotal.data && systemTotal.data
+      ? (systemTotal.data.data.sum_all_values -
+          previousSystemTotal.data.data.sum_all_values) /
+        previousSystemTotal.data.data.sum_all_values
+      : 0;
   const { scale, displayType, normalizeComparison } = useMapConfigStore();
   const { layersAdded } = useLayerVisibilityStore();
   const mapObj = map.current;
@@ -943,6 +997,7 @@ export const useUpdateMapStyleOnDataChange = (
       currentTotal,
       previousTotal,
       normalizeComparison,
+      systemGrowth,
     );
   }
 

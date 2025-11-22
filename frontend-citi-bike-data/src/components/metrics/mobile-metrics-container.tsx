@@ -3,7 +3,7 @@ import { useMetricsStore } from "@/store/metrics-store";
 import { MobileMetricWrapper } from "./mobile-metric-wrapper";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import classNames from "classnames";
-import { BasicMetric } from "./mobile-basic-metric";
+import { BasicMetric } from "./basic-metric";
 
 import { useState, useMemo } from "react";
 import { SparklineMetric } from "./sparkline-metric";

@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import {
   useTripMonthlySumData,
-  useBaselineMonthlySumData,
+  useOriginBaselineMonthlySumData,
 } from "@/map/map-config";
 import { useMapConfigStore } from "@/store/store";
 import { BasicChartWrapper } from "../charts/basic-chart-wrapper";
@@ -11,7 +11,7 @@ export const PercentageMetric: React.FC = () => {
     useMapConfigStore();
 
   const selectedQuery = useTripMonthlySumData();
-  const baselineQuery = useBaselineMonthlySumData();
+  const baselineQuery = useOriginBaselineMonthlySumData();
 
   const hasOrigin = originCells.length > 0;
   const hasDestination = destinationCells.length > 0;
