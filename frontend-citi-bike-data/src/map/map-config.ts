@@ -513,29 +513,25 @@ export const useOriginBaselineMonthlySumData = () => {
 
   // Fetch all data once from start to max available date (when not using origin as baseline)
   // This way we have all data cached for any month navigation
-  const totalQuery = useQuery({
+  const query = useQuery({
     queryKey: ["tripMonthlySumBaselineAll"],
     queryFn: () => getMonthlyTotals(),
-    enabled: !useOriginAsBaseline && !!maxDateQuery.data,
+    enabled: !!maxDateQuery.data,
     staleTime: 1000 * 60 * 60, // Consider data fresh for 60 minutes
   });
-
-  // Select the appropriate query based on whether we're using origin as baseline
-  const query = useOriginAsBaseline ? originQuery : totalQuery;
-
-  // Window data to show exactly 48 months
-  // If selected date is near the end, shift window back to show full 48 months
+  // Window data to show chartWindow
+  // If selected date is near the end, shift window back to show full chartWindow (maybe want to not do this)
   const windowedData = useMemo(() => {
     if (!query.data || !selectedMonth || !maxDateQuery.data) return undefined;
 
     const maxDate = dayjs(maxDateQuery.data);
 
-    // Try to center on selected date (2 years before, 2 years after)
+    // Try to center on selected date
     let windowStart = dayjsDate!.subtract(chartWindow).startOf("month");
     let windowEnd = dayjsDate!.add(chartWindow).endOf("month");
 
-    // If the selected date + 2 years exceeds max date, shift window back
-    // to ensure we always show 48 months ending at max date
+    // If the selected date + chartWindow exceeds max date, shift window back
+    // to ensure we always show chartWindow * 2 months ending at max date
     if (windowEnd.isAfter(maxDate)) {
       windowEnd = maxDate.endOf("month");
       windowStart = maxDate
