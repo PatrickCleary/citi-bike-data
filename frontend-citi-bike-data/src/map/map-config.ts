@@ -513,12 +513,13 @@ export const useOriginBaselineMonthlySumData = () => {
 
   // Fetch all data once from start to max available date (when not using origin as baseline)
   // This way we have all data cached for any month navigation
-  const query = useQuery({
+  const totalQuery = useQuery({
     queryKey: ["tripMonthlySumBaselineAll"],
     queryFn: () => getMonthlyTotals(),
     enabled: !!maxDateQuery.data,
     staleTime: 1000 * 60 * 60, // Consider data fresh for 60 minutes
   });
+  const query = useOriginAsBaseline ? originQuery : totalQuery;
   // Window data to show chartWindow
   // If selected date is near the end, shift window back to show full chartWindow (maybe want to not do this)
   const windowedData = useMemo(() => {
