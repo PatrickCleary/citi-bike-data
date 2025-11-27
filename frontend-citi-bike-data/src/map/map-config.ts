@@ -431,6 +431,134 @@ export const useMaxDate = () => {
   });
 };
 
+export const useOriginBaselineMonthlySumData = () => {
+  const { selectedMonth, originCells, destinationCells, chartWindow } =
+    useMapConfigStore();
+  const maxDateQuery = useMaxDate();
+  const dayjsDate = selectedMonth ? dayjs(selectedMonth) : null;
+
+  // Determine if we should use origin cells as baseline (when destination cells are selected)
+  const useOriginAsBaseline =
+    destinationCells.length > 0 && originCells.length > 0;
+
+  // Calculate which years we need for the 48-month window (when using origin as baseline)
+  const yearsToFetch = useMemo(() => {
+    if (!useOriginAsBaseline || !dayjsDate || !maxDateQuery.data) return [];
+
+    const maxDate = dayjs(maxDateQuery.data);
+
+    // Try to center on selected date (2 years before, 2 years after)
+    let windowStart = dayjsDate.subtract(chartWindow);
+    let windowEnd = dayjsDate.add(chartWindow);
+
+    // If the selected date + 2 years exceeds max date, shift window back
+    // to ensure we always show 48 months ending at max date
+    if (windowEnd.isAfter(maxDate)) {
+      windowEnd = maxDate;
+      windowStart = maxDate.subtract(chartWindow).subtract(chartWindow);
+    }
+
+    const years: string[] = [];
+    let currentYear = parseInt(windowStart.format("YYYY"));
+    const endYear = parseInt(windowEnd.format("YYYY"));
+
+    while (currentYear <= endYear) {
+      years.push(currentYear.toString());
+      currentYear++;
+    }
+
+    return years;
+  }, [useOriginAsBaseline, dayjsDate, maxDateQuery.data, chartWindow]);
+
+  // Fetch origin cell data when destination cells are selected
+  const originQuery = useQuery({
+    queryKey: ["tripMonthlySumOriginBaseline", yearsToFetch, originCells],
+    queryFn: async () => {
+      if (!useOriginAsBaseline || yearsToFetch.length === 0) {
+        return [];
+      }
+
+      // Fetch all years in parallel
+      const yearDataPromises = yearsToFetch.map((year) =>
+        getMonthlySum(originCells, [], year),
+      );
+
+      const results = await Promise.all(yearDataPromises);
+
+      // Combine all year data into a single array
+      const combinedData: Array<{ date_month: string; total_count: number }> =
+        [];
+
+      results.forEach((result) => {
+        if (result?.data) {
+          const yearData = Array.isArray(result.data) ? result.data : [];
+          combinedData.push(...yearData);
+        }
+      });
+
+      // Sort by date
+      combinedData.sort(
+        (a, b) => dayjs(a.date_month).unix() - dayjs(b.date_month).unix(),
+      );
+
+      return combinedData;
+    },
+    enabled:
+      useOriginAsBaseline &&
+      !!selectedMonth &&
+      yearsToFetch.length > 0 &&
+      !!maxDateQuery.data,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Fetch all data once from start to max available date (when not using origin as baseline)
+  // This way we have all data cached for any month navigation
+  const totalQuery = useQuery({
+    queryKey: ["tripMonthlySumBaselineAll"],
+    queryFn: () => getMonthlyTotals(),
+    enabled: !!maxDateQuery.data,
+    staleTime: 1000 * 60 * 60, // Consider data fresh for 60 minutes
+  });
+  const query = useOriginAsBaseline ? originQuery : totalQuery;
+  // Window data to show chartWindow
+  // If selected date is near the end, shift window back to show full chartWindow (maybe want to not do this)
+  const windowedData = useMemo(() => {
+    if (!query.data || !selectedMonth || !maxDateQuery.data) return undefined;
+
+    const maxDate = dayjs(maxDateQuery.data);
+
+    // Try to center on selected date
+    let windowStart = dayjsDate!.subtract(chartWindow).startOf("month");
+    let windowEnd = dayjsDate!.add(chartWindow).endOf("month");
+
+    // If the selected date + chartWindow exceeds max date, shift window back
+    // to ensure we always show chartWindow * 2 months ending at max date
+    if (windowEnd.isAfter(maxDate)) {
+      windowEnd = maxDate.endOf("month");
+      windowStart = maxDate
+        .subtract(chartWindow)
+        .subtract(chartWindow)
+        .startOf("month");
+    }
+
+    const filtered = query.data.filter((d) => {
+      const date = dayjs(d.date_month);
+      return (
+        (date.isAfter(windowStart) || date.isSame(windowStart)) &&
+        (date.isBefore(windowEnd) || date.isSame(windowEnd))
+      );
+    });
+
+    return filtered;
+  }, [query.data, selectedMonth, maxDateQuery.data, dayjsDate, chartWindow]);
+
+  return {
+    ...query,
+    data: windowedData,
+  };
+};
+
+
 // Hook to fetch baseline monthly sum data
 // If destination cells are selected, uses traffic from origin cells as baseline
 // Otherwise shows 4-year window of total traffic (no cell filters)
