@@ -69,7 +69,30 @@ const QueensboroBridge: MapConfig = {
   date: null,
 };
 
+const BedfordNostrand: MapConfig = {
+  name: "Bedford Nostrand",
+  originCells: [
+    "892a100d853ffff",
+    "892a100d85bffff",
+    "892a100da97ffff",
+    "892a100da87ffff",
+    "892a100d84bffff",
+    "892a100d843ffff",
+    "892a100d857ffff",
+    "892a100d847ffff",
+    "892a100d84fffff",
+    "892a100dab3ffff",
+  ],
+  destinationCells: [],
+  bounds: [
+    [-74.01238, 40.65317],
+    [-73.89623, 40.74501],
+  ],
+  date: "2024-07-01",
+};
+
 export const PRESETS: { [key: string]: MapConfig } = {
   bedford_bike_lane: BedfordBikeLane,
   queensboro_bridge: QueensboroBridge,
+  bedford_nostrand: BedfordNostrand,
 };

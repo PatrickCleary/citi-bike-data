@@ -255,8 +255,10 @@ export const PATH_STATION_LAYER: LayerSpecification = {
   source: PATH_STATIONS_SOURCE_ID,
   "source-layer": PATH_STATION_SOURCE_LAYER_ID,
   type: "symbol",
-  minzoom: 12, // Layer will be hidden at zoom levels less than 10
-
+  minzoom: 13,
+  paint: {
+    "icon-opacity": 0.8,
+  },
   layout: {
     "icon-image": GENERAL_IMAGES.SUBWAY, // Reference the icon by ID
     "icon-size": 0.5, // Scale the icon
@@ -284,7 +286,10 @@ export const NYC_STATION_LAYER: LayerSpecification = {
   source: NYC_STATIONS_SOURCE_ID,
   "source-layer": NYC_STATION_SOURCE_LAYER_ID,
   type: "symbol",
-  minzoom: 12, // Layer will be hidden at zoom levels less than 10
+  paint: {
+    "icon-opacity": 0.8,
+  },
+  minzoom: 13,
   layout: {
     "icon-image": GENERAL_IMAGES.SUBWAY, // Reference the icon by ID
     "icon-size": 0.5, // Scale the icon
@@ -334,8 +339,10 @@ export const NJ_LIGHT_RAIL_STATION_LAYER: LayerSpecification = {
   source: NJ_LIGHT_RAIL_STATIONS_SOURCE_ID,
   "source-layer": NJ_LIGHT_RAIL_STATION_SOURCE_LAYER_ID,
   type: "symbol",
-  minzoom: 12, // Layer will be hidden at zoom levels less than 10
-
+  paint: {
+    "icon-opacity": 0.8,
+  },
+  minzoom: 13,
   layout: {
     "icon-image": GENERAL_IMAGES.SUBWAY, // Reference the icon by ID
     "icon-size": 0.5, // Scale the icon
@@ -358,11 +365,12 @@ export const NJ_RAIL_STATION_LAYER: LayerSpecification = {
   source: NJ_RAIL_STATIONS_SOURCE_ID,
   "source-layer": NJ_RAIL_STATION_SOURCE_LAYER_ID,
   type: "symbol",
-  minzoom: 12, // Layer will be hidden at zoom levels less than 10
-
+  paint: {
+    "icon-opacity": 0.8,
+  },
+  minzoom: 13,
   layout: {
     "icon-image": GENERAL_IMAGES.SUBWAY, // Reference the icon by ID
-
     "icon-size": 0.5, // Scale the icon
     "icon-allow-overlap": false, // Optional: allow icons to overlap
   },
