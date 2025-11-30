@@ -558,7 +558,6 @@ export const useOriginBaselineMonthlySumData = () => {
   };
 };
 
-
 // Hook to fetch baseline monthly sum data
 // If destination cells are selected, uses traffic from origin cells as baseline
 // Otherwise shows 4-year window of total traffic (no cell filters)
@@ -680,8 +679,6 @@ export const useComparison = (filter = true) => {
   const previousQueryFiltered =
     useTripCountDataFilteredbyDestination(previousQuery);
 
-
-
   // Determine which data to use for the main comparison
   // If no origins and no destinations: use system-wide
   // If origins but no destinations: use origin data
@@ -708,9 +705,7 @@ export const useComparison = (filter = true) => {
   // Calculate absolute and percentage change for main comparison
   const absoluteChange = currentTotal - previousTotal;
   const percentageChange =
-    previousTotal > 0
-      ? ((currentTotal - previousTotal) / previousTotal) * 100
-      : 0;
+    previousTotal > 0 ? (currentTotal - previousTotal) / previousTotal : 0;
 
   // Calculate baseline comparison
   // - When destinations are selected: use origin traffic as baseline
@@ -722,18 +717,18 @@ export const useComparison = (filter = true) => {
   const systemPrevious = previousSystemQuery.data?.data.sum_all_values || 0;
   const baselineAbsoluteChange = systemCurrent - systemPrevious;
   const baselinePercentageChange =
-    systemPrevious > 0
-      ? ((systemCurrent - systemPrevious) / systemPrevious) * 100
-      : 0;
-
+    systemPrevious > 0 ? (systemCurrent - systemPrevious) / systemPrevious : 0;
   const normalizedPercentageChange =
-    percentageChange - baselinePercentageChange;
-
+    (1 + percentageChange) / (1 + baselinePercentageChange);
+  console.log(
+    "normalizedPercentageChange",
+    normalizedPercentageChange,
+    percentageChange,
+    baselinePercentageChange,
+  );
   // Calculate expected growth rate from baseline (if normalizing)
   const expectedGrowthRate =
-    normalizeComparison && previousTotal > 0
-      ? baselinePercentageChange / 100
-      : 0;
+    normalizeComparison && previousTotal > 0 ? baselinePercentageChange : 0;
 
   // Function to get comparison for a specific cell
   const getCellComparison = (cellId: string) => {
@@ -790,10 +785,10 @@ export const useComparison = (filter = true) => {
     currentTotal,
     previousTotal,
     absoluteChange,
-    percentageChange,
+    percentageChange: percentageChange * 100,
     baselineAbsoluteChange,
-    baselinePercentageChange,
-    normalizedPercentageChange,
+    baselinePercentageChange: baselinePercentageChange * 100,
+    normalizedPercentageChange: (normalizedPercentageChange - 1) * 100,
     baselineLabel,
     showBaseline: !shouldUseSystemWide, // Show baseline when not already showing system-wide
     getCellComparison,
