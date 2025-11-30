@@ -720,12 +720,7 @@ export const useComparison = (filter = true) => {
     systemPrevious > 0 ? (systemCurrent - systemPrevious) / systemPrevious : 0;
   const normalizedPercentageChange =
     (1 + percentageChange) / (1 + baselinePercentageChange);
-  console.log(
-    "normalizedPercentageChange",
-    normalizedPercentageChange,
-    percentageChange,
-    baselinePercentageChange,
-  );
+
   // Calculate expected growth rate from baseline (if normalizing)
   const expectedGrowthRate =
     normalizeComparison && previousTotal > 0 ? baselinePercentageChange : 0;
