@@ -24,7 +24,7 @@
     "h3-js": "^4.3.0",
     "maplibre": "^0.0.1-security",
     "maplibre-gl": "^5.7.1",
-    "next": "15.0.3",
+    "next": "15.0.7",
     "pmtiles": "^4.3.0",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.3.0",
