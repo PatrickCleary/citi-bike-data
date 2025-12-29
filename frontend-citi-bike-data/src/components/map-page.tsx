@@ -27,7 +27,7 @@ import { LayerControl } from "./layer-control";
 import { DateControl } from "./date-control";
 import { DisplaySettings } from "./display-settings";
 import { Legend } from "./legend";
-import {  useSync } from "@/store/store";
+import { useSync } from "@/store/store";
 import IconLogo from "@/icons/icon";
 import { LocationSearchModal } from "./location-search-modal";
 import { LocationSearchControl } from "./location-search-control";
@@ -131,7 +131,7 @@ export const MapPage: React.FC = () => {
 
       <Popup map={map} />
       <LocationSearchModal />
-      <IntroModal />
+      <IntroModal map={map} />
     </div>
   );
 };

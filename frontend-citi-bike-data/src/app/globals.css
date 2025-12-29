@@ -46,3 +46,28 @@ body {
 .maplibregl-popup-anchor-right .maplibregl-popup-tip {
     border-left-color: #ffffff80 !important;
     }
+
+/* Driver.js custom styles */
+.driver-popover,
+.driver-popover-tour,
+.driver-popover-map {
+  font-family: 'Outfit', sans-serif !important;
+}
+
+.driver-popover .driver-popover-title,
+.driver-popover-tour .driver-popover-title,
+.driver-popover-map .driver-popover-title {
+  font-family: 'Outfit', sans-serif !important;
+}
+
+.driver-popover .driver-popover-description,
+.driver-popover-tour .driver-popover-description,
+.driver-popover-map .driver-popover-description {
+  font-family: 'Outfit', sans-serif !important;
+}
+
+.driver-popover .driver-popover-footer button,
+.driver-popover-tour .driver-popover-footer button,
+.driver-popover-map .driver-popover-footer button {
+  font-family: 'Outfit', sans-serif !important;
+}
