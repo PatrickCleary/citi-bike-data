@@ -1,0 +1,23 @@
+{
+  "name": "citi-bike-data",
+  "version": "1.0.0",
+  "description": "An app that allows you to see where citi bike trips are taken from/to each month.",
+  "homepage": "https://github.com/PatrickCleary/citi-bike-data#readme",
+  "bugs": {
+    "url": "https://github.com/PatrickCleary/citi-bike-data/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PatrickCleary/citi-bike-data.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "supabase": "^2.70.5"
+  }
+}
