@@ -1,0 +1,12 @@
+# Supabase
+.branches
+.temp
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local
+
+# Partition schemas (managed dynamically, not in version control)
+schemas/partitions.sql
+schemas/prod.sql

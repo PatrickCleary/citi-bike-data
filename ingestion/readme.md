@@ -6,11 +6,13 @@
 4. Verify the files you want to process are in `ingestion/new_files.csv`
 5. `python processor.py new_files.csv`
 6. When complete, run these commands in the database (I use DBeaver)
+
 - `SET statement_timeout = 0;`
 - `SELECT * FROM process_date_range(<YYYY-MM-DD start_date>, <YYYY-MM-DD end_date>); `
-7. Also run the process_date_range for the previous month (trips in the files are based on end date and our data uses start date).
-8. run `REFRESH MATERIALIZED VIEW public.monthly_totals;` in the db
 
+7. Also run the process_date_range for the previous month (trips in the files are based on end date and our data uses start date).
+8. Run `populate_monthly_summaries` – not yet implemented.
+9. run `REFRESH MATERIALIZED VIEW public.monthly_totals;` in the db
 
 # Ingestion Process Steps
 
