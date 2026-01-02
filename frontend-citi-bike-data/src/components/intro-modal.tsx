@@ -133,10 +133,10 @@ export const IntroModal: React.FC<{ map: MutableRefObject<Map | null> }> = ({
             </div>
 
             {/* Walkthrough Carousel */}
-            <WalkthroughCarousel />
+            {/* <WalkthroughCarousel /> */}
 
             {/* Action Buttons */}
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="flex flex-col gap-2">
               <button
                 onClick={handleTakeTour}
                 className="group flex flex-1 flex-row items-center justify-center gap-2 rounded-lg bg-cb-blue py-4 text-cb-white transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:brightness-90 active:scale-95"
@@ -145,7 +145,7 @@ export const IntroModal: React.FC<{ map: MutableRefObject<Map | null> }> = ({
               </button>
               <button
                 onClick={handleClose}
-                className="group flex flex-1 flex-row items-center justify-center gap-2 rounded-lg border-2 border-cb-blue bg-white py-4 text-cb-blue transition-all duration-200 hover:scale-[1.02] hover:bg-cb-blue/5 hover:shadow-lg active:scale-95"
+                className="group flex flex-1 flex-row items-center justify-center gap-2 rounded-lg bg-white py-2 text-cb-blue transition-all duration-200 hover:scale-[1.02] hover:underline active:scale-95"
               >
                 Skip
               </button>

@@ -44,7 +44,7 @@ export const startInteractiveTour = (
       popover: {
         title: "Welcome to Citi Bike Data!",
         description:
-          "This interactive map shows bike share journey patterns across NYC. Let's explore the key features together.",
+          "This interactive map shows bike share trips across NYC. The map is broken down into hexagonal cells. Each cell aggregates trips starting or ending within that area for a given month.",
         side: "over",
         align: "center",
       },
@@ -53,8 +53,7 @@ export const startInteractiveTour = (
       element: ".maplibregl-canvas",
       popover: {
         title: "Explore Trip Data",
-        description:
-          "We're zooming to Lower Manhattan. Click on any colored hexagon to see trip data for that area.",
+        description: "Click on a cell to see details.",
         side: "top",
         align: "center",
         showButtons: [],
@@ -80,7 +79,7 @@ export const startInteractiveTour = (
       popover: {
         title: "Trip Data Popup",
         description:
-          "Great! This popup shows the number of trips for this region. Click the bicycle icon to set this as the origin and see where trips go.",
+          'Great! This popup shows the trips arriving to the cell. Try clicking the bicycle icon to add this cell as an "origin".',
         side: "bottom",
         align: "center",
         showButtons: [],
@@ -108,7 +107,7 @@ export const startInteractiveTour = (
       popover: {
         title: "Updated Map View",
         description:
-          "Great! Now we can see trip patterns originating from that area. ",
+          'By setting an "origin" the map updates to show trips leaving from any dock in that region. You can add multiple cells to increase the size of the origin.',
         side: "bottom",
         align: "center",
         disableButtons: ["previous"],
@@ -126,26 +125,6 @@ export const startInteractiveTour = (
       },
     },
     {
-      element: "[data-tour='layer-control']",
-      popover: {
-        title: "Layer Controls",
-        description:
-          "Toggle different map layers like bike lanes and transit stations on or off.",
-        side: "top",
-        align: "start",
-      },
-    },
-    {
-      element: "[data-tour='display-settings']",
-      popover: {
-        title: "Display Settings",
-        description:
-          "Switch between absolute trip counts and comparison mode to see how ridership has changed over time.",
-        side: "top",
-        align: "start",
-      },
-    },
-    {
       element: "[data-tour='date-control']",
       popover: {
         title: "Date Controls",
@@ -156,7 +135,10 @@ export const startInteractiveTour = (
       },
     },
     {
-      element: "[data-tour='stats-bar']",
+      element:
+        window.innerWidth >= 1024
+          ? "[data-tour='stats-bar'].lg\\:flex"
+          : "[data-tour='stats-bar'].lg\\:hidden",
       popover: {
         title: "Aggregated Statistics",
         description:
