@@ -45,6 +45,7 @@ export const LayerControl: React.FC<LayerControlProps> = ({
     <Menu>
       <MenuButton
         title="Toggle Layers"
+        data-tour="layer-control"
         className={classNames(
           MapButtonStyle,
           "pointer-events-auto focus:outline-none",

@@ -17,7 +17,10 @@ export const Legend: React.FC = () => {
     #d8d8d8, #80cdc1, #35978f, #01665e, #003c30)`;
 
   return (
-    <div className="flex h-16 lg:h-24 flex-row font-sans tabular-nums">
+    <div
+      className="flex h-16 w-fit flex-row font-sans tabular-nums lg:h-24"
+      data-tour="legend"
+    >
       <div className="tabalur-nums flex w-4 rounded-l-md border border-[0.5px] border-cb-white/30 font-sans font-light tracking-wider text-cb-white drop-shadow-md backdrop-blur-sm">
         <div
           className="flex h-full w-full flex-col items-center justify-between rounded-l-md tabular-nums"
@@ -32,10 +35,10 @@ export const Legend: React.FC = () => {
       <div className="flex h-full flex-col justify-between font-medium">
         {displayType === "comparison" ? (
           <>
-            <span className="border-l-none w-fit rounded-md text-cb-increase rounded-l-none border-[0.5px] border-cb-white/30 bg-cb-white/30 px-1 drop-shadow-md backdrop-blur-sm">
+            <span className="border-l-none w-fit rounded-md rounded-l-none border-[0.5px] border-cb-white/30 bg-cb-white/30 px-1 text-cb-increase drop-shadow-md backdrop-blur-sm">
               <TrendingUpRoundedIcon fontSize="small" />
             </span>
-            <span className="border-l-none w-fit rounded-md text-cb-decrease rounded-l-none border-[0.5px] border-cb-white/30 bg-cb-white/30 px-1 drop-shadow-md backdrop-blur-sm">
+            <span className="border-l-none w-fit rounded-md rounded-l-none border-[0.5px] border-cb-white/30 bg-cb-white/30 px-1 text-cb-decrease drop-shadow-md backdrop-blur-sm">
               <TrendingDownRoundedIcon fontSize="small" />
             </span>
           </>
