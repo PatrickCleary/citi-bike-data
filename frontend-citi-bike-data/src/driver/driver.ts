@@ -44,7 +44,7 @@ export const startInteractiveTour = (
       popover: {
         title: "Welcome to Citi Bike Data!",
         description:
-          "This interactive map shows bike share trips across NYC. The map is broken down into hexagonal cells. Each cell aggregates trips starting or ending within that area for a given month.",
+          "This interactive map shows Citi Bike trips across NYC. The map is divided into hexagonal cells.",
         side: "over",
         align: "center",
       },
@@ -55,7 +55,8 @@ export const startInteractiveTour = (
       popover: {
         title: "Explore Trip Data",
 
-        description: "Click on a cell to see details.",
+        description:
+          "Each cell shows trips arriving to any dock inside that area. Try clicking on a cell.",
         side: "top",
         align: "center",
         showButtons: [],
@@ -110,7 +111,7 @@ export const startInteractiveTour = (
         title: "Updated Map View",
 
         description:
-          'By setting an "origin" the map updates to show trips leaving from any dock in that region. You can add multiple cells to increase the size of the origin.',
+          'By setting an "origin" the map updates to show trips leaving from any dock in that region. You can set multiple origin and destination cells to filter the data further.',
         side: "bottom",
         align: "center",
         disableButtons: ["previous"],
@@ -122,7 +123,7 @@ export const startInteractiveTour = (
       popover: {
         title: "Color Legend",
         description:
-          "The legend shows what the colors mean. Brighter colors indicate more bike trips in that area.",
+          "The legend shows what the colors mean. Brighter colors indicate more bike trips in that area. The legend is dynamic, so the brightest yellow is always the area with the most trips.",
         side: "right",
         align: "start",
       },
