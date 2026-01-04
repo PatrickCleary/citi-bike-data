@@ -1,84 +1,12 @@
 "use client";
 import { useIntroModalStore } from "@/store/intro-modal-store";
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
-import { MutableRefObject, useState } from "react";
+import { MutableRefObject } from "react";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
-import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import Image from "next/image";
+
 import IconLogo from "@/icons/icon";
 import { startInteractiveTour } from "@/driver/driver";
 import { Map } from "maplibre-gl";
-
-const WalkthroughCarousel: React.FC = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  const totalSlides = 5;
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % totalSlides);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
-  };
-
-  return (
-    <div className="space-y-3">
-      <div className="relative mx-auto max-w-lg">
-        {/* Carousel Container */}
-        <div className="relative overflow-hidden rounded-lg">
-          <div
-            className="flex transition-transform duration-300 ease-in-out"
-            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-          >
-            {Array.from({ length: totalSlides }, (_, i) => (
-              <div key={i} className="w-full flex-shrink-0">
-                <Image
-                  src={`/walkthrough/desktop_${i}.jpg`}
-                  alt={`Walkthrough step ${i + 1}`}
-                  width={600}
-                  height={450}
-                  className="w-full rounded-lg"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Navigation Buttons */}
-        <button
-          onClick={prevSlide}
-          className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-md transition hover:bg-white active:scale-95"
-          aria-label="Previous slide"
-        >
-          <ChevronLeftRoundedIcon className="h-6 w-6 text-gray-700" />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-md transition hover:bg-white active:scale-95"
-          aria-label="Next slide"
-        >
-          <ChevronRightRoundedIcon className="h-6 w-6 text-gray-700" />
-        </button>
-
-        {/* Slide Indicators */}
-        <div className="mt-4 flex justify-center gap-2">
-          {Array.from({ length: totalSlides }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentSlide(i)}
-              className={`h-2 w-2 rounded-full transition ${
-                i === currentSlide ? "w-8 bg-cb-blue" : "bg-gray-300"
-              }`}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export const IntroModal: React.FC<{ map: MutableRefObject<Map | null> }> = ({
   map,

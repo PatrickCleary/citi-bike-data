@@ -24,6 +24,6 @@ if (typeof window !== "undefined") {
   const hasVisited = localStorage.getItem("citibike-data-visited") === "true";
   useIntroModalStore.setState({
     hasVisited,
-    isOpen: !hasVisited // Open modal on first visit
+    isOpen: !hasVisited, // Open modal on first visit
   });
 }
