@@ -110,7 +110,7 @@ export const MapPage: React.FC = () => {
   return (
     <div className="flex h-[100svh] w-[100svw] flex-col font-sans">
       <SnackBar />
-      <div className="h-full w-full" ref={mapContainer}>
+      <div className="h-full w-full" ref={mapContainer} id="map-container">
         <Logo />
         <ZoomLevelOverlay map={map} mapLoaded={mapLoaded} />
         <div className="pointer-events-none absolute bottom-2 z-10 flex w-full flex-col gap-2">

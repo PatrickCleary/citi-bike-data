@@ -71,3 +71,8 @@ body {
 .driver-popover-map .driver-popover-footer button {
   font-family: 'Outfit', sans-serif !important;
 }
+
+.driver-active .maplibregl-popup,
+.driver-active .maplibregl-popup * {
+  pointer-events: auto;
+}

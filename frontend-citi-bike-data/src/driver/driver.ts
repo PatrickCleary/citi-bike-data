@@ -40,7 +40,7 @@ export const startInteractiveTour = (
 
   const steps: DriveStep[] = [
     {
-      element: ".maplibregl-canvas",
+      element: "#map-container",
       popover: {
         title: "Welcome to Citi Bike Data!",
         description:
@@ -50,9 +50,11 @@ export const startInteractiveTour = (
       },
     },
     {
-      element: ".maplibregl-canvas",
+      element: "#map-container",
+      disableActiveInteraction: false,
       popover: {
         title: "Explore Trip Data",
+
         description: "Click on a cell to see details.",
         side: "top",
         align: "center",
@@ -103,9 +105,10 @@ export const startInteractiveTour = (
       },
     },
     {
-      element: ".maplibregl-canvas",
+      element: "#map-container",
       popover: {
         title: "Updated Map View",
+
         description:
           'By setting an "origin" the map updates to show trips leaving from any dock in that region. You can add multiple cells to increase the size of the origin.',
         side: "bottom",
