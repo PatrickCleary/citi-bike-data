@@ -50,7 +50,10 @@ export const MobileMetricsContainer: React.FC = () => {
   }, [data]);
 
   return (
-    <div className="pointer-events-auto z-10 flex w-full flex-col items-center bg-white lg:hidden">
+    <div
+      className="pointer-events-auto z-10 flex w-full flex-col items-center bg-white lg:hidden"
+      data-tour="stats-bar"
+    >
       {/* Render the visible metrics */}
       <MobileMetricWrapper
         key={selectedMobileMetric}
@@ -62,7 +65,7 @@ export const MobileMetricsContainer: React.FC = () => {
           className={classNames(
             "grid w-full bg-cb-white px-4 transition-all duration-300 ease-in-out",
             expanded
-              ? "grid-rows-[1fr] opacity-100 pb-2"
+              ? "grid-rows-[1fr] pb-2 opacity-100"
               : "grid-rows-[0fr] opacity-0",
           )}
         >

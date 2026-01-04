@@ -27,7 +27,7 @@ import { LayerControl } from "./layer-control";
 import { DateControl } from "./date-control";
 import { DisplaySettings } from "./display-settings";
 import { Legend } from "./legend";
-import {  useSync } from "@/store/store";
+import { useSync } from "@/store/store";
 import IconLogo from "@/icons/icon";
 import { LocationSearchModal } from "./location-search-modal";
 import { LocationSearchControl } from "./location-search-control";
@@ -110,7 +110,7 @@ export const MapPage: React.FC = () => {
   return (
     <div className="flex h-[100svh] w-[100svw] flex-col font-sans">
       <SnackBar />
-      <div className="h-full w-full" ref={mapContainer}>
+      <div className="h-full w-full" ref={mapContainer} id="map-container">
         <Logo />
         <ZoomLevelOverlay map={map} mapLoaded={mapLoaded} />
         <div className="pointer-events-none absolute bottom-2 z-10 flex w-full flex-col gap-2">
@@ -131,7 +131,7 @@ export const MapPage: React.FC = () => {
 
       <Popup map={map} />
       <LocationSearchModal />
-      <IntroModal />
+      <IntroModal map={map} />
     </div>
   );
 };

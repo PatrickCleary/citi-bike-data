@@ -14,7 +14,10 @@ export const DesktopMetricsContainer: React.FC = () => {
   const setPreset = usePreset();
 
   return (
-    <div className="pointer-events-auto z-10 flex hidden w-full flex-row items-start bg-white drop-shadow-lg lg:flex">
+    <div
+      className="pointer-events-auto z-10 flex hidden w-full flex-row items-start bg-white drop-shadow-lg lg:flex"
+      data-tour="stats-bar"
+    >
       <div className="grow-1 flex w-80 min-w-80 max-w-80 flex-grow items-start p-4">
         <div className="flex flex-col gap-2">
           <MetricHeader />
@@ -28,7 +31,7 @@ export const DesktopMetricsContainer: React.FC = () => {
           <ChartWindowTabs />
           <ChartDatasetToggles />
         </div>
-        <div className="flex hidden w-full cursor-default flex-row h-full items-center gap-2 overflow-hidden px-4 py-2 tracking-wide lg:flex">
+        <div className="flex hidden h-full w-full cursor-default flex-row items-center gap-2 overflow-hidden px-4 py-2 tracking-wide lg:flex">
           <div className="flex w-full max-w-lg">
             <SparklineMetric />
           </div>

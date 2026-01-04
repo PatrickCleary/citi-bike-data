@@ -20,6 +20,7 @@
     "chart.js": "^4.5.1",
     "classnames": "^2.5.1",
     "dayjs": "^1.11.18",
+    "driver.js": "^1.4.0",
     "eventemitter3": "^5.0.1",
     "h3-js": "^4.3.0",
     "maplibre": "^0.0.1-security",

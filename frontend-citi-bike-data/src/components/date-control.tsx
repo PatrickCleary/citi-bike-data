@@ -27,7 +27,7 @@ export const DateControl: React.FC = () => {
   });
 
   return (
-    <div className="pointer-events-auto font-sans">
+    <div className="pointer-events-auto font-sans" data-tour="date-control">
       <div className="flex flex-row bg-cb-lighterGray rounded-md overflow-hidden">
         <button
           className={dateButtonStyle}

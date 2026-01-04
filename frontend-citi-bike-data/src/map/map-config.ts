@@ -217,7 +217,6 @@ const addHexLayer = (
   });
   return () => {
     removeHexLayer(mapObj, eventHandlers);
-    // source?.off('error', (e) => handleSourceError(e as MapBoxSourceLoadError));
   };
 };
 
