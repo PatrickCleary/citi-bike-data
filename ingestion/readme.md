@@ -11,7 +11,7 @@
 - `SELECT * FROM process_date_range(<YYYY-MM-DD start_date>, <YYYY-MM-DD end_date>); `
 
 7. Also run the process_date_range for the previous month (trips in the files are based on end date and our data uses start date).
-8. Run `populate_monthly_summaries` – not yet implemented.
+8. Run `REFRESH MATERIALIZED VIEW "public"."citi_bike_monthly_summary";`
 9. run `REFRESH MATERIALIZED VIEW public.monthly_totals;` in the db
 
 # Ingestion Process Steps
