@@ -22,8 +22,9 @@ export const useIntroModalStore = create<IntroModalStore>((set) => ({
 // Initialize the hasVisited state from localStorage
 if (typeof window !== "undefined") {
   const hasVisited = localStorage.getItem("citibike-data-visited") === "true";
+  const hasUrlParams = window.location.search.length > 0;
   useIntroModalStore.setState({
     hasVisited,
-    isOpen: !hasVisited, // Open modal on first visit
+    isOpen: !hasVisited && !hasUrlParams, // Open modal on first visit, but not if URL params are present
   });
 }
