@@ -58,7 +58,6 @@ export const MapPage: React.FC = () => {
   useUpdateDestinationShape(map, mapLoaded);
   useDimNonSelectedCells(map, mapLoaded);
   useSync();
-
   useAddPMTilesProtocol();
   usePrefetchTripCountData();
   useLocationMarker(map, mapLoaded);

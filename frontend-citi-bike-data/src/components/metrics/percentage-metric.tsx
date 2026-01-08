@@ -70,7 +70,7 @@ export const PercentageMetric: React.FC = () => {
   return (
     <div className="relative flex w-full flex-col items-center">
       {!shouldDisplay && (
-        <div className="absolute flex h-full text-center font-light w-full items-center justify-center bg-white/10 backdrop-blur-sm z-10 text-gray-400">
+        <div className="absolute z-10 flex h-full w-full items-center justify-center bg-white/10 text-center font-light text-gray-400 backdrop-blur-sm">
           <p>Select origin/destination for trip percentage chart</p>
         </div>
       )}

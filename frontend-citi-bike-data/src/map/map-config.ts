@@ -110,7 +110,7 @@ export const useApplyLayers = (
     addHexLayer(map, setHoveredFeature);
     addDockLayer(map);
     setLayersAdded(true);
-  }, [mapLoaded, map, setHoveredFeature]);
+  }, [mapLoaded, map]);
 };
 const addTransitLayers = (map: MutableRefObject<Map | null>) => {
   if (!map.current) return;
